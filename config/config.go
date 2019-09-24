@@ -13,7 +13,10 @@ type argsT struct {
 }
 
 type confT struct {
-	Bind       string `yaml:"bind"`
+	Bind struct {
+		Http string `yaml:"http"`
+		Udp  string `yaml:"udp"`
+	} `yaml:"bind"`
 	Clickhouse string `yaml:"clickhouse"`
 }
 

@@ -16,5 +16,5 @@ func main() {
 		c.JSON(200, types.Logs{})
 	})
 
-	r.Run(config.Get().Bind)
+	r.Run(config.Get().Bind.Http)
 }

@@ -2,5 +2,6 @@
 logger
 
 1) clickhouse.Init() init conn, create schemas
-2) write log to clickhouse
-3) read log from clickhouse, use sqlx
+2) read log from clickhouse, use sqlx
+3) http and udp handlers
+4) write log to clickhouse
