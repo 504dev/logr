@@ -9,4 +9,7 @@ type Log struct {
 	Logname   string    `json:logname`
 	Level     string    `json:level`
 	Message   string    `json:message`
+	Order     int       `json:order`
 }
+
+type Logs []Log

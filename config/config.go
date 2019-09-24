@@ -1,1 +1,5 @@
 package config
+
+func Init() {
+
+}
