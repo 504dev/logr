@@ -10,7 +10,6 @@ import (
 
 type argsT struct {
 	Configpath string
-	Since      string
 }
 
 type confT struct {
@@ -23,7 +22,6 @@ var config confT
 
 func ParseArgs() {
 	flag.StringVar(&args.Configpath, "config", "./config.yaml", "config path")
-	flag.StringVar(&args.Since, "since", "", "date from")
 	flag.Parse()
 }
 
