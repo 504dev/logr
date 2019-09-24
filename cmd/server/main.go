@@ -15,5 +15,6 @@ func main() {
 	r.GET("/filter", func(c *gin.Context) {
 		c.JSON(200, types.Logs{})
 	})
-	r.Run()
+
+	r.Run(config.Get().Bind)
 }

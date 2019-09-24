@@ -10,3 +10,11 @@ type Where struct {
 	Level     string       `json:level`
 	Message   string       `json:message`
 }
+
+func (w *Where) Match(log Log) bool {
+	return true
+}
+
+func (w *Where) ToSql() string {
+	return ""
+}
