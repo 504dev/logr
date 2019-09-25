@@ -13,3 +13,16 @@ type Log struct {
 }
 
 type Logs []Log
+
+type LogPackage struct {
+	Public   string `json:"public"`
+	LogCrypt string `json:"logcrypt"`
+	*Log     `json:"log"`
+}
+
+func (pl *LogPackage) Decrypt() error {
+	// get private key by public
+	// decrypt LogCrypt field
+	// set Log field
+	return nil
+}
