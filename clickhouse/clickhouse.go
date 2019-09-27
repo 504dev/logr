@@ -1,7 +1,7 @@
 package clickhouse
 
 import (
-	"../types"
+	"github.com/504dev/kidlog/types"
 )
 
 func Init() {

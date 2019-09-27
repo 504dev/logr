@@ -1,9 +1,9 @@
 package main
 
 import (
-	"../../clickhouse"
-	"../../config"
-	"../../types"
+	"github.com/504dev/kidlog/clickhouse"
+	"github.com/504dev/kidlog/config"
+	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 )
 
