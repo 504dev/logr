@@ -10,7 +10,7 @@ setup: ## Installing all service dependencies
 .PHONY: config
 config: ## Creating the local config yml.
 	echo "Creating local config yml ..."
-	cp config.example.yml local.yml
+	cp config.example.yml config.yml
 
 build\:server: ## Build the executable file of service
 	echo "Building..."
