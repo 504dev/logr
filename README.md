@@ -10,9 +10,9 @@ logger
 # Build service
 
 1. Create directories:
-    `cd $GOPATH/src/github.com && mkdir 504dev`
+    `cd $GOPATH/src/github.com && mkdir 504dev && cd $_`
 2. Clone repository:
-    `cd $GOPATH/src/github.com/504dev && git clone git@github.com:504dev/kidlog.git`
+    `git clone git@github.com:504dev/kidlog.git && cd $_`
 3. Make helper:
     `make`
 4. Init config file:
