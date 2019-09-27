@@ -1,0 +1,4 @@
+bind:
+  http: "localhost:7778"
+  udp: "localhost:7776"
+clickhouse: "tcp:/localhost:9000?database=kidlog&username=kidlog&password=kidlog"
