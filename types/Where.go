@@ -1,6 +1,9 @@
 package types
 
-import "time"
+import (
+	"github.com/504dev/kidlog/models/log"
+	"time"
+)
 
 type Where struct {
 	Timestamp [2]time.Time `json:"timestamp"`
@@ -11,7 +14,7 @@ type Where struct {
 	Message   string       `json:"message"`
 }
 
-func (w *Where) Match(log Log) bool {
+func (w *Where) Match(log log.Log) bool {
 	return true
 }
 

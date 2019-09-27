@@ -1,7 +1,7 @@
 package clickhouse
 
 import (
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/kidlog/models/log"
 )
 
 func Init() {
@@ -13,10 +13,10 @@ func Schema() {
 	// create schemas if not exist
 }
 
-func InsertQueue(log types.Log) {
+func InsertQueue(log log.Log) {
 
 }
 
-func InsertBatch(logs types.Logs) {
+func InsertBatch(logs log.Logs) {
 
 }
