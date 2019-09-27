@@ -12,7 +12,7 @@ logger
 1. Create directories:
     `cd $GOPATH/src/github.com && mkdir 504dev && cd $_`
 2. Clone repository:
-    `git clone git@github.com:504dev/kidlog.git && cd $_`
+    `git clone git@github.com:504dev/kidlog.git && cd kidlog`
 3. Make helper:
     `make`
 4. Init config file:
