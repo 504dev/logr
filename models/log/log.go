@@ -4,13 +4,13 @@ import "time"
 
 var logs = Logs{
 	{
-		Timestamp: time.Now(),
 		DashId:    1,
+		Timestamp: time.Now(),
 		Host:      "localhost",
 		Project:   "kodlog.project",
 		Logname:   "performance.log",
 		Level:     1,
-		Message:   "504",
+		Message:   "Hello",
 		Order:     0,
 	},
 }

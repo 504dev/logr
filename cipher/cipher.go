@@ -2,15 +2,17 @@ package cipher
 
 import (
 	"crypto"
+	"crypto/aes"
+	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
 	"crypto/sha512"
 	"crypto/x509"
 	"errors"
+	"io"
 )
 
-// GenerateKeyPair generates a new key pair
 func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	privkey, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
@@ -19,31 +21,18 @@ func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privkey, &privkey.PublicKey, nil
 }
 
-// PrivateKeyToBytes private key to bytes
 func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	return x509.MarshalPKCS1PrivateKey(priv)
 }
 
-// PublicKeyToBytes public key to bytes
 func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
-	pubASN1, err := x509.MarshalPKIXPublicKey(pub)
-	if err != nil {
-		return nil, err
-	}
-
-	return pubASN1, nil
+	return x509.MarshalPKIXPublicKey(pub)
 }
 
-// BytesToPrivateKey bytes to private key
 func BytesToPrivateKey(priv []byte) (*rsa.PrivateKey, error) {
-	key, err := x509.ParsePKCS1PrivateKey(priv)
-	if err != nil {
-		return nil, err
-	}
-	return key, nil
+	return x509.ParsePKCS1PrivateKey(priv)
 }
 
-// BytesToPublicKey bytes to public key
 func BytesToPublicKey(pub []byte) (*rsa.PublicKey, error) {
 	ifc, err := x509.ParsePKIXPublicKey(pub)
 	if err != nil {
@@ -57,33 +46,64 @@ func BytesToPublicKey(pub []byte) (*rsa.PublicKey, error) {
 	return key, nil
 }
 
-// EncryptWithPublicKey encrypts data with public key
 func EncryptWithPublicKey(msg []byte, pub *rsa.PublicKey) ([]byte, error) {
 	hash := sha512.New()
-	ciphertext, err := rsa.EncryptOAEP(hash, rand.Reader, pub, msg, nil)
-	if err != nil {
-		return nil, err
-	}
-	return ciphertext, nil
+	return rsa.EncryptOAEP(hash, rand.Reader, pub, msg, nil)
 }
 
-// DecryptWithPrivateKey decrypts data with private key
 func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, error) {
 	hash := sha512.New()
-	plaintext, err := rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
+	return rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
+}
+
+func EncryptAes(plainText []byte, key []byte) ([]byte, error) {
+	hash := sha256.Sum256(key)
+	block, err := aes.NewCipher(hash[:])
 	if err != nil {
 		return nil, err
 	}
-	return plaintext, nil
+
+	//IV needs to be unique, but doesn't have to be secure.
+	//It's common to put it at the beginning of the ciphertext.
+	cipherText := make([]byte, aes.BlockSize+len(plainText))
+	iv := cipherText[:aes.BlockSize]
+	if _, err = io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, err
+	}
+
+	stream := cipher.NewCFBEncrypter(block, iv)
+	stream.XORKeyStream(cipherText[aes.BlockSize:], plainText)
+
+	return cipherText, err
+}
+
+func DecryptAes(cipherText []byte, key []byte) ([]byte, error) {
+	hash := sha256.Sum256(key)
+	block, err := aes.NewCipher(hash[:])
+	if err != nil {
+		return nil, err
+	}
+
+	if len(cipherText) < aes.BlockSize {
+		err = errors.New("Ciphertext block size is too short!")
+		return nil, err
+	}
+
+	//IV needs to be unique, but doesn't have to be secure.
+	//It's common to put it at the beginning of the ciphertext.
+	iv := cipherText[:aes.BlockSize]
+	cipherText = cipherText[aes.BlockSize:]
+
+	stream := cipher.NewCFBDecrypter(block, iv)
+	// XORKeyStream can work in-place if the two arguments are the same.
+	stream.XORKeyStream(cipherText, cipherText)
+
+	return cipherText, nil
 }
 
 func SignMessage(msg []byte, priv *rsa.PrivateKey) ([]byte, error) {
 	digest := sha256.Sum256(msg)
-	signature, err := rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA256, digest[:])
-	if err != nil {
-		return nil, err
-	}
-	return signature, nil
+	return rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA256, digest[:])
 }
 
 func CheckSig(msg []byte, sig []byte, pub *rsa.PublicKey) error {
