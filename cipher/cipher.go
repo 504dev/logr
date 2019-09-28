@@ -5,9 +5,7 @@ import (
 	"crypto/rsa"
 	"crypto/sha512"
 	"crypto/x509"
-	"encoding/pem"
 	"errors"
-	"log"
 )
 
 // GenerateKeyPair generates a new key pair
@@ -21,14 +19,7 @@ func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 
 // PrivateKeyToBytes private key to bytes
 func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
-	privBytes := pem.EncodeToMemory(
-		&pem.Block{
-			Type:  "RSA PRIVATE KEY",
-			Bytes: x509.MarshalPKCS1PrivateKey(priv),
-		},
-	)
-
-	return privBytes
+	return x509.MarshalPKCS1PrivateKey(priv)
 }
 
 // PublicKeyToBytes public key to bytes
@@ -38,28 +29,12 @@ func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
 		return nil, err
 	}
 
-	pubBytes := pem.EncodeToMemory(&pem.Block{
-		Type:  "RSA PUBLIC KEY",
-		Bytes: pubASN1,
-	})
-
-	return pubBytes, nil
+	return pubASN1, nil
 }
 
 // BytesToPrivateKey bytes to private key
 func BytesToPrivateKey(priv []byte) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode(priv)
-	enc := x509.IsEncryptedPEMBlock(block)
-	b := block.Bytes
-	var err error
-	if enc {
-		log.Println("is encrypted pem block")
-		b, err = x509.DecryptPEMBlock(block, nil)
-		if err != nil {
-			return nil, err
-		}
-	}
-	key, err := x509.ParsePKCS1PrivateKey(b)
+	key, err := x509.ParsePKCS1PrivateKey(priv)
 	if err != nil {
 		return nil, err
 	}
@@ -68,18 +43,7 @@ func BytesToPrivateKey(priv []byte) (*rsa.PrivateKey, error) {
 
 // BytesToPublicKey bytes to public key
 func BytesToPublicKey(pub []byte) (*rsa.PublicKey, error) {
-	block, _ := pem.Decode(pub)
-	enc := x509.IsEncryptedPEMBlock(block)
-	b := block.Bytes
-	var err error
-	if enc {
-		log.Println("is encrypted pem block")
-		b, err = x509.DecryptPEMBlock(block, nil)
-		if err != nil {
-			return nil, err
-		}
-	}
-	ifc, err := x509.ParsePKIXPublicKey(b)
+	ifc, err := x509.ParsePKIXPublicKey(pub)
 	if err != nil {
 		return nil, err
 	}
@@ -112,9 +76,11 @@ func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, err
 }
 
 func Sig(msq []byte) []byte {
+	// TODO
 	return []byte{}
 }
 
-func CheckSig(sig []byte) bool {
+func CheckSig(sig []byte, pub *rsa.PublicKey) bool {
+	// TODO
 	return true
 }

@@ -9,10 +9,10 @@ import (
 )
 
 func TestFinder(t *testing.T) {
-	dashboard := dashboard.GetById(1)
-	fmt.Println(dashboard)
-	publicKeyBytes, _ := base64.StdEncoding.DecodeString(dashboard.PublicKey)
-	privateKeyBytes, _ := base64.StdEncoding.DecodeString(dashboard.PrivateKey)
+	dash := dashboard.GetById(1)
+	fmt.Println("Dashboard:", dash)
+	publicKeyBytes, _ := base64.StdEncoding.DecodeString(dash.PublicKey)
+	privateKeyBytes, _ := base64.StdEncoding.DecodeString(dash.PrivateKey)
 	publicKey, _ := cipher.BytesToPublicKey(publicKeyBytes)
 	privateKey, _ := cipher.BytesToPrivateKey(privateKeyBytes)
 	publicKeyBytes, _ = cipher.PublicKeyToBytes(publicKey)

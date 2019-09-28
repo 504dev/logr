@@ -1,8 +1,8 @@
 package user
 
 var users = Users{
-	{5584596, "DmitryKozhurkin"},
-	{3855715, "kumirska"},
+	{1, 5584596, "DmitryKozhurkin"},
+	{2, 3855715, "kumirska"},
 }
 
 func GetById(id int) *User {
