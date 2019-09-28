@@ -1,8 +1,10 @@
 package cipher
 
 import (
+	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/sha512"
 	"crypto/x509"
 	"errors"
@@ -75,12 +77,16 @@ func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, err
 	return plaintext, nil
 }
 
-func Sig(msq []byte) []byte {
-	// TODO
-	return []byte{}
+func SignMessage(msg []byte, priv *rsa.PrivateKey) ([]byte, error) {
+	digest := sha256.Sum256(msg)
+	signature, err := rsa.SignPKCS1v15(rand.Reader, priv, crypto.SHA256, digest[:])
+	if err != nil {
+		return nil, err
+	}
+	return signature, nil
 }
 
-func CheckSig(sig []byte, pub *rsa.PublicKey) bool {
-	// TODO
-	return true
+func CheckSig(msg []byte, sig []byte, pub *rsa.PublicKey) error {
+	digest := sha256.Sum256(msg)
+	return rsa.VerifyPKCS1v15(pub, crypto.SHA256, digest[:], sig)
 }

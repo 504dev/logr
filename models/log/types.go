@@ -3,7 +3,6 @@ package log
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/models/dashboard"
 	"time"
@@ -20,7 +19,7 @@ type Log struct {
 	Order     int       `json:"order"`
 }
 
-type Logs []Log
+type Logs []*Log
 
 type LogPackage struct {
 	PublicKey  string `json:"publickey"`
@@ -33,16 +32,16 @@ func (lp *LogPackage) Decrypt() error {
 	dash := dashboard.GetByPub(lp.PublicKey)
 	priv64, _ := base64.StdEncoding.DecodeString(dash.PrivateKey)
 	sig64, _ := base64.StdEncoding.DecodeString(lp.Signature)
-	text64, _ := base64.StdEncoding.DecodeString(lp.CipherText)
+	cipher64, _ := base64.StdEncoding.DecodeString(lp.CipherText)
 	privateKey, err := cipher.BytesToPrivateKey(priv64)
 	if err != nil {
 		return err
 	}
-	if !cipher.CheckSig(sig64, &privateKey.PublicKey) {
-		return errors.New("Bad sig")
-	}
-	text, err := cipher.DecryptWithPrivateKey(text64, privateKey)
+	text, err := cipher.DecryptWithPrivateKey(cipher64, privateKey)
 	if err != nil {
+		return err
+	}
+	if err = cipher.CheckSig(text, sig64, &privateKey.PublicKey); err != nil {
 		return err
 	}
 	err = json.Unmarshal(text, &lp.Log)
