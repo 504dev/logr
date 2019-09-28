@@ -26,7 +26,7 @@ type LogPackage struct {
 	PublicKey  string `json:"publickey"`
 	CipherText string `json:"ciphertext"`
 	Signature  string `json:"sig"`
-	Log        `json:"log"`
+	*Log       `json:"log"`
 }
 
 func (lp *LogPackage) Decrypt() error {
@@ -45,8 +45,7 @@ func (lp *LogPackage) Decrypt() error {
 	if err != nil {
 		return err
 	}
-	var log Log
-	err = json.Unmarshal(text, &log)
+	err = json.Unmarshal(text, &lp.Log)
 	if err != nil {
 		return err
 	}
