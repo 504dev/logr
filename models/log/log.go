@@ -11,7 +11,6 @@ var logs = Logs{
 		Logname:   "performance.log",
 		Level:     1,
 		Message:   "Hello",
-		Order:     0,
 	},
 }
 

@@ -7,6 +7,7 @@ import (
 
 type Where struct {
 	Timestamp [2]time.Time `json:"timestamp"`
+	Border    time.Time    `json:"border"`
 	Host      string       `json:"host"`
 	Project   string       `json:"project"`
 	Logname   string       `json:"logname"`
