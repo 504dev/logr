@@ -14,7 +14,7 @@ func Schema() {
 }
 
 func InsertQueue(log log.Log) bool {
-	return true
+	return false
 }
 
 func InsertBatch(logs log.Logs) error {
