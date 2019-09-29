@@ -13,10 +13,10 @@ func Schema() {
 	// create schemas if not exist
 }
 
-func InsertQueue(log log.Log) {
-
+func InsertQueue(log log.Log) bool {
+	return true
 }
 
-func InsertBatch(logs log.Logs) {
-
+func InsertBatch(logs log.Logs) error {
+	return nil
 }
