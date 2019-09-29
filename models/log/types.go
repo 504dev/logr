@@ -42,3 +42,20 @@ func (lp *LogPackage) Decrypt() error {
 	lp.DashId = dash.Id
 	return nil
 }
+
+func (lp *LogPackage) Encrypt() error {
+	dash := dashboard.GetByPub(lp.PublicKey)
+	privateKeyBytes, _ := base64.StdEncoding.DecodeString(dash.PrivateKey)
+	jsonMsg, err := json.Marshal(lp.Log)
+	if err != nil {
+		return err
+	}
+	cipherBytes, err := cipher.EncryptAes(jsonMsg, privateKeyBytes)
+	if err != nil {
+		return err
+	}
+	cipherText := base64.StdEncoding.EncodeToString(cipherBytes)
+	lp.CipherText = cipherText
+	lp.Log = nil
+	return nil
+}

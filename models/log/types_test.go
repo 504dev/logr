@@ -1,34 +1,26 @@
 package log
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"fmt"
-	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/models/dashboard"
 	"testing"
 )
 
-func TestFinder(t *testing.T) {
+func TestCrypt(t *testing.T) {
 	//priv, pub, _ := cipher.GenerateKeyPair(256)
 	//pubBytes, _ := cipher.PublicKeyToBytes(pub)
 	//privBytes := cipher.PrivateKeyToBytes(priv)
 	//fmt.Println(base64.StdEncoding.EncodeToString(pubBytes))
 	//fmt.Println(base64.StdEncoding.EncodeToString(privBytes))
 	dash := dashboard.GetById(1)
-	privateKeyBytes, _ := base64.StdEncoding.DecodeString(dash.PrivateKey)
-	fmt.Println("Dashboard:", dash)
-	logitem := GetLast()
-	jsonMsg, _ := json.Marshal(logitem)
-	fmt.Println("Json:", string(jsonMsg))
-	cipherBytes, err := cipher.EncryptAes(jsonMsg, privateKeyBytes)
-	cipherText := base64.StdEncoding.EncodeToString(cipherBytes)
-	fmt.Println("CipherText:", cipherText, err)
 	logpack := LogPackage{
-		PublicKey:  dash.PublicKey,
-		CipherText: cipherText,
+		PublicKey: dash.PublicKey,
+		Log:       GetLast(),
 	}
-	fmt.Println("LogPackage:", logpack)
+	fmt.Println("Create:", logpack.Log, logpack.CipherText)
+	var err error
+	err = logpack.Encrypt()
+	fmt.Println("Encrypt:", logpack.Log, logpack.CipherText, err)
 	err = logpack.Decrypt()
-	fmt.Println("Log:", logpack.Log, err)
+	fmt.Println("Decrypt:", logpack.Log, logpack.CipherText, err)
 }
