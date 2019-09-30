@@ -1,8 +1,8 @@
 package user
 
 type User struct {
-	Id       int    `json:"id"`
-	GithubId int    `json:"gid"`
-	Username string `json:"username"`
+	Id       int    `db:"id"`
+	GithubId int    `db:"github_id"`
+	Username string `db:"username"`
 }
 type Users []*User

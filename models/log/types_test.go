@@ -19,8 +19,9 @@ func TestCrypt(t *testing.T) {
 	}
 	fmt.Println("Create:", logpack.Log, logpack.CipherText)
 	var err error
-	err = logpack.Encrypt()
+	err = logpack.EncryptLog()
+	logpack.Log = nil
 	fmt.Println("Encrypt:", logpack.Log, logpack.CipherText, err)
-	err = logpack.Decrypt()
+	err = logpack.DecryptLog()
 	fmt.Println("Decrypt:", logpack.Log, logpack.CipherText, err)
 }

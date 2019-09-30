@@ -18,6 +18,7 @@ type confT struct {
 		Udp  string `yaml:"udp"`
 	} `yaml:"bind"`
 	Clickhouse string `yaml:"clickhouse"`
+	Mysql      string `yaml:"mysql"`
 }
 
 var args argsT

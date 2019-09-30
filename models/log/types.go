@@ -1,8 +1,6 @@
 package log
 
 import (
-	"encoding/base64"
-	"encoding/json"
 	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/models/dashboard"
 	"time"
@@ -26,35 +24,24 @@ type LogPackage struct {
 	*Log       `json:"log"`
 }
 
-func (lp *LogPackage) Decrypt() error {
+func (lp *LogPackage) DecryptLog() error {
 	dash := dashboard.GetByPub(lp.PublicKey)
-	priv64, _ := base64.StdEncoding.DecodeString(dash.PrivateKey)
-	cipher64, _ := base64.StdEncoding.DecodeString(lp.CipherText)
-	text, err := cipher.DecryptAes(cipher64, priv64)
+	log := &Log{}
+	err := cipher.DecodeAesJson(lp.CipherText, dash.PrivateKey, log)
 	if err != nil {
 		return err
 	}
-	err = json.Unmarshal(text, &lp.Log)
-	if err != nil {
-		return err
-	}
+	lp.Log = log
 	lp.DashId = dash.Id
 	return nil
 }
 
-func (lp *LogPackage) Encrypt() error {
+func (lp *LogPackage) EncryptLog() error {
 	dash := dashboard.GetByPub(lp.PublicKey)
-	privateKeyBytes, _ := base64.StdEncoding.DecodeString(dash.PrivateKey)
-	jsonMsg, err := json.Marshal(lp.Log)
+	cipherText, err := cipher.EncryptAesJson(lp.Log, dash.PrivateKey)
 	if err != nil {
 		return err
 	}
-	cipherBytes, err := cipher.EncryptAes(jsonMsg, privateKeyBytes)
-	if err != nil {
-		return err
-	}
-	cipherText := base64.StdEncoding.EncodeToString(cipherBytes)
 	lp.CipherText = cipherText
-	lp.Log = nil
 	return nil
 }

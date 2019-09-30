@@ -9,6 +9,8 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"crypto/x509"
+	"encoding/base64"
+	"encoding/json"
 	"errors"
 	"io"
 )
@@ -54,6 +56,34 @@ func EncryptWithPublicKey(msg []byte, pub *rsa.PublicKey) ([]byte, error) {
 func DecryptWithPrivateKey(ciphertext []byte, priv *rsa.PrivateKey) ([]byte, error) {
 	hash := sha512.New()
 	return rsa.DecryptOAEP(hash, rand.Reader, priv, ciphertext, nil)
+}
+
+func EncryptAesJson(data interface{}, priv string) (string, error) {
+	privateKeyBytes, _ := base64.StdEncoding.DecodeString(priv)
+	jsonMsg, err := json.Marshal(data)
+	if err != nil {
+		return "", err
+	}
+	cipherBytes, err := EncryptAes(jsonMsg, privateKeyBytes)
+	if err != nil {
+		return "", err
+	}
+	cipherText := base64.StdEncoding.EncodeToString(cipherBytes)
+	return cipherText, err
+}
+
+func DecodeAesJson(cipherText string, priv string, dest interface{}) error {
+	priv64, _ := base64.StdEncoding.DecodeString(priv)
+	cipher64, _ := base64.StdEncoding.DecodeString(cipherText)
+	text, err := DecryptAes(cipher64, priv64)
+	if err != nil {
+		return err
+	}
+	err = json.Unmarshal(text, dest)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func EncryptAes(plainText []byte, key []byte) ([]byte, error) {
