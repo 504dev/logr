@@ -7,7 +7,7 @@ import (
 )
 
 type Log struct {
-	DashId    int       `json:"dashid"`
+	DashId    int       `json:"dash_id"`
 	Timestamp time.Time `json:"timestamp"`
 	Host      string    `json:"host"`
 	Project   string    `json:"project"`

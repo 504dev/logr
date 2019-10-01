@@ -5,6 +5,10 @@ var users = Users{
 	{2, 3855715, "kumirska"},
 }
 
+func GetAll() Users {
+	return users
+}
+
 func GetById(id int) *User {
 	for _, item := range users {
 		if item.GithubId == id {

@@ -14,6 +14,10 @@ var logs = Logs{
 	},
 }
 
+func GetAll() Logs {
+	return logs
+}
+
 func GetLast() *Log {
 	return logs[len(logs)-1]
 }

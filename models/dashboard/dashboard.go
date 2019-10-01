@@ -10,6 +10,10 @@ var dashboards = Dashboards{
 	},
 }
 
+func GetAll() Dashboards {
+	return dashboards
+}
+
 func GetById(id int) *Dashboard {
 	for _, item := range dashboards {
 		if item.Id == id {
