@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"fmt"
 	"github.com/504dev/kidlog/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
@@ -8,6 +9,10 @@ import (
 )
 
 var db *sqlx.DB
+
+func Conn() *sqlx.DB {
+	return db
+}
 
 func Init() {
 	var err error
@@ -20,14 +25,13 @@ func Init() {
 
 func Schema() {
 	var err error
-	users, _ := ioutil.ReadFile("../../mysql/schema/users.sql")
-	_, err = db.Exec(string(users))
-	if err != nil {
-		panic(err)
-	}
-	dashboards, _ := ioutil.ReadFile("../../mysql/schema/dashboards.sql")
-	_, err = db.Exec(string(dashboards))
-	if err != nil {
-		panic(err)
+	tables := []string{"dashboards", "dashboard_members", "users"}
+	for _, table := range tables {
+		path := fmt.Sprintf("../../mysql/schema/%v.sql", table)
+		sql, _ := ioutil.ReadFile(path)
+		_, err = db.Exec(string(sql))
+		if err != nil {
+			panic(err)
+		}
 	}
 }

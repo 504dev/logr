@@ -8,6 +8,7 @@ import (
 	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/mysql"
 	"github.com/gin-gonic/gin"
+	"strconv"
 )
 
 func main() {
@@ -20,10 +21,22 @@ func main() {
 		c.JSON(200, log.GetAll())
 	})
 	r.GET("/dashboards", func(c *gin.Context) {
-		c.JSON(200, dashboard.GetAll())
+		dashboards, _ := dashboard.GetAll()
+		c.JSON(200, dashboards)
+	})
+	r.GET("/dashboard/:id", func(c *gin.Context) {
+		id, _ := strconv.Atoi(c.Param("id"))
+		dash, _ := dashboard.GetById(id)
+		c.JSON(200, dash)
 	})
 	r.GET("/users", func(c *gin.Context) {
-		c.JSON(200, user.GetAll())
+		users, _ := user.GetAll()
+		c.JSON(200, users)
+	})
+	r.GET("/user/:id", func(c *gin.Context) {
+		id, _ := strconv.Atoi(c.Param("id"))
+		usr, _ := user.GetById(id)
+		c.JSON(200, usr)
 	})
 
 	r.Run(config.Get().Bind.Http)

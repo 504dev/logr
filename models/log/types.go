@@ -25,7 +25,7 @@ type LogPackage struct {
 }
 
 func (lp *LogPackage) DecryptLog() error {
-	dash := dashboard.GetByPub(lp.PublicKey)
+	dash, _ := dashboard.GetByPub(lp.PublicKey)
 	log := &Log{}
 	err := cipher.DecodeAesJson(lp.CipherText, dash.PrivateKey, log)
 	if err != nil {
@@ -37,7 +37,7 @@ func (lp *LogPackage) DecryptLog() error {
 }
 
 func (lp *LogPackage) EncryptLog() error {
-	dash := dashboard.GetByPub(lp.PublicKey)
+	dash, _ := dashboard.GetByPub(lp.PublicKey)
 	cipherText, err := cipher.EncryptAesJson(lp.Log, dash.PrivateKey)
 	if err != nil {
 		return err

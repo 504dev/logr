@@ -1,5 +1,10 @@
 package dashboard
 
+import (
+	"fmt"
+	"github.com/504dev/kidlog/mysql"
+)
+
 var dashboards = Dashboards{
 	{
 		Id:         1,
@@ -10,24 +15,44 @@ var dashboards = Dashboards{
 	},
 }
 
-func GetAll() Dashboards {
-	return dashboards
+func GetAll() (Dashboards, error) {
+	conn := mysql.Conn()
+	rows, err := conn.Queryx("SELECT id, owner_id, name, public_key, private_key FROM dashboards")
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	dashboards := make(Dashboards, 0)
+
+	for rows.Next() {
+		var dash Dashboard
+		err := rows.StructScan(&dash)
+		if err != nil {
+			return nil, err
+		}
+		dashboards = append(dashboards, &dash)
+	}
+	return dashboards, nil
 }
 
-func GetById(id int) *Dashboard {
-	for _, item := range dashboards {
-		if item.Id == id {
-			return item
-		}
+func getByField(fieldname string, val interface{}) (*Dashboard, error) {
+	var dash Dashboard
+	conn := mysql.Conn()
+	sql := fmt.Sprintf("SELECT id, owner_id, name, public_key, private_key FROM dashboards WHERE %v = ?", fieldname)
+	row := conn.QueryRowx(sql, val)
+	err := row.StructScan(&dash)
+
+	if err != nil {
+		return nil, err
 	}
-	return nil
+
+	return &dash, nil
 }
 
-func GetByPub(pub string) *Dashboard {
-	for _, item := range dashboards {
-		if item.PublicKey == pub {
-			return item
-		}
-	}
-	return nil
+func GetById(id int) (*Dashboard, error) {
+	return getByField("id", id)
+}
+
+func GetByPub(pub string) (*Dashboard, error) {
+	return getByField("public_key", pub)
 }
