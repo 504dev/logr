@@ -18,7 +18,9 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/logs", func(c *gin.Context) {
-		c.JSON(200, log.GetAll())
+		where := log.Filter{DashId: 1}
+		logs, _ := log.GetAll(where)
+		c.JSON(200, logs)
 	})
 	r.GET("/dashboards", func(c *gin.Context) {
 		dashboards, _ := dashboard.GetAll()

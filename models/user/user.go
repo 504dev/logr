@@ -5,11 +5,6 @@ import (
 	"github.com/504dev/kidlog/mysql"
 )
 
-var users = Users{
-	{1, 5584596, "DmitryKozhurkin"},
-	{2, 3855715, "kumirska"},
-}
-
 func getByField(fieldname string, val interface{}) (*User, error) {
 	var user User
 	conn := mysql.Conn()
