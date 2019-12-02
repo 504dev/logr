@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
 	"time"
 )
@@ -19,8 +20,12 @@ var logs = Logs{
 func GetAll(f Filter) (Logs, error) {
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
-	sql := "SELECT timestamp, dash_id, hostname, logname, level, message FROM logs " + where
-	rows, err := conn.Queryx(sql, values)
+	sql := "SELECT timestamp, dash_id, hostname, logname, level, message FROM logs " + where + " ORDER BY day DESC, timestamp DESC"
+	if f.Limit > 0 {
+		sql += fmt.Sprintf(" LIMIT %v", f.Limit)
+	}
+	fmt.Println(sql, values)
+	rows, err := conn.Queryx(sql, values...)
 	if err != nil {
 		return nil, err
 	}

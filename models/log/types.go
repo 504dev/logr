@@ -56,6 +56,9 @@ type Filter struct {
 }
 
 func (f *Filter) Match(log Log) bool {
+	if f.DashId != 0 && f.DashId != log.DashId {
+		return false
+	}
 	if f.Hostname != "" && f.Hostname != log.Hostname {
 		return false
 	}
@@ -63,6 +66,12 @@ func (f *Filter) Match(log Log) bool {
 		return false
 	}
 	if f.Level != 0 && f.Level != log.Level {
+		return false
+	}
+	if f.Timestamp[0] != 0 && log.Timestamp < f.Timestamp[0] {
+		return false
+	}
+	if f.Timestamp[1] != 0 && log.Timestamp > f.Timestamp[1] {
 		return false
 	}
 	return true
@@ -80,8 +89,20 @@ func (f *Filter) ToSql() (string, []interface{}) {
 		values = append(values, f.Logname)
 	}
 	if f.Level != 0 {
-		sql += "level = ?"
+		sql += " AND level = ?"
 		values = append(values, f.Level)
+	}
+	if f.Timestamp[0] != 0 {
+		sql += " AND timestamp > ?"
+		values = append(values, f.Timestamp[0])
+	}
+	to := f.Timestamp[1]
+	if f.Offset != 0 {
+		to = f.Offset
+	}
+	if to != 0 {
+		sql += " AND timestamp < ?"
+		values = append(values, to)
 	}
 	return sql, values
 }
