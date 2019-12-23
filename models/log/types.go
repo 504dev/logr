@@ -104,5 +104,9 @@ func (f *Filter) ToSql() (string, []interface{}) {
 		sql += " AND timestamp < ?"
 		values = append(values, to)
 	}
+	if f.Message != "" {
+		sql += " AND match(message, ?)"
+		values = append(values, f.Message)
+	}
 	return sql, values
 }
