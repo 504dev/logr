@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
 	"github.com/504dev/kidlog/config"
@@ -11,7 +13,9 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 )
@@ -86,15 +90,55 @@ func main() {
 		c.JSON(200, usr)
 	})
 
-	r.GET("/me", func(c *gin.Context) {
-		usr, _ := user.GetById(1)
-		c.JSON(200, usr)
-	})
+	{
+		r.GET("/me", func(c *gin.Context) {
+			usr, _ := user.GetById(1)
+			c.JSON(200, usr)
+		})
 
-	r.GET("/my/dashboards", func(c *gin.Context) {
-		dashboards, _ := dashboard.GetAll()
-		c.JSON(200, dashboards)
-	})
+		r.GET("/my/dashboards", func(c *gin.Context) {
+			dashboards, _ := dashboard.GetAll()
+			c.JSON(200, dashboards)
+		})
+	}
+
+	{
+		CLIENT_ID := "a3e0eabef800cd0e7a84"
+		CLIENT_SECRET := "95344c1682df6e82e71652398dcf9f44b1c6ed8d"
+		SCOPE := "user"
+		STATE := "secretstring"
+		REDIRECT_URL := "http://localhost:8080/"
+
+		r.GET("/oauth/signin", func(c *gin.Context) {
+			params := url.Values{}
+			params.Add("client_id", CLIENT_ID)
+			params.Add("state", STATE)
+			params.Add("scope", SCOPE)
+			redirectUrl := "https://github.com/login/oauth/authorize?" + params.Encode()
+			c.Redirect(http.StatusMovedPermanently, redirectUrl)
+			c.Abort()
+		})
+		r.GET("/oauth/callback", func(c *gin.Context) {
+			state := c.Query("state")
+			code := c.Query("code")
+			requestBody, _ := json.Marshal(map[string]string{
+				"client_id":     CLIENT_ID,
+				"client_secret": CLIENT_SECRET,
+				"code":          code,
+				"state":         state,
+			})
+
+			url := "https://github.com/login/oauth/access_token"
+			resp, _ := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
+			defer resp.Body.Close()
+
+			body, _ := ioutil.ReadAll(resp.Body)
+			fmt.Println(string(body))
+
+			c.Redirect(http.StatusMovedPermanently, REDIRECT_URL)
+			c.Abort()
+		})
+	}
 
 	r.Run(config.Get().Bind.Http)
 }
