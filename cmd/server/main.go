@@ -8,6 +8,7 @@ import (
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/mysql"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net/http"
@@ -31,6 +32,8 @@ func main() {
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, LogHandler{})
 
 	r := gin.Default()
+	r.Use(cors.Default())
+
 	r.GET("/logs", func(c *gin.Context) {
 		dashid, _ := strconv.Atoi(c.Query("dash_id"))
 		if dashid == 0 {
@@ -81,6 +84,16 @@ func main() {
 		id, _ := strconv.Atoi(c.Param("id"))
 		usr, _ := user.GetById(id)
 		c.JSON(200, usr)
+	})
+
+	r.GET("/me", func(c *gin.Context) {
+		usr, _ := user.GetById(1)
+		c.JSON(200, usr)
+	})
+
+	r.GET("/my/dashboards", func(c *gin.Context) {
+		dashboards, _ := dashboard.GetAll()
+		c.JSON(200, dashboards)
 	})
 
 	r.Run(config.Get().Bind.Http)
