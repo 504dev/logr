@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/google/go-github/v29/github"
 	"golang.org/x/oauth2"
 	"net/http"
 )
@@ -39,6 +40,11 @@ func (u OAuthController) Callback(c *gin.Context) {
 	tok, err := conf.Exchange(c, code)
 
 	fmt.Println(state, tok, err)
+
+	client := github.NewClient(conf.Client(c, tok))
+	repos, _, err := client.Users.Get(c, "")
+
+	fmt.Println(repos, err)
 
 	c.Redirect(http.StatusMovedPermanently, REDIRECT_URL)
 	c.Abort()
