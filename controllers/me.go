@@ -8,11 +8,11 @@ import (
 
 type MeController struct{}
 
-func (u MeController) Me(c *gin.Context) {
+func (_ MeController) Me(c *gin.Context) {
 	usr, _ := user.GetById(1)
 	c.JSON(200, usr)
 }
-func (u MeController) Dashboards(c *gin.Context) {
+func (_ MeController) Dashboards(c *gin.Context) {
 	dashboards, _ := dashboard.GetAll()
 	c.JSON(200, dashboards)
 }

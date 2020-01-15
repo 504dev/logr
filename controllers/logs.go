@@ -10,7 +10,7 @@ import (
 
 type LogsController struct{}
 
-func (u LogsController) Find(c *gin.Context) {
+func (_ LogsController) Find(c *gin.Context) {
 	dashid, _ := strconv.Atoi(c.Query("dash_id"))
 	if dashid == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "day required"})
