@@ -34,18 +34,19 @@ func NewRouter() *gin.Engine {
 		c.JSON(200, usr)
 	})
 
-	// me
-	me := controllers.MeController{}
-	{
-		r.GET("/me", me.Me)
-		r.GET("/me/dashboards", me.Dashboards)
-	}
-
 	// oauth
 	oauth := controllers.OAuthController{}
 	{
 		r.GET("/oauth/authorize", oauth.Authorize)
 		r.GET("/oauth/callback", oauth.Callback)
+	}
+
+	// me
+	me := controllers.MeController{}
+	{
+		r.Use(oauth.EnsureJWT)
+		r.GET("/me", me.Me)
+		r.GET("/me/dashboards", me.Dashboards)
 	}
 
 	return r

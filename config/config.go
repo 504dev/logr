@@ -17,6 +17,11 @@ type confT struct {
 		Http string `yaml:"http"`
 		Udp  string `yaml:"udp"`
 	} `yaml:"bind"`
+	OAuth struct {
+		JwtSecret   string `yaml:"jwt_secret"`
+		StateSecret string `yaml:"state_secret"`
+		RedirectUrl string `yaml:"redirect_url"`
+	} `yaml:"oauth"`
 	Clickhouse string `yaml:"clickhouse"`
 	Mysql      string `yaml:"mysql"`
 }
