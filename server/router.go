@@ -11,7 +11,10 @@ import (
 
 func NewRouter() *gin.Engine {
 	r := gin.Default()
-	r.Use(cors.Default())
+	r.Use(cors.New(cors.Config{
+		AllowHeaders:    []string{"Authorization"},
+		AllowAllOrigins: true,
+	}))
 
 	logsController := controllers.LogsController{}
 	r.GET("/logs", logsController.Find)

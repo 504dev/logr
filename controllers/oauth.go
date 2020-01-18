@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/504dev/kidlog/config"
+	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/types"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -42,25 +43,54 @@ func (_ OAuthController) Callback(c *gin.Context) {
 	}
 
 	tok, err := conf.Exchange(c, code)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	client := github.NewClient(conf.Client(c, tok))
-	user, _, err := client.Users.Get(c, "")
+	userGithub, _, err := client.Users.Get(c, "")
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	fmt.Println(userGithub)
 
-	// TODO create user if not exist
-
-	fmt.Println(user, err)
+	userDb, err := user.GetByGithubId(*userGithub.ID)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	if userDb == nil {
+		userDb, err = user.Create(*userGithub.ID, *userGithub.Login)
+		if err != nil {
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+	}
+	fmt.Println(userDb)
 
 	claims := types.Claims{
-		GihubId:     *user.ID,
+		Id:          userDb.Id,
+		GihubId:     *userGithub.ID,
+		Username:    *userGithub.Login,
 		AccessToken: tok.AccessToken,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
 		},
 	}
-	claims.EncryptAccessToken()
+	err = claims.EncryptAccessToken()
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(config.Get().OAuth.JwtSecret))
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 
 	REDIRECT_URL := config.Get().OAuth.RedirectUrl
 	u, _ := url.Parse(REDIRECT_URL)
@@ -77,17 +107,21 @@ func (_ OAuthController) Callback(c *gin.Context) {
 }
 
 func (_ OAuthController) EnsureJWT(c *gin.Context) {
-	var tknStr string
+	var token string
 	splitted := strings.Split(c.Request.Header.Get("Authorization"), " ")
 	if len(splitted) == 2 {
-		tknStr = splitted[1]
+		token = splitted[1]
 	}
-	if tknStr == "" {
-		tknStr = c.Query("token")
+	if token == "" {
+		token = c.Query("token")
+	}
+	if token == "" {
+		token = c.PostForm("token")
+
 	}
 
 	claims := &types.Claims{}
-	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Get().OAuth.JwtSecret), nil
 	})
 
@@ -103,7 +137,9 @@ func (_ OAuthController) EnsureJWT(c *gin.Context) {
 		return
 	}
 
-	c.Set("jwt", claims)
+	c.Set("claims", claims)
+	c.Set("token", token)
+	c.Set("id", claims.Id)
 
 	c.Next()
 }

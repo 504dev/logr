@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/user"
 	"github.com/gin-gonic/gin"
@@ -10,12 +9,12 @@ import (
 type MeController struct{}
 
 func (_ MeController) Me(c *gin.Context) {
-	usr, _ := user.GetById(1)
+	id := c.GetInt("id")
+	usr, _ := user.GetById(id)
 	c.JSON(200, usr)
 }
 func (_ MeController) Dashboards(c *gin.Context) {
-	jwt, _ := c.Get("jwt")
-	fmt.Println("jwt", jwt)
-	dashboards, _ := dashboard.GetAll()
+	id := c.GetInt("id")
+	dashboards, _ := dashboard.GetUserDashboards(id)
 	c.JSON(200, dashboards)
 }

@@ -42,3 +42,27 @@ func GetAll() (Users, error) {
 func GetById(id int) (*User, error) {
 	return getByField("id", id)
 }
+
+func GetByGithubId(id int64) (*User, error) {
+	return getByField("github_id", id)
+}
+
+func Create(githubId int64, username string) (*User, error) {
+	values := []interface{}{githubId, username}
+	conn := mysql.Conn()
+
+	sqlstr := `INSERT INTO users (github_id, username) VALUES (?, ?)`
+	stmt, err := conn.Prepare(sqlstr)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = stmt.Exec(values...)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := GetByGithubId(githubId)
+
+	return user, err
+}

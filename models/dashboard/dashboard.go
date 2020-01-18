@@ -5,16 +5,6 @@ import (
 	"github.com/504dev/kidlog/mysql"
 )
 
-var dashboards = Dashboards{
-	{
-		Id:         1,
-		OwnerId:    1,
-		Name:       "sandbox",
-		PublicKey:  "MDwwDQYJKoZIhvcNAQEBBQADKwAwKAIhAJ/dD/71Ak7I0e0Q9R9M+yQr45dk3FxbSLT6PQ3vPwLLAgMBAAE=",
-		PrivateKey: "MIGpAgEAAiEAn90P/vUCTsjR7RD1H0z7JCvjl2TcXFtItPo9De8/AssCAwEAAQIgO8gzfyiooEXBG2JICFiFYb4dArQbN+TJgkJdqTHthcECEQDFJHDL3Px0ZlPNfgt6bBYJAhEAz5doRIkWyGkNx1dk5lFnMwIQLEeDDkcUbRCOwhkNevHMAQIQGE7IXM4Yptr2TBNFs1pw1QIQYjC4bb5B1l4cGi2zHH8a2Q==",
-	},
-}
-
 func GetAll() (Dashboards, error) {
 	conn := mysql.Conn()
 	rows, err := conn.Queryx("SELECT id, owner_id, name, public_key, private_key FROM dashboards")
@@ -35,24 +25,45 @@ func GetAll() (Dashboards, error) {
 	return dashboards, nil
 }
 
-func getByField(fieldname string, val interface{}) (*Dashboard, error) {
-	var dash Dashboard
+func getAllByField(fieldname string, val interface{}) (Dashboards, error) {
+	var dashboards Dashboards
 	conn := mysql.Conn()
 	sql := fmt.Sprintf("SELECT id, owner_id, name, public_key, private_key FROM dashboards WHERE %v = ?", fieldname)
-	row := conn.QueryRowx(sql, val)
-	err := row.StructScan(&dash)
-
+	rows, err := conn.Queryx(sql, val)
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
+	dashboards = make(Dashboards, 0)
+	for rows.Next() {
+		dash := Dashboard{}
+		err = rows.StructScan(&dash)
+		dashboards = append(dashboards, &dash)
 
-	return &dash, nil
+	}
+
+	return dashboards, nil
+}
+
+func getOneByField(fieldname string, val interface{}) (*Dashboard, error) {
+	dashboards, err := getAllByField(fieldname, val)
+	if err != nil {
+		return nil, err
+	}
+	if len(dashboards) == 0 {
+		return nil, nil
+	}
+	return dashboards[0], nil
 }
 
 func GetById(id int) (*Dashboard, error) {
-	return getByField("id", id)
+	return getOneByField("id", id)
 }
 
 func GetByPub(pub string) (*Dashboard, error) {
-	return getByField("public_key", pub)
+	return getOneByField("public_key", pub)
+}
+
+func GetUserDashboards(id int) (Dashboards, error) {
+	return getAllByField("owner_id", id)
 }

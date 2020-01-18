@@ -9,17 +9,24 @@ import (
 )
 
 type Claims struct {
+	Id                int    `json:"id"`
 	GihubId           int64  `json:"github_id"`
+	Username          string `json:"username"`
 	AccessToken       string `json:"access_token"`
 	AccessTokenCipher string `json:"access_token_cipher"`
 	jwt.StandardClaims
 }
 
-func (p *Claims) EncryptAccessToken() {
-	cipherAccessToken, _ := cipher.EncryptAes([]byte(p.AccessToken), []byte(config.Get().OAuth.JwtSecret))
+func (p *Claims) EncryptAccessToken() error {
+	cipherAccessToken, err := cipher.EncryptAes([]byte(p.AccessToken), []byte(config.Get().OAuth.JwtSecret))
+	if err != nil {
+		return err
+	}
 	p.AccessTokenCipher = base64.StdEncoding.EncodeToString(cipherAccessToken)
 	fmt.Println("EncryptAccessToken", p.AccessToken, p.AccessTokenCipher)
 	p.AccessToken = ""
+
+	return nil
 }
 
 func (p *Claims) DecryptAccessToken() error {
