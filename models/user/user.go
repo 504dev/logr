@@ -8,7 +8,7 @@ import (
 func getByField(fieldname string, val interface{}) (*User, error) {
 	var user User
 	conn := mysql.Conn()
-	sql := fmt.Sprintf("SELECT id, github_id, username FROM users WHERE %v = ?", fieldname)
+	sql := fmt.Sprintf("SELECT id, github_id, username, role FROM users WHERE %v = ?", fieldname)
 	row := conn.QueryRowx(sql, val)
 	err := row.StructScan(&user)
 
@@ -21,7 +21,7 @@ func getByField(fieldname string, val interface{}) (*User, error) {
 
 func GetAll() (Users, error) {
 	conn := mysql.Conn()
-	rows, err := conn.Queryx("SELECT id, github_id, username FROM users")
+	rows, err := conn.Queryx("SELECT id, github_id, username, role FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -48,10 +48,10 @@ func GetByGithubId(id int64) (*User, error) {
 }
 
 func Create(githubId int64, username string) (*User, error) {
-	values := []interface{}{githubId, username}
+	values := []interface{}{githubId, username, Roles["USER"]}
 	conn := mysql.Conn()
 
-	sqlstr := `INSERT INTO users (github_id, username) VALUES (?, ?)`
+	sqlstr := `INSERT INTO users (github_id, username, role) VALUES (?, ?, ?)`
 	stmt, err := conn.Prepare(sqlstr)
 	if err != nil {
 		return nil, err

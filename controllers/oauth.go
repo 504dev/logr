@@ -72,6 +72,7 @@ func (_ OAuthController) Callback(c *gin.Context) {
 
 	claims := types.Claims{
 		Id:          userDb.Id,
+		Role:        userDb.Role,
 		GihubId:     *userGithub.ID,
 		Username:    *userGithub.Login,
 		AccessToken: tok.AccessToken,
@@ -141,5 +142,16 @@ func (_ OAuthController) EnsureJWT(c *gin.Context) {
 	c.Set("token", token)
 	c.Set("id", claims.Id)
 
+	c.Next()
+}
+
+func (_ OAuthController) EnsureAdmin(c *gin.Context) {
+	claims, _ := c.Get("claims")
+	role := claims.(*types.Claims).Role
+	fmt.Println(role, user.Roles["ADMIN"])
+	if role != user.Roles["ADMIN"] {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
 	c.Next()
 }

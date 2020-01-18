@@ -10,9 +10,10 @@ import (
 
 type Claims struct {
 	Id                int    `json:"id"`
+	Role              int    `json:"role"`
 	GihubId           int64  `json:"github_id"`
 	Username          string `json:"username"`
-	AccessToken       string `json:"access_token"`
+	AccessToken       string `json:"access_token,omitempty"`
 	AccessTokenCipher string `json:"access_token_cipher"`
 	jwt.StandardClaims
 }

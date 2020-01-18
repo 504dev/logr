@@ -5,5 +5,6 @@ CREATE TABLE IF NOT EXISTS dashboards (
     public_key VARCHAR(1024),
     private_key VARCHAR(1024),
     PRIMARY KEY (id),
+    UNIQUE (public_key),
     FOREIGN KEY (owner_id) REFERENCES users(id)
 );

@@ -23,6 +23,21 @@ func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	return privkey, &privkey.PublicKey, nil
 }
 
+func GenerateKeyPairBase64(bits int) (string, string, error) {
+	priv, pub, err := GenerateKeyPair(bits)
+	if err != nil {
+		return "", "", err
+	}
+	pubBytes, err := PublicKeyToBytes(pub)
+	if err != nil {
+		return "", "", err
+	}
+	privBytes := PrivateKeyToBytes(priv)
+	pubString := base64.StdEncoding.EncodeToString(pubBytes)
+	privString := base64.StdEncoding.EncodeToString(privBytes)
+	return pubString, privString, nil
+}
+
 func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
 	return x509.MarshalPKCS1PrivateKey(priv)
 }

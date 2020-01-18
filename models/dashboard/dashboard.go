@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"fmt"
+	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/mysql"
 )
 
@@ -66,4 +67,34 @@ func GetByPub(pub string) (*Dashboard, error) {
 
 func GetUserDashboards(id int) (Dashboards, error) {
 	return getAllByField("owner_id", id)
+}
+
+func CreateDashboard(ownerId int, name string) (*Dashboard, error) {
+	conn := mysql.Conn()
+
+	pubkey, privkey, err := cipher.GenerateKeyPairBase64(256)
+	if err != nil {
+		return nil, err
+	}
+
+	values := []interface{}{ownerId, name, pubkey, privkey}
+	sqlstr := `INSERT INTO dashboards (owner_id, name, public_key, private_key) VALUES (?, ?)`
+	stmt, err := conn.Prepare(sqlstr)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := stmt.Exec(values...)
+	if err != nil {
+		return nil, err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := GetById(int(id))
+
+	return user, err
 }
