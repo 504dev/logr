@@ -78,7 +78,7 @@ func CreateDashboard(ownerId int, name string) (*Dashboard, error) {
 	}
 
 	values := []interface{}{ownerId, name, pubkey, privkey}
-	sqlstr := `INSERT INTO dashboards (owner_id, name, public_key, private_key) VALUES (?, ?)`
+	sqlstr := `INSERT INTO dashboards (owner_id, name, public_key, private_key) VALUES (?, ?, ?, ?)`
 	stmt, err := conn.Prepare(sqlstr)
 	if err != nil {
 		return nil, err

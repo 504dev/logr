@@ -9,7 +9,8 @@ import (
 func NewRouter() *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowHeaders:    []string{"Authorization"},
+		AllowMethods:    []string{"GET", "PUT", "POST"},
+		AllowHeaders:    []string{"Authorization", "Content-Type"},
 		AllowAllOrigins: true,
 	}))
 
@@ -25,6 +26,7 @@ func NewRouter() *gin.Engine {
 	{
 		r.GET("/me", oauth.EnsureJWT, me.Me)
 		r.GET("/me/dashboards", oauth.EnsureJWT, me.Dashboards)
+		r.POST("/me/dashboard", oauth.EnsureJWT, me.AddDashboard)
 	}
 
 	logsController := controllers.LogsController{}
