@@ -10,12 +10,12 @@ import (
 type MeController struct{}
 
 func (_ MeController) Me(c *gin.Context) {
-	id := c.GetInt("id")
+	id := c.GetInt("userId")
 	usr, _ := user.GetById(id)
 	c.JSON(http.StatusOK, usr)
 }
 func (_ MeController) Dashboards(c *gin.Context) {
-	id := c.GetInt("id")
+	id := c.GetInt("userId")
 	dashboards, _ := dashboard.GetUserDashboards(id)
 	c.JSON(http.StatusOK, dashboards)
 }
@@ -29,7 +29,7 @@ func (_ MeController) AddDashboard(c *gin.Context) {
 		return
 	}
 
-	id := c.GetInt("id")
+	id := c.GetInt("userId")
 	dash, err := dashboard.CreateDashboard(id, body.Name)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)

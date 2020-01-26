@@ -10,7 +10,7 @@ type Log struct {
 	Timestamp int64  `db:"timestamp" json:"timestamp"`
 	Hostname  string `db:"hostname"  json:"hostname"`
 	Logname   string `db:"logname"   json:"logname"`
-	Level     int    `db:"level"     json:"level"`
+	Level     string `db:"level"     json:"level"`
 	Message   string `db:"message"   json:"message"`
 }
 
@@ -49,7 +49,7 @@ type Filter struct {
 	DashId    int      `json:"dash_id"`
 	Hostname  string   `json:"hostname"`
 	Logname   string   `json:"logname"`
-	Level     int      `json:"level"`
+	Level     string   `json:"level"`
 	Message   string   `json:"message"`
 	Offset    int64    `json:"offset"`
 	Limit     int      `json:"limit"`
@@ -65,7 +65,7 @@ func (f *Filter) Match(log Log) bool {
 	if f.Logname != "" && f.Logname != log.Logname {
 		return false
 	}
-	if f.Level != 0 && f.Level != log.Level {
+	if f.Level != "" && f.Level != log.Level {
 		return false
 	}
 	if f.Timestamp[0] != 0 && log.Timestamp < f.Timestamp[0] {
@@ -88,7 +88,7 @@ func (f *Filter) ToSql() (string, []interface{}) {
 		sql += " AND logname = ?"
 		values = append(values, f.Logname)
 	}
-	if f.Level != 0 {
+	if f.Level != "" {
 		sql += " AND level = ?"
 		values = append(values, f.Level)
 	}

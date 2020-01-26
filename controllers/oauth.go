@@ -25,15 +25,15 @@ var conf = &oauth2.Config{
 	},
 }
 
-type OAuthController struct{}
+type AuthController struct{}
 
-func (_ OAuthController) Authorize(c *gin.Context) {
+func (_ AuthController) Authorize(c *gin.Context) {
 	authorizeUrl := conf.AuthCodeURL(config.Get().OAuth.StateSecret)
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
 	c.Abort()
 }
 
-func (_ OAuthController) Callback(c *gin.Context) {
+func (_ AuthController) Callback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
@@ -93,6 +93,7 @@ func (_ OAuthController) Callback(c *gin.Context) {
 		return
 	}
 
+	JWT_LIFETIME := 60 * 10
 	REDIRECT_URL := config.Get().OAuth.RedirectUrl
 	u, _ := url.Parse(REDIRECT_URL)
 	http.SetCookie(c.Writer, &http.Cookie{
@@ -100,14 +101,14 @@ func (_ OAuthController) Callback(c *gin.Context) {
 		Value:  tokenString,
 		Path:   "/",
 		Domain: u.Hostname(),
-		MaxAge: 60,
+		MaxAge: JWT_LIFETIME,
 	})
 
 	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", REDIRECT_URL, tokenString))
 	c.Abort()
 }
 
-func (_ OAuthController) EnsureJWT(c *gin.Context) {
+func (_ AuthController) EnsureJWT(c *gin.Context) {
 	var token string
 	splitted := strings.Split(c.Request.Header.Get("Authorization"), " ")
 	if len(splitted) == 2 {
@@ -140,12 +141,12 @@ func (_ OAuthController) EnsureJWT(c *gin.Context) {
 
 	c.Set("claims", claims)
 	c.Set("token", token)
-	c.Set("id", claims.Id)
+	c.Set("userId", claims.Id)
 
 	c.Next()
 }
 
-func (_ OAuthController) EnsureAdmin(c *gin.Context) {
+func (_ AuthController) EnsureAdmin(c *gin.Context) {
 	claims, _ := c.Get("claims")
 	role := claims.(*types.Claims).Role
 	fmt.Println(role, user.Roles["ADMIN"])

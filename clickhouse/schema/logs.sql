@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS logs (
     dash_id Int32,
     hostname String,
     logname String,
-    level Int16,
+    level String,
     message String
 )
 ENGINE = MergeTree()

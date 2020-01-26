@@ -15,31 +15,32 @@ func NewRouter() *gin.Engine {
 	}))
 
 	// oauth
-	oauth := controllers.OAuthController{}
+	auth := controllers.AuthController{}
 	{
-		r.GET("/oauth/authorize", oauth.Authorize)
-		r.GET("/oauth/callback", oauth.Callback)
+		r.GET("/oauth/authorize", auth.Authorize)
+		r.GET("/oauth/callback", auth.Callback)
 	}
 
 	// me
 	me := controllers.MeController{}
 	{
-		r.GET("/me", oauth.EnsureJWT, me.Me)
-		r.GET("/me/dashboards", oauth.EnsureJWT, me.Dashboards)
-		r.POST("/me/dashboard", oauth.EnsureJWT, me.AddDashboard)
+		r.GET("/me", auth.EnsureJWT, me.Me)
+		r.GET("/me/dashboards", auth.EnsureJWT, me.Dashboards)
+		r.POST("/me/dashboard", auth.EnsureJWT, me.AddDashboard)
 	}
 
 	logsController := controllers.LogsController{}
 	{
-		r.GET("/logs", oauth.EnsureJWT, logsController.Find)
+		r.GET("/logs", auth.EnsureJWT, logsController.Find)
+		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
 	}
 
 	adminController := controllers.AdminController{}
 	{
-		r.GET("/dashboards", oauth.EnsureJWT, oauth.EnsureAdmin, adminController.Dashboards)
-		r.GET("/dashboard/:id", oauth.EnsureJWT, oauth.EnsureAdmin, adminController.DashboardById)
-		r.GET("/users", oauth.EnsureJWT, oauth.EnsureAdmin, adminController.Users)
-		r.GET("/user/:id", oauth.EnsureJWT, oauth.EnsureAdmin, adminController.UserById)
+		r.GET("/dashboards", auth.EnsureJWT, auth.EnsureAdmin, adminController.Dashboards)
+		r.GET("/dashboard/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.DashboardById)
+		r.GET("/users", auth.EnsureJWT, auth.EnsureAdmin, adminController.Users)
+		r.GET("/user/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.UserById)
 	}
 
 	return r

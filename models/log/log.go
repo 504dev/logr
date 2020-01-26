@@ -3,24 +3,16 @@ package log
 import (
 	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
-	"time"
 )
-
-var logs = Logs{
-	{
-		DashId:    1,
-		Timestamp: time.Now().UnixNano(),
-		Hostname:  "localhost",
-		Logname:   "performance.log",
-		Level:     0,
-		Message:   "Hello",
-	},
-}
 
 func GetAll(f Filter) (Logs, error) {
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
-	sql := "SELECT timestamp, dash_id, hostname, logname, level, message FROM logs " + where + " ORDER BY day DESC, timestamp DESC"
+	sql := `
+      SELECT timestamp, dash_id, hostname, logname, level, message
+      FROM logs ` + where + `
+      ORDER BY day DESC, timestamp DESC
+    `
 	if f.Limit > 0 {
 		sql += fmt.Sprintf(" LIMIT %v", f.Limit)
 	}
@@ -43,6 +35,35 @@ func GetAll(f Filter) (Logs, error) {
 	return logs, nil
 }
 
-func GetLast() *Log {
-	return logs[len(logs)-1]
+type DashStatRow struct {
+	Hostname string `db:"hostname"  json:"hostname"`
+	Logname  string `db:"logname"   json:"logname"`
+	Level    string `db:"level"     json:"level"`
+	Cnt      int    `db:"cnt"       json:"cnt"`
+	Updated  string `db:"updated"   json:"updated"`
+}
+
+func GetDashStats(dashId int) ([]*DashStatRow, error) {
+	conn := clickhouse.Conn()
+	sql := `
+      SELECT hostname, logname, level, count(*) AS cnt, max(day) AS updated
+      FROM logs WHERE dash_id = ?
+      GROUP BY hostname, logname, level
+    `
+	rows, err := conn.Queryx(sql, dashId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	stats := make([]*DashStatRow, 0)
+
+	for rows.Next() {
+		var row DashStatRow
+		err := rows.StructScan(&row)
+		if err != nil {
+			return nil, err
+		}
+		stats = append(stats, &row)
+	}
+	return stats, nil
 }
