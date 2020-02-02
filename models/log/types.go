@@ -14,12 +14,48 @@ type Log struct {
 	Message   string `db:"message"   json:"message"`
 }
 
+type Metr struct {
+	DashId    int                `db:"dash_id"   json:"dash_id"`
+	Timestamp int64              `db:"timestamp" json:"timestamp"`
+	Hostname  string             `db:"hostname"  json:"hostname"`
+	Type      string             `db:"type"      json:"type"`
+	Name      string             `db:"name"      json:"name"`
+	Scores    map[string]float64 `db:"scores"    json:"scores"`
+}
+
+type DashStatRow struct {
+	Hostname string `db:"hostname"  json:"hostname"`
+	Logname  string `db:"logname"   json:"logname"`
+	Level    string `db:"level"     json:"level"`
+	Cnt      int    `db:"cnt"       json:"cnt"`
+	Updated  string `db:"updated"   json:"updated"`
+}
+
 type Logs []*Log
+
+func (log *Log) Decrypt(cipherText string, priv string) error {
+	return cipher.DecodeAesJson(cipherText, priv, log)
+}
+
+func (log *Log) Encrypt(priv string) (string, error) {
+	return cipher.EncryptAesJson(log, priv)
+}
 
 type LogPackage struct {
 	PublicKey  string `json:"publickey"`
 	CipherText string `json:"ciphertext"`
 	*Log       `json:"log"`
+	*Metr      `json:"metr"`
+}
+
+func (lp *LogPackage) EncryptLog() error {
+	dash, _ := dashboard.GetByPub(lp.PublicKey)
+	cipherText, err := cipher.EncryptAesJson(lp.Log, dash.PrivateKey)
+	if err != nil {
+		return err
+	}
+	lp.CipherText = cipherText
+	return nil
 }
 
 func (lp *LogPackage) DecryptLog() error {
@@ -30,17 +66,7 @@ func (lp *LogPackage) DecryptLog() error {
 		return err
 	}
 	lp.Log = log
-	lp.DashId = dash.Id
-	return nil
-}
-
-func (lp *LogPackage) EncryptLog() error {
-	dash, _ := dashboard.GetByPub(lp.PublicKey)
-	cipherText, err := cipher.EncryptAesJson(lp.Log, dash.PrivateKey)
-	if err != nil {
-		return err
-	}
-	lp.CipherText = cipherText
+	log.DashId = dash.Id
 	return nil
 }
 

@@ -11,5 +11,6 @@ func main() {
 	config.Init()
 	clickhouse.Init()
 	mysql.Init()
+	go server.Udp()
 	server.Init()
 }

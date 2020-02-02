@@ -23,11 +23,11 @@ build\:prod: ## Build the executable file of service for production prod.
 
 run: build ## Run service.
 	echo "Running..."
-	cd cmd/$(SERVICE_SERVER) && ./$(SERVICE_SERVER) --config=../../config.yml
+	cd cmd/$(SERVICE_SERVER) && ./$(SERVICE_SERVER) -config=../../config.yml
 
 test: ## Run tests for all packages.
 	echo "Testing..."
-	go test -race -count=1 ${PKG_LIST}
+	go test -race -count=1 ${PKG_LIST} -args -config=../../config.yml
 
 coverage: ## Calculating code test coverage.
 	echo "Calculating coverage..."

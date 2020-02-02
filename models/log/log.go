@@ -3,9 +3,33 @@ package log
 import (
 	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
+	"time"
 )
 
-func GetAll(f Filter) (Logs, error) {
+func Create(log *Log) error {
+	day := time.Unix(0, log.Timestamp).Format("2006-01-02")
+	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message}
+	conn := clickhouse.Conn()
+
+	sqlstr := `INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
+	tx, _ := conn.Begin()
+	stmt, _ := tx.Prepare(sqlstr)
+	defer stmt.Close()
+
+	_, err := stmt.Exec(values...)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func GetByFilter(f Filter) (Logs, error) {
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
 	sql := `
@@ -33,14 +57,6 @@ func GetAll(f Filter) (Logs, error) {
 		logs = append(logs, &log)
 	}
 	return logs, nil
-}
-
-type DashStatRow struct {
-	Hostname string `db:"hostname"  json:"hostname"`
-	Logname  string `db:"logname"   json:"logname"`
-	Level    string `db:"level"     json:"level"`
-	Cnt      int    `db:"cnt"       json:"cnt"`
-	Updated  string `db:"updated"   json:"updated"`
 }
 
 func GetDashStats(dashId int) ([]*DashStatRow, error) {

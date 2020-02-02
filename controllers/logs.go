@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"fmt"
+	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/gin-gonic/gin"
@@ -18,7 +18,7 @@ func (_ LogsController) Stats(c *gin.Context) {
 		return
 	}
 	stats, err := log.GetDashStats(dashId)
-	fmt.Println(err)
+	logger.Error(err)
 	c.JSON(200, stats)
 }
 
@@ -62,9 +62,9 @@ func (_ LogsController) Find(c *gin.Context) {
 		Offset:    offset,
 		Limit:     limit,
 	}
-	fmt.Println(where)
+	logger.Info(where)
 
-	logs, err := log.GetAll(where)
-	fmt.Println(err)
+	logs, err := log.GetByFilter(where)
+	logger.Error(err)
 	c.JSON(200, logs)
 }
