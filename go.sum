@@ -1,4 +1,6 @@
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
+github.com/504dev/go-kidlog v0.0.0-20200205152417-03024b70c741 h1:BkmJPi68SL0ULhrNjVXfNE24zNGKIU9x2b5xx37ugns=
+github.com/504dev/go-kidlog v0.0.0-20200205152417-03024b70c741/go.mod h1:XIRDn17bvv0qZGPBlUaURfi8t8MgGUZRusqk3Ul04AU=
 github.com/ClickHouse/clickhouse-go v1.3.12 h1:HvD2NhKPLSeO3Ots6YV0ePgs4l3wO0bLqa9Uk1yeMOs=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/bkaradzic/go-lz4 v1.0.0/go.mod h1:0YdlkowM3VswSROI7qDxhRvJ3sLhlFrRRwjwegp5jy4=

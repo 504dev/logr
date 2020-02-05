@@ -15,7 +15,7 @@ import (
 func Init() {
 	gin.ForceConsoleColor()
 
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, logger.Handler{})
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, logger.Logr)
 
 	r := NewRouter()
 
