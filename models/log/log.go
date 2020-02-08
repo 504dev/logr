@@ -3,10 +3,11 @@ package log
 import (
 	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
+	"github.com/504dev/kidlog/types"
 	"time"
 )
 
-func Create(log *Log) error {
+func Create(log *types.Log) error {
 	day := time.Unix(0, log.Timestamp).Format("2006-01-02")
 	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message}
 	conn := clickhouse.Conn()
@@ -29,7 +30,7 @@ func Create(log *Log) error {
 	return nil
 }
 
-func GetByFilter(f Filter) (Logs, error) {
+func GetByFilter(f types.Filter) (types.Logs, error) {
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
 	sql := `
@@ -46,10 +47,10 @@ func GetByFilter(f Filter) (Logs, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	logs := make(Logs, 0)
+	logs := make(types.Logs, 0)
 
 	for rows.Next() {
-		var log Log
+		var log types.Log
 		err := rows.StructScan(&log)
 		if err != nil {
 			return nil, err
@@ -59,7 +60,7 @@ func GetByFilter(f Filter) (Logs, error) {
 	return logs, nil
 }
 
-func GetDashStats(dashId int) ([]*DashStatRow, error) {
+func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	conn := clickhouse.Conn()
 	sql := `
       SELECT hostname, logname, level, count(*) AS cnt, max(day) AS updated
@@ -71,10 +72,10 @@ func GetDashStats(dashId int) ([]*DashStatRow, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	stats := make([]*DashStatRow, 0)
+	stats := make([]*types.DashStatRow, 0)
 
 	for rows.Next() {
-		var row DashStatRow
+		var row types.DashStatRow
 		err := rows.StructScan(&row)
 		if err != nil {
 			return nil, err

@@ -1,4 +1,4 @@
-package user
+package types
 
 type User struct {
 	Id       int    `db:"id"        json:"id"`
@@ -12,5 +12,5 @@ type Users []*User
 var Roles = map[string]int{
 	"ADMIN":  1,
 	"USER":   2,
-	"VIEWER": 2,
+	"VIEWER": 3,
 }

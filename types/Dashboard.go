@@ -1,4 +1,4 @@
-package dashboard
+package types
 
 type Dashboard struct {
 	Id         int         `db:"id"          json:"id"`
@@ -16,3 +16,11 @@ type DashMember struct {
 	UserId int `db:"user_id"   json:"user_id"`
 }
 type DashMembers []*DashMembers
+
+type DashStatRow struct {
+	Hostname string `db:"hostname"  json:"hostname"`
+	Logname  string `db:"logname"   json:"logname"`
+	Level    string `db:"level"     json:"level"`
+	Cnt      int    `db:"cnt"       json:"cnt"`
+	Updated  string `db:"updated"   json:"updated"`
+}

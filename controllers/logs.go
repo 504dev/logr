@@ -4,6 +4,7 @@ import (
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
+	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -52,7 +53,7 @@ func (_ LogsController) Find(c *gin.Context) {
 	from, _ := strconv.ParseInt(c.Query("timestamp.from"), 10, 64)
 	to, _ := strconv.ParseInt(c.Query("timestamp.to"), 10, 64)
 
-	where := log.Filter{
+	where := types.Filter{
 		Timestamp: [2]int64{from, to},
 		DashId:    dashId,
 		Logname:   logname,

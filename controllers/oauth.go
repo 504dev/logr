@@ -149,8 +149,8 @@ func (_ AuthController) EnsureJWT(c *gin.Context) {
 func (_ AuthController) EnsureAdmin(c *gin.Context) {
 	claims, _ := c.Get("claims")
 	role := claims.(*types.Claims).Role
-	fmt.Println(role, user.Roles["ADMIN"])
-	if role != user.Roles["ADMIN"] {
+	fmt.Println(role, types.Roles["ADMIN"])
+	if role != types.Roles["ADMIN"] {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}

@@ -4,19 +4,20 @@ import (
 	"fmt"
 	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/mysql"
+	"github.com/504dev/kidlog/types"
 )
 
-func GetAll() (Dashboards, error) {
+func GetAll() (types.Dashboards, error) {
 	conn := mysql.Conn()
 	rows, err := conn.Queryx("SELECT id, owner_id, name, public_key, private_key FROM dashboards")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	dashboards := make(Dashboards, 0)
+	dashboards := make(types.Dashboards, 0)
 
 	for rows.Next() {
-		var dash Dashboard
+		var dash types.Dashboard
 		err := rows.StructScan(&dash)
 		if err != nil {
 			return nil, err
@@ -26,8 +27,8 @@ func GetAll() (Dashboards, error) {
 	return dashboards, nil
 }
 
-func getAllByField(fieldname string, val interface{}) (Dashboards, error) {
-	var dashboards Dashboards
+func getAllByField(fieldname string, val interface{}) (types.Dashboards, error) {
+	var dashboards types.Dashboards
 	conn := mysql.Conn()
 	sql := fmt.Sprintf("SELECT id, owner_id, name, public_key, private_key FROM dashboards WHERE %v = ?", fieldname)
 	rows, err := conn.Queryx(sql, val)
@@ -35,9 +36,9 @@ func getAllByField(fieldname string, val interface{}) (Dashboards, error) {
 		return nil, err
 	}
 	defer rows.Close()
-	dashboards = make(Dashboards, 0)
+	dashboards = make(types.Dashboards, 0)
 	for rows.Next() {
-		dash := Dashboard{}
+		dash := types.Dashboard{}
 		err = rows.StructScan(&dash)
 		dashboards = append(dashboards, &dash)
 
@@ -46,7 +47,7 @@ func getAllByField(fieldname string, val interface{}) (Dashboards, error) {
 	return dashboards, nil
 }
 
-func getOneByField(fieldname string, val interface{}) (*Dashboard, error) {
+func getOneByField(fieldname string, val interface{}) (*types.Dashboard, error) {
 	dashboards, err := getAllByField(fieldname, val)
 	if err != nil {
 		return nil, err
@@ -57,19 +58,19 @@ func getOneByField(fieldname string, val interface{}) (*Dashboard, error) {
 	return dashboards[0], nil
 }
 
-func GetById(id int) (*Dashboard, error) {
+func GetById(id int) (*types.Dashboard, error) {
 	return getOneByField("id", id)
 }
 
-func GetByPub(pub string) (*Dashboard, error) {
+func GetByPub(pub string) (*types.Dashboard, error) {
 	return getOneByField("public_key", pub)
 }
 
-func GetUserDashboards(id int) (Dashboards, error) {
+func GetUserDashboards(id int) (types.Dashboards, error) {
 	return getAllByField("owner_id", id)
 }
 
-func CreateDashboard(ownerId int, name string) (*Dashboard, error) {
+func CreateDashboard(ownerId int, name string) (*types.Dashboard, error) {
 	conn := mysql.Conn()
 
 	pubkey, privkey, err := cipher.GenerateKeyPairBase64(256)

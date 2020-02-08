@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/504dev/kidlog/config"
 	"github.com/504dev/kidlog/logger"
+	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
+	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"io"
 	"net"
@@ -40,14 +42,19 @@ func Udp() {
 
 		fmt.Println("Chunk ", string(buf[0:n]), " from ", addr, err)
 
-		lp := log.LogPackage{}
+		lp := types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
 		if err != nil {
 			fmt.Println("UDP parse json error:", err)
 			continue
 		}
 
-		err = lp.DecryptLog()
+		dash, err := dashboard.GetByPub(lp.PublicKey)
+		if err != nil {
+			fmt.Println("UDP dash error:", err)
+			continue
+		}
+		err = lp.Log.Decrypt(lp.CipherText, dash.PrivateKey)
 		if err != nil {
 			fmt.Println("UDP decrypt error:", err)
 			continue

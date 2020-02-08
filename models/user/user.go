@@ -3,10 +3,11 @@ package user
 import (
 	"fmt"
 	"github.com/504dev/kidlog/mysql"
+	"github.com/504dev/kidlog/types"
 )
 
-func getByField(fieldname string, val interface{}) (*User, error) {
-	var user User
+func getByField(fieldname string, val interface{}) (*types.User, error) {
+	var user types.User
 	conn := mysql.Conn()
 	sql := fmt.Sprintf("SELECT id, github_id, username, role FROM users WHERE %v = ?", fieldname)
 	row := conn.QueryRowx(sql, val)
@@ -19,17 +20,17 @@ func getByField(fieldname string, val interface{}) (*User, error) {
 	return &user, nil
 }
 
-func GetAll() (Users, error) {
+func GetAll() (types.Users, error) {
 	conn := mysql.Conn()
 	rows, err := conn.Queryx("SELECT id, github_id, username, role FROM users")
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	dashboards := make(Users, 0)
+	dashboards := make(types.Users, 0)
 
 	for rows.Next() {
-		var user User
+		var user types.User
 		err := rows.StructScan(&user)
 		if err != nil {
 			return nil, err
@@ -39,16 +40,16 @@ func GetAll() (Users, error) {
 	return dashboards, nil
 }
 
-func GetById(id int) (*User, error) {
+func GetById(id int) (*types.User, error) {
 	return getByField("id", id)
 }
 
-func GetByGithubId(id int64) (*User, error) {
+func GetByGithubId(id int64) (*types.User, error) {
 	return getByField("github_id", id)
 }
 
-func Create(githubId int64, username string) (*User, error) {
-	values := []interface{}{githubId, username, Roles["USER"]}
+func Create(githubId int64, username string) (*types.User, error) {
+	values := []interface{}{githubId, username, types.Roles["USER"]}
 	conn := mysql.Conn()
 
 	sqlstr := `INSERT INTO users (github_id, username, role) VALUES (?, ?, ?)`
