@@ -66,4 +66,3 @@ func (f *Filter) ToSql() (string, []interface{}) {
 	}
 	return sql, values
 }
-

@@ -54,14 +54,14 @@ func Udp() {
 			fmt.Println("UDP dash error:", err)
 			continue
 		}
-		err = lp.Log.Decrypt(lp.CipherText, dash.PrivateKey)
+		err = lp.DecryptLog(dash.PrivateKey)
 		if err != nil {
 			fmt.Println("UDP decrypt error:", err)
 			continue
 		}
 
+		fmt.Println(lp.Log, err)
 		if lp.Log != nil {
-			fmt.Println(lp.Log, err)
 			err = log.Create(lp.Log)
 			if err != nil {
 				fmt.Println("create error", err)

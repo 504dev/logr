@@ -13,8 +13,6 @@ var conf = go_kidlog.Config{
 
 var Logr = conf.Create("main.log")
 
-
-
 func Info(v ...interface{}) {
 	Logr.Info(v...)
 }
