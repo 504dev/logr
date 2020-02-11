@@ -93,7 +93,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 		return
 	}
 
-	JWT_LIFETIME := 60 * 10
+	JWT_LIFETIME := 60 * 60
 	REDIRECT_URL := config.Get().OAuth.RedirectUrl
 	u, _ := url.Parse(REDIRECT_URL)
 	http.SetCookie(c.Writer, &http.Cookie{

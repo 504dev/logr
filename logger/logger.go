@@ -11,7 +11,7 @@ var conf = go_kidlog.Config{
 	Hostname:   "localhost",
 }
 
-var Logr = conf.Create("main.log")
+var Logr, _ = conf.Create("main.log")
 
 func Info(v ...interface{}) {
 	Logr.Info(v...)

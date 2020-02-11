@@ -9,6 +9,7 @@ import (
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/websocket"
 	"io"
 	"net"
 	"os"
@@ -21,7 +22,17 @@ func Init() {
 
 	r := NewRouter()
 
+	r.GET("/ws", func(c *gin.Context) {
+		handler := websocket.Handler(Ws)
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
+
 	r.Run(config.Get().Bind.Http)
+}
+
+func Ws(ws *websocket.Conn) {
+	fmt.Println(ws.Config())
+	io.Copy(ws, ws)
 }
 
 func Udp() {
@@ -33,14 +44,12 @@ func Udp() {
 
 	for {
 		buf := make([]byte, 1024)
-		n, addr, err := pc.ReadFrom(buf)
+		n, _, err := pc.ReadFrom(buf)
 
 		if err != nil {
 			fmt.Println("UDP read error:", err)
 			continue
 		}
-
-		fmt.Println("Chunk ", string(buf[0:n]), " from ", addr, err)
 
 		lp := types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
@@ -60,11 +69,11 @@ func Udp() {
 			continue
 		}
 
-		fmt.Println(lp.Log, err)
 		if lp.Log != nil {
+			//fmt.Println(lp.Log)
 			err = log.Create(lp.Log)
 			if err != nil {
-				fmt.Println("create error", err)
+				fmt.Println("UDP create log error", err)
 			}
 		}
 
