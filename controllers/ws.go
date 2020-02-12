@@ -3,6 +3,7 @@ package controllers
 import (
 	"github.com/504dev/kidlog/config"
 	"github.com/504dev/kidlog/logger"
+	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/types"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -16,12 +17,23 @@ func (wc WsController) Index(c *gin.Context) {
 	handler.ServeHTTP(c.Writer, c.Request)
 }
 
-type message struct {
-	Message string `json:"message"`
-}
+var SockMap = make(types.SockMap)
 
 func (wc WsController) Reader(ws *websocket.Conn) {
-	claims, tkn, err := wc.EnsureJWT(ws)
+	cfg := ws.Config()
+	query := cfg.Location.Query()
+	token := query.Get("token")
+	uid := query.Get("uid")
+
+	if token == "" || uid == "" {
+		return
+	}
+
+	claims := &types.Claims{}
+	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(config.Get().OAuth.JwtSecret), nil
+	})
+
 	logger.Debug(claims)
 	logger.Debug(tkn, err)
 
@@ -29,32 +41,33 @@ func (wc WsController) Reader(ws *websocket.Conn) {
 		return
 	}
 
+	usr, err := user.GetById(claims.Id)
+	if err != nil {
+		return
+	}
+
+	SockMap[claims.Id] = types.Sock{
+		Uid:  uid,
+		User: usr,
+		Conn: ws,
+	}
+
+	logger.Info(ws.IsClientConn())
+	logger.Info(ws.IsServerConn())
+
 	for {
-		var m message
+		var m types.SockMessage
 
 		if err := websocket.JSON.Receive(ws, &m); err != nil {
-			logger.Error(err)
+			logger.Error("websocket.JSON.Receive: %v", err)
 			break
 		}
 
-		logger.Debug("Received message: %v", m.Message)
+		logger.Debug("Received payload: %v", m.Payload)
 
-		m2 := message{"Thanks for the message!"}
-		if err := websocket.JSON.Send(ws, m2); err != nil {
-			logger.Error(err)
+		if err := websocket.JSON.Send(ws, m); err != nil {
+			logger.Error("websocket.JSON.Send: %v", err)
 			break
 		}
 	}
-}
-
-func (_ WsController) EnsureJWT(ws *websocket.Conn) (*types.Claims, *jwt.Token, error) {
-	cfg := ws.Config()
-	logger.Debug(cfg)
-	query := cfg.Location.Query()
-	token := query.Get("token")
-	claims := &types.Claims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Get().OAuth.JwtSecret), nil
-	})
-	return claims, tkn, err
 }

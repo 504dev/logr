@@ -1,12 +1,12 @@
 package types
 
 type Filter struct {
-	Timestamp [2]int64 `json:"timestamp"`
 	DashId    int      `json:"dash_id"`
 	Hostname  string   `json:"hostname"`
 	Logname   string   `json:"logname"`
 	Level     string   `json:"level"`
 	Message   string   `json:"message"`
+	Timestamp [2]int64 `json:"timestamp"`
 	Offset    int64    `json:"offset"`
 	Limit     int      `json:"limit"`
 }
