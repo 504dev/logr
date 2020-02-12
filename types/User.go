@@ -9,8 +9,8 @@ type User struct {
 
 type Users []*User
 
-var Roles = map[string]int{
-	"ADMIN":  1,
-	"USER":   2,
-	"VIEWER": 3,
-}
+const (
+	RoleAdmin  = 1
+	RoleUser   = 2
+	RoleViewer = 3
+)

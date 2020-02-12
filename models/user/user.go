@@ -49,7 +49,7 @@ func GetByGithubId(id int64) (*types.User, error) {
 }
 
 func Create(githubId int64, username string) (*types.User, error) {
-	values := []interface{}{githubId, username, types.Roles["USER"]}
+	values := []interface{}{githubId, username, types.RoleUser}
 	conn := mysql.Conn()
 
 	sqlstr := `INSERT INTO users (github_id, username, role) VALUES (?, ?, ?)`

@@ -2,7 +2,6 @@ package types
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/config"
 	"github.com/dgrijalva/jwt-go"
@@ -24,7 +23,7 @@ func (p *Claims) EncryptAccessToken() error {
 		return err
 	}
 	p.AccessTokenCipher = base64.StdEncoding.EncodeToString(cipherAccessToken)
-	fmt.Println("EncryptAccessToken", p.AccessToken, p.AccessTokenCipher)
+	//fmt.Println("EncryptAccessToken", p.AccessToken, p.AccessTokenCipher)
 	p.AccessToken = ""
 
 	return nil
@@ -37,7 +36,7 @@ func (p *Claims) DecryptAccessToken() error {
 		return err
 	}
 	p.AccessToken = string(accessToken)
-	fmt.Println("DecryptAccessToken", p.AccessTokenCipher, p.AccessToken)
+	//fmt.Println("DecryptAccessToken", p.AccessTokenCipher, p.AccessToken)
 	p.AccessTokenCipher = ""
 
 	return nil

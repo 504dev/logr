@@ -3,6 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/504dev/kidlog/config"
+	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/types"
 	"github.com/dgrijalva/jwt-go"
@@ -54,7 +55,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	fmt.Println(userGithub)
+	logger.Info(userGithub)
 
 	userDb, err := user.GetByGithubId(*userGithub.ID)
 	if err != nil {
@@ -68,8 +69,9 @@ func (_ AuthController) Callback(c *gin.Context) {
 			return
 		}
 	}
-	fmt.Println(userDb)
+	logger.Info(userDb)
 
+	JWT_LIFETIME := 60 * 60
 	claims := types.Claims{
 		Id:          userDb.Id,
 		Role:        userDb.Role,
@@ -77,7 +79,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 		Username:    *userGithub.Login,
 		AccessToken: tok.AccessToken,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+			ExpiresAt: time.Now().Add(time.Duration(JWT_LIFETIME) * time.Second).Unix(),
 		},
 	}
 	err = claims.EncryptAccessToken()
@@ -93,7 +95,6 @@ func (_ AuthController) Callback(c *gin.Context) {
 		return
 	}
 
-	JWT_LIFETIME := 60 * 60
 	REDIRECT_URL := config.Get().OAuth.RedirectUrl
 	u, _ := url.Parse(REDIRECT_URL)
 	http.SetCookie(c.Writer, &http.Cookie{
@@ -149,8 +150,8 @@ func (_ AuthController) EnsureJWT(c *gin.Context) {
 func (_ AuthController) EnsureAdmin(c *gin.Context) {
 	claims, _ := c.Get("claims")
 	role := claims.(*types.Claims).Role
-	fmt.Println(role, types.Roles["ADMIN"])
-	if role != types.Roles["ADMIN"] {
+	logger.Info(role, types.RoleAdmin)
+	if role != types.RoleAdmin {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
