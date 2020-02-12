@@ -63,7 +63,7 @@ func (_ LogsController) Find(c *gin.Context) {
 		Offset:    offset,
 		Limit:     limit,
 	}
-	logger.Info(where)
+	logger.Debug(where)
 
 	logs, err := log.GetByFilter(where)
 	logger.Error(err)

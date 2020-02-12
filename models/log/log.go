@@ -3,6 +3,7 @@ package log
 import (
 	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
+	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/types"
 	"time"
 )
@@ -41,7 +42,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	if f.Limit > 0 {
 		sql += fmt.Sprintf(" LIMIT %v", f.Limit)
 	}
-	fmt.Println(sql, values)
+	logger.Debug(sql, values)
 	rows, err := conn.Queryx(sql, values...)
 	if err != nil {
 		return nil, err

@@ -69,7 +69,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 			return
 		}
 	}
-	logger.Info(userDb)
+	logger.Debug(userDb)
 
 	JWT_LIFETIME := 60 * 60
 	claims := types.Claims{
@@ -150,7 +150,7 @@ func (_ AuthController) EnsureJWT(c *gin.Context) {
 func (_ AuthController) EnsureAdmin(c *gin.Context) {
 	claims, _ := c.Get("claims")
 	role := claims.(*types.Claims).Role
-	logger.Info(role, types.RoleAdmin)
+	logger.Debug(role, types.RoleAdmin)
 	if role != types.RoleAdmin {
 		c.AbortWithStatus(http.StatusForbidden)
 		return

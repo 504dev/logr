@@ -13,10 +13,7 @@ var conf = go_kidlog.Config{
 
 var Logr, _ = conf.Create("main.log")
 
-func Info(v ...interface{}) {
-	Logr.Info(v...)
-}
-
-func Error(v ...interface{}) {
-	Logr.Error(v...)
-}
+var Info = Logr.Info
+var Error = Logr.Error
+var Warn = Logr.Warn
+var Debug = Logr.Debug
