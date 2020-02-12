@@ -43,7 +43,7 @@ func Udp() {
 		lp := types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
 		if err != nil {
-			fmt.Println("UDP parse json error:", err)
+			fmt.Println("UDP parse json error:", err, string(buf[0:n]))
 			continue
 		}
 

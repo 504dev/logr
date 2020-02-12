@@ -42,7 +42,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	if f.Limit > 0 {
 		sql += fmt.Sprintf(" LIMIT %v", f.Limit)
 	}
-	logger.Debug(sql, values)
+	logger.Debug("%v %v", sql, values)
 	rows, err := conn.Queryx(sql, values...)
 	if err != nil {
 		return nil, err
