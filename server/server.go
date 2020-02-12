@@ -9,7 +9,6 @@ import (
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/net/websocket"
 	"io"
 	"net"
 	"os"
@@ -22,17 +21,7 @@ func Init() {
 
 	r := NewRouter()
 
-	r.GET("/ws", func(c *gin.Context) {
-		handler := websocket.Handler(Ws)
-		handler.ServeHTTP(c.Writer, c.Request)
-	})
-
 	r.Run(config.Get().Bind.Http)
-}
-
-func Ws(ws *websocket.Conn) {
-	fmt.Println(ws.Config())
-	io.Copy(ws, ws)
 }
 
 func Udp() {

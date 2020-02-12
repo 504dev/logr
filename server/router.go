@@ -43,5 +43,8 @@ func NewRouter() *gin.Engine {
 		r.GET("/user/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.UserById)
 	}
 
+	wsController := controllers.WsController{}
+	r.GET("/ws", wsController.Index)
+
 	return r
 }
