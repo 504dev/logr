@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/504dev/kidlog/config"
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/user"
@@ -46,11 +47,14 @@ func (wc WsController) Reader(ws *websocket.Conn) {
 		return
 	}
 
-	SockMap[claims.Id] = types.Sock{
+	SockMap.Set(&types.Sock{
 		Uid:  uid,
 		User: usr,
 		Conn: ws,
-	}
+	})
+
+	j, _ := json.MarshalIndent(SockMap, "", "    ")
+	logger.Info(string(j))
 
 	logger.Info(ws.IsClientConn())
 	logger.Info(ws.IsServerConn())
@@ -60,6 +64,7 @@ func (wc WsController) Reader(ws *websocket.Conn) {
 
 		if err := websocket.JSON.Receive(ws, &m); err != nil {
 			logger.Error("websocket.JSON.Receive: %v", err)
+			SockMap.Delete(usr.Id, uid)
 			break
 		}
 
@@ -67,6 +72,7 @@ func (wc WsController) Reader(ws *websocket.Conn) {
 
 		if err := websocket.JSON.Send(ws, m); err != nil {
 			logger.Error("websocket.JSON.Send: %v", err)
+			SockMap.Delete(usr.Id, uid)
 			break
 		}
 	}

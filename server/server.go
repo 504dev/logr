@@ -17,7 +17,8 @@ import (
 func Init() {
 	gin.ForceConsoleColor()
 
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, logger.Logr)
+	w, _ := logger.Create("gin.log")
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, w)
 
 	r := NewRouter()
 
@@ -59,6 +60,7 @@ func Udp() {
 		}
 
 		if lp.Log != nil {
+			lp.Log.DashId = dash.Id
 			//fmt.Println(lp.Log)
 			err = log.Create(lp.Log)
 			if err != nil {
