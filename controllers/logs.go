@@ -4,6 +4,7 @@ import (
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
+	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -25,6 +26,7 @@ func (_ LogsController) Stats(c *gin.Context) {
 
 func (_ LogsController) Find(c *gin.Context) {
 	dashId, _ := strconv.Atoi(c.Query("dash_id"))
+	sockId := c.Query("sock_id")
 	if dashId == 0 {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "dash_id required"})
 		return
@@ -53,7 +55,7 @@ func (_ LogsController) Find(c *gin.Context) {
 	from, _ := strconv.ParseInt(c.Query("timestamp.from"), 10, 64)
 	to, _ := strconv.ParseInt(c.Query("timestamp.to"), 10, 64)
 
-	where := types.Filter{
+	filter := types.Filter{
 		Timestamp: [2]int64{from, to},
 		DashId:    dashId,
 		Logname:   logname,
@@ -63,9 +65,12 @@ func (_ LogsController) Find(c *gin.Context) {
 		Offset:    offset,
 		Limit:     limit,
 	}
-	logger.Debug(where)
+	if sockId != "" {
+		ws.SockMap.SetFilter(userId, sockId, &filter)
+	}
+	logger.Debug(filter)
 
-	logs, err := log.GetByFilter(where)
+	logs, err := log.GetByFilter(filter)
 	logger.Error(err)
 	c.JSON(200, logs)
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/504dev/kidlog/config"
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/user"
+	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/types"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -18,15 +19,13 @@ func (wc WsController) Index(c *gin.Context) {
 	handler.ServeHTTP(c.Writer, c.Request)
 }
 
-var SockMap = make(types.SockMap)
-
-func (wc WsController) Reader(ws *websocket.Conn) {
-	cfg := ws.Config()
+func (wc WsController) Reader(w *websocket.Conn) {
+	cfg := w.Config()
 	query := cfg.Location.Query()
 	token := query.Get("token")
-	uid := query.Get("uid")
+	sockId := query.Get("sock_id")
 
-	if token == "" || uid == "" {
+	if token == "" || sockId == "" {
 		return
 	}
 
@@ -47,32 +46,29 @@ func (wc WsController) Reader(ws *websocket.Conn) {
 		return
 	}
 
-	SockMap.Set(&types.Sock{
-		Uid:  uid,
-		User: usr,
-		Conn: ws,
+	ws.SockMap.Set(&types.Sock{
+		SockId: sockId,
+		User:   usr,
+		Conn:   w,
 	})
 
-	j, _ := json.MarshalIndent(SockMap, "", "    ")
+	j, _ := json.MarshalIndent(ws.SockMap, "", "    ")
 	logger.Info(string(j))
-
-	logger.Info(ws.IsClientConn())
-	logger.Info(ws.IsServerConn())
 
 	for {
 		var m types.SockMessage
 
-		if err := websocket.JSON.Receive(ws, &m); err != nil {
+		if err := websocket.JSON.Receive(w, &m); err != nil {
 			logger.Error("websocket.JSON.Receive: %v", err)
-			SockMap.Delete(usr.Id, uid)
+			ws.SockMap.Delete(usr.Id, sockId)
 			break
 		}
 
 		logger.Debug("Received payload: %v", m.Payload)
 
-		if err := websocket.JSON.Send(ws, m); err != nil {
+		if err := websocket.JSON.Send(w, m); err != nil {
 			logger.Error("websocket.JSON.Send: %v", err)
-			SockMap.Delete(usr.Id, uid)
+			ws.SockMap.Delete(usr.Id, sockId)
 			break
 		}
 	}

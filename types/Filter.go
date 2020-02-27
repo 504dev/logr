@@ -11,7 +11,7 @@ type Filter struct {
 	Limit     int      `json:"limit"`
 }
 
-func (f *Filter) Match(log Log) bool {
+func (f *Filter) Match(log *Log) bool {
 	if f.DashId != 0 && f.DashId != log.DashId {
 		return false
 	}

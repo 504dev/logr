@@ -7,6 +7,7 @@ import (
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
+	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -62,6 +63,7 @@ func Udp() {
 		if lp.Log != nil {
 			lp.Log.DashId = dash.Id
 			//fmt.Println(lp.Log)
+			ws.SockMap.PushLog(lp.Log)
 			err = log.Create(lp.Log)
 			if err != nil {
 				fmt.Println("UDP create log error", err)

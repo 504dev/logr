@@ -15,11 +15,17 @@ func Create(log *types.Log) error {
 
 	sqlstr := `INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
-	tx, _ := conn.Begin()
-	stmt, _ := tx.Prepare(sqlstr)
+	tx, err := conn.Begin()
+	if err != nil {
+		return err
+	}
+	stmt, err := tx.Prepare(sqlstr)
+	if err != nil {
+		return err
+	}
 	defer stmt.Close()
 
-	_, err := stmt.Exec(values...)
+	_, err = stmt.Exec(values...)
 	if err != nil {
 		return err
 	}
