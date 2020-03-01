@@ -1,5 +1,7 @@
 package types
 
+import "regexp"
+
 type Filter struct {
 	DashId    int      `json:"dash_id"`
 	Hostname  string   `json:"hostname"`
@@ -28,6 +30,9 @@ func (f *Filter) Match(log *Log) bool {
 		return false
 	}
 	if f.Timestamp[1] != 0 && log.Timestamp > f.Timestamp[1] {
+		return false
+	}
+	if f.Message != "" && !regexp.MustCompile(f.Message).MatchString(log.Message) {
 		return false
 	}
 	return true

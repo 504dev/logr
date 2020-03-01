@@ -13,7 +13,16 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 )
+
+func InfoWs() {
+	for {
+		time.Sleep(5 * time.Second)
+		j, _ := json.MarshalIndent(ws.SockMap, "", "\t")
+		logger.Info(string(j))
+	}
+}
 
 func Init() {
 	gin.ForceConsoleColor()
@@ -49,7 +58,7 @@ func Udp() {
 			continue
 		}
 
-		dash, err := dashboard.GetByPub(lp.PublicKey)
+		dash, err := dashboard.GetById(lp.DashId)
 		if err != nil {
 			fmt.Println("UDP dash error:", err)
 			continue

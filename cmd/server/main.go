@@ -12,5 +12,7 @@ func main() {
 	clickhouse.Init()
 	mysql.Init()
 	go server.Udp()
-	server.Init()
+	go server.Init()
+	go server.InfoWs()
+	select {}
 }

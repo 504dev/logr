@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	"github.com/504dev/kidlog/config"
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/user"
@@ -51,9 +50,6 @@ func (wc WsController) Reader(w *websocket.Conn) {
 		User:   usr,
 		Conn:   w,
 	})
-
-	j, _ := json.MarshalIndent(ws.SockMap, "", "    ")
-	logger.Info(string(j))
 
 	for {
 		var m types.SockMessage

@@ -1,6 +1,7 @@
 package types
 
 type LogPackage struct {
+	DashId     int    `json:"dash_id"`
 	PublicKey  string `json:"publickey"`
 	CipherText string `json:"ciphertext"`
 	*Log       `json:"log"`
