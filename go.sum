@@ -13,8 +13,11 @@ github.com/504dev/go-kidlog v0.0.5 h1:E1Zj4M5rT64CuMQwEP3LsrfhFgL3CznF4A+QXZIStW
 github.com/504dev/go-kidlog v0.0.5/go.mod h1:jC13wj+YVVEcemIM6W1k7vAMy6Lc6NA779ZB4hplGPM=
 github.com/504dev/go-kidlog v0.0.7 h1:3yD9oJ4+FXmm4Tq7MWkRWvbTCDNyRMKQbZk/i9F3K6o=
 github.com/504dev/go-kidlog v0.0.7/go.mod h1:jC13wj+YVVEcemIM6W1k7vAMy6Lc6NA779ZB4hplGPM=
+github.com/504dev/go-kidlog v0.0.8 h1:JF3MPIntuX7l2B92Ip/7DWiR9+ioCnQHbf9Wqov1wik=
+github.com/504dev/go-kidlog v0.0.8/go.mod h1:UZmHY2KU98ci4BDCylTzL3WOXNhCjhRX4ghv9aUmIIU=
 github.com/504dev/kidlog v0.0.0-20200208131113-85d3572e21f4/go.mod h1:UW/jzcZtWX8wKpCJb0BPoDrNB/kgF7bL/Zr0jYdeo6Y=
 github.com/504dev/kidlog v0.0.0-20200211235155-f84eb704545c/go.mod h1:fJxClzhV8pWjK7sq4w4YGk90e8NSDe5ulpmAdeehlfU=
+github.com/504dev/kidlog v0.0.0-20200301193507-a1d9ad398fbc/go.mod h1:dIc6rgZOzd+EgkBlDvEohjvKJCuNSNhCnauNnwh+kg4=
 github.com/ClickHouse/clickhouse-go v1.3.12 h1:HvD2NhKPLSeO3Ots6YV0ePgs4l3wO0bLqa9Uk1yeMOs=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/bkaradzic/go-lz4 v1.0.0/go.mod h1:0YdlkowM3VswSROI7qDxhRvJ3sLhlFrRRwjwegp5jy4=

@@ -57,10 +57,18 @@ func Udp() {
 			fmt.Println("UDP parse json error:", err, string(buf[0:n]))
 			continue
 		}
-
-		dash, err := dashboard.GetById(lp.DashId)
+		var dash *types.Dashboard
+		if lp.DashId != 0 {
+			dash, err = dashboard.GetById(lp.DashId)
+		} else {
+			dash, err = dashboard.GetByPub(lp.PublicKey)
+		}
 		if err != nil {
 			fmt.Println("UDP dash error:", err)
+			continue
+		}
+		if dash == nil {
+			fmt.Println("UDP unknown dash")
 			continue
 		}
 		err = lp.DecryptLog(dash.PrivateKey)
