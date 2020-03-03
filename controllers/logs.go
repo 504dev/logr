@@ -21,7 +21,18 @@ func (_ LogsController) Stats(c *gin.Context) {
 	}
 	stats, err := log.GetDashStats(dashId)
 	logger.Error(err)
-	c.JSON(200, stats)
+	c.JSON(http.StatusOK, stats)
+}
+
+func (_ LogsController) Pause(c *gin.Context) {
+	userId := c.GetInt("userId")
+	sockId := c.Query("sock_id")
+	state := false
+	if c.Query("state") == "true" {
+		state = true
+	}
+	ws.SockMap.SetPaused(userId, sockId, state)
+	c.Status(http.StatusOK)
 }
 
 func (_ LogsController) Find(c *gin.Context) {
@@ -72,5 +83,5 @@ func (_ LogsController) Find(c *gin.Context) {
 
 	logs, err := log.GetByFilter(filter)
 	logger.Error(err)
-	c.JSON(200, logs)
+	c.JSON(http.StatusOK, logs)
 }

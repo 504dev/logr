@@ -40,14 +40,16 @@ func Create(log *types.Log) error {
 func GetByFilter(f types.Filter) (types.Logs, error) {
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
+	limit := f.Limit
+	if limit == 0 {
+		limit = 100
+	}
 	sql := `
       SELECT timestamp, dash_id, hostname, logname, level, message
       FROM logs ` + where + `
       ORDER BY day DESC, timestamp DESC
-    `
-	if f.Limit > 0 {
-		sql += fmt.Sprintf(" LIMIT %v", f.Limit)
-	}
+      LIMIT ` + fmt.Sprint(limit)
+
 	logger.Debug("%v %v", sql, values)
 	rows, err := conn.Queryx(sql, values...)
 	if err != nil {
