@@ -6,7 +6,10 @@ func (sm SockMap) PushLog(lg *Log) int {
 	cnt := 0
 	for _, m := range sm {
 		for _, s := range m {
-			if s.Filter != nil && !s.Paused && s.Filter.Match(lg) {
+			if s.Filter == nil || s.Paused || s.Listeners == nil || s.Listeners["/log"] == 0 {
+				continue
+			}
+			if s.Filter.Match(lg) {
 				err := s.SendLog(lg)
 				if err != nil {
 					sm.Delete(s.User.Id, s.SockId)

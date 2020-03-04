@@ -45,11 +45,12 @@ func (wc WsController) Reader(w *websocket.Conn) {
 		return
 	}
 
-	ws.SockMap.Set(&types.Sock{
+	sock := &types.Sock{
 		SockId: sockId,
 		User:   usr,
 		Conn:   w,
-	})
+	}
+	ws.SockMap.Set(sock)
 
 	for {
 		var m types.SockMessage
@@ -59,13 +60,19 @@ func (wc WsController) Reader(w *websocket.Conn) {
 			ws.SockMap.Delete(usr.Id, sockId)
 			break
 		}
-
-		logger.Debug("Received payload: %v", m.Payload)
-
-		if err := websocket.JSON.Send(w, m); err != nil {
-			logger.Error("websocket.JSON.Send: %v", err)
-			ws.SockMap.Delete(usr.Id, sockId)
-			break
+		switch m.Action {
+		case "subscribe":
+			sock.AddListener(m.Path)
+		case "unsubscribe":
+			sock.RemoveListener(m.Path)
 		}
+
+		logger.Debug("Received: %v", m)
+
+		//if err := websocket.JSON.Send(w, m); err != nil {
+		//	logger.Error("websocket.JSON.Send: %v", err)
+		//	ws.SockMap.Delete(usr.Id, sockId)
+		//	break
+		//}
 	}
 }

@@ -19,7 +19,7 @@ import (
 func InfoWs() {
 	for {
 		time.Sleep(5 * time.Second)
-		j, _ := json.MarshalIndent(ws.SockMap, "", "\t")
+		j, _ := json.Marshal(ws.SockMap)
 		logger.Info(string(j))
 	}
 }
@@ -43,7 +43,7 @@ func Udp() {
 	defer pc.Close()
 
 	for {
-		buf := make([]byte, 1024)
+		buf := make([]byte, 65535)
 		n, _, err := pc.ReadFrom(buf)
 
 		if err != nil {
