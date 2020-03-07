@@ -19,8 +19,13 @@ func Create(log *types.Log) error {
 	if err != nil {
 		return err
 	}
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
 
-	_, err = tx.Exec(sql, values...)
+	_, err = stmt.Exec(values...)
 	if err != nil {
 		return err
 	}

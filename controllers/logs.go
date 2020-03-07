@@ -15,12 +15,17 @@ import (
 type LogsController struct{}
 
 func (_ LogsController) Stats(c *gin.Context) {
-	dashId, _ := strconv.Atoi(c.Query("dash_id"))
-	if dashId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"msg": "dash_id required"})
+	dashboards, err := dashboard.GetUserDashboards(c.GetInt("userId"))
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	stats, err := log.GetDashStats([]int{dashId})
+	if len(dashboards) == 0 {
+		c.JSON(http.StatusOK, []int{})
+		return
+	}
+	ids := dashboards.Ids()
+	stats, err := log.GetDashStats(ids)
 	logger.Error(err)
 	c.JSON(http.StatusOK, stats)
 }

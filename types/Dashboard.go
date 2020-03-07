@@ -10,6 +10,14 @@ type Dashboard struct {
 }
 type Dashboards []*Dashboard
 
+func (ds Dashboards) Ids() []int {
+	ids := make([]int, len(ds))
+	for k, v := range ds {
+		ids[k] = v.Id
+	}
+	return ids
+}
+
 type DashKey struct {
 	Id         int    `db:"id"          json:"id"`
 	DashId     int    `db:"dash_id"     json:"dash_id"`

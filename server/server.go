@@ -75,7 +75,7 @@ func ListenUDP() error {
 			lp.Log.DashId = dash.Id
 			//fmt.Println(lp.Log)
 			ws.SockMap.PushLog(lp.Log)
-			err = log.Create(lp.Log)
+			err = log.PushToQueue(lp.Log)
 			if err != nil {
 				fmt.Println("UDP create log error", err)
 			}
@@ -85,5 +85,4 @@ func ListenUDP() error {
 			fmt.Println(lp.Metr, err)
 		}
 	}
-	return nil
 }
