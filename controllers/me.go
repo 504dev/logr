@@ -30,7 +30,7 @@ func (_ MeController) AddDashboard(c *gin.Context) {
 	}
 
 	id := c.GetInt("userId")
-	dash, err := dashboard.CreateDashboard(id, body.Name)
+	dash, err := dashboard.Create(id, body.Name)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

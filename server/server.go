@@ -13,18 +13,9 @@ import (
 	"io"
 	"net"
 	"os"
-	"time"
 )
 
-func InfoWs() {
-	for {
-		time.Sleep(5 * time.Second)
-		j, _ := json.Marshal(ws.SockMap)
-		logger.Info(string(j))
-	}
-}
-
-func Init() {
+func ListenHTTP() error {
 	gin.ForceConsoleColor()
 
 	w, _ := logger.Create("gin.log")
@@ -32,19 +23,22 @@ func Init() {
 
 	r := NewRouter()
 
-	r.Run(config.Get().Bind.Http)
+	return r.Run(config.Get().Bind.Http)
 }
 
-func Udp() {
-	pc, err := net.ListenPacket("udp", config.Get().Bind.Udp)
+func ListenUDP() error {
+	serverAddr, err := net.ResolveUDPAddr("udp", config.Get().Bind.Udp)
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
-	defer pc.Close()
+	pc, err := net.ListenUDP("udp", serverAddr)
+	if err != nil {
+		return err
+	}
 
 	for {
-		buf := make([]byte, 65535)
-		n, _, err := pc.ReadFrom(buf)
+		buf := make([]byte, 65536)
+		n, _, err := pc.ReadFromUDP(buf)
 
 		if err != nil {
 			fmt.Println("UDP read error:", err)
@@ -59,9 +53,9 @@ func Udp() {
 		}
 		var dash *types.Dashboard
 		if lp.DashId != 0 {
-			dash, err = dashboard.GetById(lp.DashId)
+			dash, err = dashboard.GetByIdCached(lp.DashId)
 		} else {
-			dash, err = dashboard.GetByPub(lp.PublicKey)
+			dash, err = dashboard.GetByPubCached(lp.PublicKey)
 		}
 		if err != nil {
 			fmt.Println("UDP dash error:", err)
@@ -91,4 +85,5 @@ func Udp() {
 			fmt.Println(lp.Metr, err)
 		}
 	}
+	return nil
 }

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
@@ -19,7 +20,7 @@ func (_ LogsController) Stats(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "dash_id required"})
 		return
 	}
-	stats, err := log.GetDashStats(dashId)
+	stats, err := log.GetDashStats([]int{dashId})
 	logger.Error(err)
 	c.JSON(http.StatusOK, stats)
 }
@@ -79,9 +80,13 @@ func (_ LogsController) Find(c *gin.Context) {
 	if sockId != "" {
 		ws.SockMap.SetFilter(userId, sockId, &filter)
 	}
-	logger.Debug(filter)
+	f, _ := json.Marshal(filter)
+	logger.Info(string(f))
 
 	logs, err := log.GetByFilter(filter)
-	logger.Error(err)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	c.JSON(http.StatusOK, logs)
 }

@@ -9,23 +9,18 @@ import (
 )
 
 func Create(log *types.Log) error {
-	day := time.Unix(0, log.Timestamp).Format("2006-01-02")
-	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message}
 	conn := clickhouse.Conn()
 
-	sqlstr := `INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	day := time.Unix(0, log.Timestamp).Format("2006-01-02")
+	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message}
+	sql := `INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
 
 	tx, err := conn.Begin()
 	if err != nil {
 		return err
 	}
-	stmt, err := tx.Prepare(sqlstr)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
 
-	_, err = stmt.Exec(values...)
+	_, err = tx.Exec(sql, values...)
 	if err != nil {
 		return err
 	}
@@ -51,45 +46,53 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
       LIMIT ` + fmt.Sprint(limit)
 
 	logger.Debug("%v %v", sql, values)
-	rows, err := conn.Queryx(sql, values...)
+	logs := types.Logs{}
+	err := conn.Select(&logs, sql, values...)
 	if err != nil {
 		return nil, err
-	}
-	defer rows.Close()
-	logs := make(types.Logs, 0)
-
-	for rows.Next() {
-		var log types.Log
-		err := rows.StructScan(&log)
-		if err != nil {
-			return nil, err
-		}
-		logs = append(logs, &log)
 	}
 	return logs, nil
 }
 
-func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
+func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
 	conn := clickhouse.Conn()
 	sql := `
-      SELECT hostname, logname, level, count(*) AS cnt, max(day) AS updated
-      FROM logs WHERE dash_id = ?
-      GROUP BY hostname, logname, level
+      SELECT dash_id, hostname, logname, level, count(*) AS cnt, max(day) AS updated
+      FROM logs WHERE dash_id IN (?)
+      GROUP BY dash_id, hostname, logname, level
     `
-	rows, err := conn.Queryx(sql, dashId)
+	stats := types.DashStatRows{}
+	err := conn.Select(&stats, sql, dashIds)
+	if err != nil {
+		return nil, err
+	}
+	return stats, nil
+}
+
+func GetFrequentDashboards(len int) ([]int, error) {
+	conn := clickhouse.Conn()
+	sql := `
+      SELECT dash_id, count(*) AS cnt
+      FROM logs WHERE timestamp > ?
+      GROUP BY dash_id
+      ORDER BY cnt DESC
+      LIMIT ?
+    `
+	ts := time.Now().Add(-3 * time.Hour)
+	rows, err := conn.Queryx(sql, ts, len)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	stats := make([]*types.DashStatRow, 0)
+	res := make([]int, 0, len)
 
 	for rows.Next() {
-		var row types.DashStatRow
-		err := rows.StructScan(&row)
+		var id, cnt int
+		err := rows.Scan(&id, &cnt)
 		if err != nil {
 			return nil, err
 		}
-		stats = append(stats, &row)
+		res = append(res, id)
 	}
-	return stats, nil
+	return res, nil
 }

@@ -15,11 +15,15 @@ github.com/504dev/go-kidlog v0.0.7 h1:3yD9oJ4+FXmm4Tq7MWkRWvbTCDNyRMKQbZk/i9F3K6
 github.com/504dev/go-kidlog v0.0.7/go.mod h1:jC13wj+YVVEcemIM6W1k7vAMy6Lc6NA779ZB4hplGPM=
 github.com/504dev/go-kidlog v0.0.8 h1:JF3MPIntuX7l2B92Ip/7DWiR9+ioCnQHbf9Wqov1wik=
 github.com/504dev/go-kidlog v0.0.8/go.mod h1:UZmHY2KU98ci4BDCylTzL3WOXNhCjhRX4ghv9aUmIIU=
+github.com/504dev/go-kidlog v0.0.9 h1:ybLjBChV3hYB3I7A/oDsLBY8KeDxE7SEqwB9dteVMtg=
+github.com/504dev/go-kidlog v0.0.9/go.mod h1:UZmHY2KU98ci4BDCylTzL3WOXNhCjhRX4ghv9aUmIIU=
 github.com/504dev/kidlog v0.0.0-20200208131113-85d3572e21f4/go.mod h1:UW/jzcZtWX8wKpCJb0BPoDrNB/kgF7bL/Zr0jYdeo6Y=
 github.com/504dev/kidlog v0.0.0-20200211235155-f84eb704545c/go.mod h1:fJxClzhV8pWjK7sq4w4YGk90e8NSDe5ulpmAdeehlfU=
 github.com/504dev/kidlog v0.0.0-20200301193507-a1d9ad398fbc/go.mod h1:dIc6rgZOzd+EgkBlDvEohjvKJCuNSNhCnauNnwh+kg4=
 github.com/ClickHouse/clickhouse-go v1.3.12 h1:HvD2NhKPLSeO3Ots6YV0ePgs4l3wO0bLqa9Uk1yeMOs=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
+github.com/allegro/bigcache v1.2.1 h1:hg1sY1raCwic3Vnsvje6TT7/pnZba83LeFck5NrFKSc=
+github.com/allegro/bigcache v1.2.1/go.mod h1:Cb/ax3seSYIx7SuZdm2G2xzfwmv3TPSk2ucNfQESPXM=
 github.com/bkaradzic/go-lz4 v1.0.0/go.mod h1:0YdlkowM3VswSROI7qDxhRvJ3sLhlFrRRwjwegp5jy4=
 github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58 h1:F1EaeKL/ta07PY/k9Os/UFtwERei2/XzGemhpGnBKNg=
 github.com/cloudflare/golz4 v0.0.0-20150217214814-ef862a3cdc58/go.mod h1:EOBUe0h4xcZ5GoxqC5SDxFQ8gwyZPKQoEzownBlhI80=
@@ -67,6 +71,8 @@ github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd h1:TRLaZ9cD/w
 github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd/go.mod h1:6dJC0mAP4ikYIbvyc7fijjWJddQyLn8Ig3JB5CqoB9Q=
 github.com/modern-go/reflect2 v1.0.1 h1:9f412s+6RmYXLWZSEzVVgPGK7C2PphHj5RJrvfx9AWI=
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
+github.com/patrickmn/go-cache v2.1.0+incompatible h1:HRMgzkcYKYpi3C8ajMPV8OFXaaRUnok+kx1WdO15EQc=
+github.com/patrickmn/go-cache v2.1.0+incompatible/go.mod h1:3Qf8kWWT7OJRJbdiICTKqZju1ZixQ/KpMGzzAfe6+WQ=
 github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi+IEE17M5jbnwPHcY=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=

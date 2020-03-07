@@ -2,8 +2,11 @@ package server
 
 import (
 	"github.com/504dev/kidlog/controllers"
+	"github.com/504dev/kidlog/logger"
+	"github.com/504dev/kidlog/models/log"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func NewRouter() *gin.Engine {
@@ -34,6 +37,11 @@ func NewRouter() *gin.Engine {
 		r.GET("/logs", auth.EnsureJWT, logsController.Find)
 		r.GET("/logs/pause", auth.EnsureJWT, logsController.Pause)
 		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
+		r.GET("/logs/freq", func(c *gin.Context) {
+			stats, err := log.GetFrequentDashboards(1000)
+			logger.Error(err)
+			c.JSON(http.StatusOK, stats)
+		})
 	}
 
 	adminController := controllers.AdminController{}
