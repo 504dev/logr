@@ -18,8 +18,7 @@ import (
 func ListenHTTP() error {
 	gin.ForceConsoleColor()
 
-	w, _ := logger.Create("gin.log")
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, w)
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, logger.Gin)
 
 	r := NewRouter()
 

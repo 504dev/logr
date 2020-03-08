@@ -3,7 +3,7 @@ module github.com/504dev/kidlog
 go 1.12
 
 require (
-	github.com/504dev/go-kidlog v0.0.9
+	github.com/504dev/go-kidlog v0.0.10
 	github.com/ClickHouse/clickhouse-go v1.3.12
 	github.com/allegro/bigcache v1.2.1 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
