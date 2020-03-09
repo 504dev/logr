@@ -6,7 +6,8 @@ type Count struct {
 	DashId    int    `db:"dash_id"   json:"dash_id"`
 	Timestamp int64  `db:"timestamp" json:"timestamp"`
 	Hostname  string `db:"hostname"  json:"hostname"`
-	Name      string `db:"name"      json:"name"`
+	Logname   string `db:"logname"   json:"logname"`
+	Keyname   string `db:"keyname"   json:"keyname"`
 	*Inc
 	*Avg
 	*Max
