@@ -18,7 +18,7 @@ type Avg struct {
 }
 
 type Inc struct {
-	Inc float64 `json:"inc"`
+	Val float64 `json:"inc"`
 }
 
 type Per struct {
@@ -27,9 +27,9 @@ type Per struct {
 }
 
 type Max struct {
-	Max float64 `json:"max"`
+	Val float64 `json:"max"`
 }
 
 type Min struct {
-	Min float64 `json:"min"`
+	Val float64 `json:"min"`
 }
