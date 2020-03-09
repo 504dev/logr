@@ -80,8 +80,8 @@ func ListenUDP() error {
 			}
 		}
 
-		if lp.Metr != nil {
-			fmt.Println(lp.Metr, err)
+		if lp.Counter != nil {
+			fmt.Println(lp.Counter, err)
 		}
 	}
 }
