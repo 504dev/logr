@@ -1,6 +1,9 @@
 package types
 
-import "github.com/504dev/kidlog/cipher"
+import (
+	"github.com/504dev/kidlog/cipher"
+	"time"
+)
 
 type Count struct {
 	DashId    int    `db:"dash_id"   json:"dash_id"`
@@ -25,11 +28,16 @@ func (c *Count) Encrypt(priv string) (string, error) {
 	return cipher.EncryptAesJson(c, priv)
 }
 
+func (c *Count) now() {
+	c.Timestamp = time.Now().UnixNano()
+}
+
 func (c *Count) Inc(num float64) {
 	if c.inc == nil {
 		c.inc = &Inc{}
 	}
 	c.inc.Val += num
+	c.now()
 }
 
 func (c *Count) Max(num float64) {
@@ -39,6 +47,7 @@ func (c *Count) Max(num float64) {
 	if c.max.Val == nil || num > *c.max.Val {
 		c.max.Val = &num
 	}
+	c.now()
 }
 
 func (c *Count) Min(num float64) {
@@ -48,6 +57,7 @@ func (c *Count) Min(num float64) {
 	if c.min.Val == nil || num > *c.min.Val {
 		c.min.Val = &num
 	}
+	c.now()
 }
 
 func (c *Count) Avg(num float64) {
@@ -56,6 +66,7 @@ func (c *Count) Avg(num float64) {
 	}
 	c.avg.Sum += num
 	c.avg.Num += 1
+	c.now()
 }
 
 func (c *Count) Per(taken float64, total float64) {
@@ -64,6 +75,7 @@ func (c *Count) Per(taken float64, total float64) {
 	}
 	c.per.Taken += taken
 	c.per.Total += total
+	c.now()
 }
 
 type Inc struct {
