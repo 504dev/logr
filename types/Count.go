@@ -50,12 +50,12 @@ func (c *Count) Min(num float64) {
 	}
 }
 
-func (c *Count) Avg(sum float64, num int) {
+func (c *Count) Avg(num float64) {
 	if c.avg == nil {
 		c.avg = &Avg{}
 	}
-	c.avg.Sum += sum
-	c.avg.Num += num
+	c.avg.Sum += num
+	c.avg.Num += 1
 }
 
 func (c *Count) Per(taken float64, total float64) {
