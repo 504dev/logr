@@ -29,9 +29,8 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 		return nil, err
 	}
 	delta := time.Now().Sub(ts).Seconds()
-	logger.Avg("/logs", delta)
-	logger.Max("/logs", delta)
-	logger.Min("/logs", delta)
+	logger.Avg("/logs:time", delta).Max(delta).Min(delta)
+	logger.Inc("/logs:cnt", 1)
 	return logs, nil
 }
 

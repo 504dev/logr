@@ -90,7 +90,7 @@ func ListenUDP() error {
 				fmt.Println("UDP decrypt count error:", err)
 			} else if lp.Count != nil {
 				lp.Count.DashId = dash.Id
-				fmt.Println(lp.Count)
+				//fmt.Println("UDP Count", lp.Count)
 				err = count.PushToQueue(lp.Count)
 				if err != nil {
 					fmt.Println("UDP create count error", err)

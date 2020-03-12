@@ -6,50 +6,21 @@ import (
 )
 
 type Count struct {
-	DashId    int    `db:"dash_id"   json:"dash_id"`
-	Timestamp int64  `db:"timestamp" json:"timestamp"`
-	Hostname  string `db:"hostname"  json:"hostname"`
-	Logname   string `db:"logname"   json:"logname"`
-	Keyname   string `db:"keyname"   json:"keyname"`
-	inc       *Inc
-	avg       *Avg
-	max       *Max
-	min       *Min
-	per       *Per
+	DashId    int    `json:"dash_id"`
+	Timestamp int64  `json:"timestamp"`
+	Hostname  string `json:"hostname"`
+	Logname   string `json:"logname"`
+	Keyname   string `json:"keyname"`
+	Metrics   struct {
+		*Inc
+		*Avg
+		*Max
+		*Min
+		*Per
+	} `json:"metrics"`
 }
 
 type Counts []*Count
-
-func (c *Count) AsVector() []interface{} {
-	day := time.Unix(0, c.Timestamp).Format("2006-01-02")
-	values := []interface{}{day, c.Timestamp, c.DashId, c.Hostname, c.Logname, c.Keyname}
-	if c.inc == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.inc.Val)
-	}
-	if c.max == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.max.Val)
-	}
-	if c.min == nil {
-		values = append(values, nil)
-	} else {
-		values = append(values, c.min.Val)
-	}
-	if c.avg == nil {
-		values = append(values, 0.0, 0)
-	} else {
-		values = append(values, c.avg.Sum, c.avg.Num)
-	}
-	if c.per == nil {
-		values = append(values, 0.0, 0.0)
-	} else {
-		values = append(values, c.per.Taken, c.per.Total)
-	}
-	return values
-}
 
 func (c *Count) Decrypt(cipherText string, priv string) error {
 	return cipher.DecodeAesJson(cipherText, priv, c)
@@ -59,55 +30,86 @@ func (c *Count) Encrypt(priv string) (string, error) {
 	return cipher.EncryptAesJson(c, priv)
 }
 
+func (c *Count) AsVector() []interface{} {
+	day := time.Unix(0, c.Timestamp).Format("2006-01-02")
+	values := []interface{}{day, c.Timestamp, c.DashId, c.Hostname, c.Logname, c.Keyname}
+	if c.Metrics.Inc == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.Metrics.Inc.Val)
+	}
+	if c.Metrics.Max == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.Metrics.Max.Val)
+	}
+	if c.Metrics.Min == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.Metrics.Min.Val)
+	}
+	if c.Metrics.Avg == nil {
+		values = append(values, 0.0, 0)
+	} else {
+		values = append(values, c.Metrics.Avg.Sum, c.Metrics.Avg.Num)
+	}
+	if c.Metrics.Per == nil {
+		values = append(values, 0.0, 0.0)
+	} else {
+		values = append(values, c.Metrics.Per.Taken, c.Metrics.Per.Total)
+	}
+	return values
+}
+
 func (c *Count) now() {
 	c.Timestamp = time.Now().UnixNano()
 }
 
 func (c *Count) Inc(num float64) *Count {
-	if c.inc == nil {
-		c.inc = &Inc{}
+	if c.Metrics.Inc == nil {
+		c.Metrics.Inc = &Inc{}
 	}
-	c.inc.Val += num
+	c.Metrics.Inc.Val += num
 	c.now()
 	return c
 }
 
 func (c *Count) Max(num float64) *Count {
-	if c.max == nil {
-		c.max = &Max{Val: num}
-	} else if num > c.max.Val {
-		c.max.Val = num
+	if c.Metrics.Max == nil {
+		c.Metrics.Max = &Max{Val: num}
+	} else if num > c.Metrics.Max.Val {
+		c.Metrics.Max.Val = num
 	}
 	c.now()
 	return c
 }
 
 func (c *Count) Min(num float64) *Count {
-	if c.min == nil {
-		c.min = &Min{Val: num}
-	} else if num > c.min.Val {
-		c.min.Val = num
+	if c.Metrics.Min == nil {
+		c.Metrics.Min = &Min{Val: num}
+	} else if num < c.Metrics.Min.Val {
+		c.Metrics.Min.Val = num
 	}
 	c.now()
 	return c
 }
 
 func (c *Count) Avg(num float64) *Count {
-	if c.avg == nil {
-		c.avg = &Avg{}
+	if c.Metrics.Avg == nil {
+		c.Metrics.Avg = &Avg{}
 	}
-	c.avg.Sum += num
-	c.avg.Num += 1
+	c.Metrics.Avg.Sum += num
+	c.Metrics.Avg.Num += 1
 	c.now()
 	return c
 }
 
 func (c *Count) Per(taken float64, total float64) *Count {
-	if c.per == nil {
-		c.per = &Per{}
+	if c.Metrics.Per == nil {
+		c.Metrics.Per = &Per{}
 	}
-	c.per.Taken += taken
-	c.per.Total += total
+	c.Metrics.Per.Taken += taken
+	c.Metrics.Per.Total += total
 	c.now()
 	return c
 }
