@@ -6,11 +6,11 @@ import (
 )
 
 type Count struct {
-	DashId    int    `json:"dash_id"`
-	Timestamp int64  `json:"timestamp"`
-	Hostname  string `json:"hostname"`
-	Logname   string `json:"logname"`
-	Keyname   string `json:"keyname"`
+	DashId    int       `json:"dash_id"`
+	Timestamp time.Time `json:"timestamp"`
+	Hostname  string    `json:"hostname"`
+	Logname   string    `json:"logname"`
+	Keyname   string    `json:"keyname"`
 	Metrics   struct {
 		*Inc
 		*Avg
@@ -31,7 +31,7 @@ func (c *Count) Encrypt(priv string) (string, error) {
 }
 
 func (c *Count) AsVector() []interface{} {
-	day := time.Unix(0, c.Timestamp).Format("2006-01-02")
+	day := c.Timestamp.Format("2006-01-02")
 	values := []interface{}{day, c.Timestamp, c.DashId, c.Hostname, c.Logname, c.Keyname}
 	if c.Metrics.Inc == nil {
 		values = append(values, nil)
@@ -62,7 +62,7 @@ func (c *Count) AsVector() []interface{} {
 }
 
 func (c *Count) now() {
-	c.Timestamp = time.Now().UnixNano()
+	c.Timestamp = time.Now()
 }
 
 func (c *Count) Inc(num float64) *Count {
