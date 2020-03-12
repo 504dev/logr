@@ -20,6 +20,37 @@ type Count struct {
 
 type Counts []*Count
 
+func (c *Count) AsVector() []interface{} {
+	day := time.Unix(0, c.Timestamp).Format("2006-01-02")
+	values := []interface{}{day, c.Timestamp, c.DashId, c.Hostname, c.Logname, c.Keyname}
+	if c.inc == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.inc.Val)
+	}
+	if c.max == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.max.Val)
+	}
+	if c.min == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.min.Val)
+	}
+	if c.avg == nil {
+		values = append(values, 0.0, 0)
+	} else {
+		values = append(values, c.avg.Sum, c.avg.Num)
+	}
+	if c.per == nil {
+		values = append(values, 0.0, 0.0)
+	} else {
+		values = append(values, c.per.Taken, c.per.Total)
+	}
+	return values
+}
+
 func (c *Count) Decrypt(cipherText string, priv string) error {
 	return cipher.DecodeAesJson(cipherText, priv, c)
 }
@@ -32,50 +63,53 @@ func (c *Count) now() {
 	c.Timestamp = time.Now().UnixNano()
 }
 
-func (c *Count) Inc(num float64) {
+func (c *Count) Inc(num float64) *Count {
 	if c.inc == nil {
 		c.inc = &Inc{}
 	}
 	c.inc.Val += num
 	c.now()
+	return c
 }
 
-func (c *Count) Max(num float64) {
+func (c *Count) Max(num float64) *Count {
 	if c.max == nil {
-		c.max = &Max{}
-	}
-	if c.max.Val == nil || num > *c.max.Val {
-		c.max.Val = &num
+		c.max = &Max{Val: num}
+	} else if num > c.max.Val {
+		c.max.Val = num
 	}
 	c.now()
+	return c
 }
 
-func (c *Count) Min(num float64) {
+func (c *Count) Min(num float64) *Count {
 	if c.min == nil {
-		c.min = &Min{}
-	}
-	if c.min.Val == nil || num > *c.min.Val {
-		c.min.Val = &num
+		c.min = &Min{Val: num}
+	} else if num > c.min.Val {
+		c.min.Val = num
 	}
 	c.now()
+	return c
 }
 
-func (c *Count) Avg(num float64) {
+func (c *Count) Avg(num float64) *Count {
 	if c.avg == nil {
 		c.avg = &Avg{}
 	}
 	c.avg.Sum += num
 	c.avg.Num += 1
 	c.now()
+	return c
 }
 
-func (c *Count) Per(taken float64, total float64) {
+func (c *Count) Per(taken float64, total float64) *Count {
 	if c.per == nil {
 		c.per = &Per{}
 	}
 	c.per.Taken += taken
 	c.per.Total += total
 	c.now()
+	return c
 }
 
 type Inc struct {
@@ -83,11 +117,11 @@ type Inc struct {
 }
 
 type Max struct {
-	Val *float64 `json:"max"`
+	Val float64 `json:"max"`
 }
 
 type Min struct {
-	Val *float64 `json:"min"`
+	Val float64 `json:"min"`
 }
 
 type Avg struct {
@@ -109,11 +143,11 @@ func (i *Inc) Value() float64 {
 }
 
 func (m *Max) Value() float64 {
-	return *m.Val
+	return m.Val
 }
 
 func (m *Min) Value() float64 {
-	return *m.Val
+	return m.Val
 }
 
 func (a *Avg) Value() float64 {

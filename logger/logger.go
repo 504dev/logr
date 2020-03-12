@@ -15,8 +15,9 @@ var conf = Config{
 	Hostname:   hostname,
 }
 
-var Main, _ = conf.Create("main.log")
-var gin, _ = conf.Create("gin.log")
+var main, _ = conf.NewLogger("main.log")
+var gin, _ = conf.NewLogger("gin.log")
+
 var Gin = gin.CustomWritter(func(log *Log) {
 	codestr := log.Message[38:41]
 	code, _ := strconv.Atoi(codestr)
@@ -27,8 +28,15 @@ var Gin = gin.CustomWritter(func(log *Log) {
 	}
 })
 
-var Create = conf.Create
-var Info = Main.Info
-var Error = Main.Error
-var Debug = Main.Debug
-var Warn = Main.Warn
+var counter, _ = conf.NewCounter("main.cnt")
+
+var Info = main.Info
+var Error = main.Error
+var Debug = main.Debug
+var Warn = main.Warn
+
+var Inc = counter.Inc
+var Max = counter.Max
+var Min = counter.Min
+var Avg = counter.Avg
+var Per = counter.Per

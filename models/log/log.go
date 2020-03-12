@@ -8,36 +8,8 @@ import (
 	"time"
 )
 
-func Create(log *types.Log) error {
-	conn := clickhouse.Conn()
-
-	day := time.Unix(0, log.Timestamp).Format("2006-01-02")
-	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message}
-	sql := `INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-
-	tx, err := conn.Begin()
-	if err != nil {
-		return err
-	}
-	stmt, err := tx.Prepare(sql)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(values...)
-	if err != nil {
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func GetByFilter(f types.Filter) (types.Logs, error) {
+	ts := time.Now()
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
 	limit := f.Limit
@@ -56,6 +28,10 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	if err != nil {
 		return nil, err
 	}
+	delta := time.Now().Sub(ts).Seconds()
+	logger.Avg("/logs", delta)
+	logger.Max("/logs", delta)
+	logger.Min("/logs", delta)
 	return logs, nil
 }
 

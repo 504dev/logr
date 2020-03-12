@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/504dev/kidlog/config"
 	"github.com/504dev/kidlog/logger"
+	"github.com/504dev/kidlog/models/count"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/models/ws"
@@ -44,8 +45,11 @@ func ListenUDP() error {
 			continue
 		}
 
+		logger.Inc("udp", 1)
+
 		lp := types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
+
 		if err != nil {
 			fmt.Println("UDP parse json error:", err, string(buf[0:n]))
 			continue
@@ -64,24 +68,34 @@ func ListenUDP() error {
 			fmt.Println("UDP unknown dash")
 			continue
 		}
-		err = lp.DecryptLog(dash.PrivateKey)
-		if err != nil {
-			fmt.Println("UDP decrypt error:", err)
-			continue
-		}
 
-		if lp.Log != nil {
-			lp.Log.DashId = dash.Id
-			//fmt.Println(lp.Log)
-			ws.SockMap.PushLog(lp.Log)
-			err = log.PushToQueue(lp.Log)
+		if lp.CipherLog != "" {
+			err = lp.DecryptLog(dash.PrivateKey)
 			if err != nil {
-				fmt.Println("UDP create log error", err)
+				fmt.Println("UDP decrypt log error:", err)
+			} else if lp.Log != nil {
+				lp.Log.DashId = dash.Id
+				//fmt.Println(lp.Log)
+				ws.SockMap.PushLog(lp.Log)
+				err = log.PushToQueue(lp.Log)
+				if err != nil {
+					fmt.Println("UDP create log error", err)
+				}
 			}
 		}
 
-		if lp.Count != nil {
-			fmt.Println(lp.Count, err)
+		if lp.CipherCount != "" {
+			err = lp.DecryptCount(dash.PrivateKey)
+			if err != nil {
+				fmt.Println("UDP decrypt count error:", err)
+			} else if lp.Count != nil {
+				lp.Count.DashId = dash.Id
+				fmt.Println(lp.Count)
+				err = count.PushToQueue(lp.Count)
+				if err != nil {
+					fmt.Println("UDP create count error", err)
+				}
+			}
 		}
 	}
 }

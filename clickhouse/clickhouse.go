@@ -29,7 +29,7 @@ func Init() {
 
 func Schema() {
 	var err error
-	tables := []string{"logs"}
+	tables := []string{"logs", "counts"}
 	for _, table := range tables {
 		path := fmt.Sprintf("../../clickhouse/schema/%v.sql", table)
 		sql, _ := ioutil.ReadFile(path)

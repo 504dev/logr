@@ -18,3 +18,13 @@ func (lp *LogPackage) DecryptLog(priv string) error {
 	lp.Log = &log
 	return nil
 }
+
+func (lp *LogPackage) DecryptCount(priv string) error {
+	count := Count{}
+	err := count.Decrypt(lp.CipherCount, priv)
+	if err != nil {
+		return err
+	}
+	lp.Count = &count
+	return nil
+}
