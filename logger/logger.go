@@ -1,7 +1,7 @@
 package logger
 
 import (
-	. "github.com/504dev/go-kidlog"
+	. "github.com/504dev/logr-go-client"
 	"os"
 	"strconv"
 )
