@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS counts
 (
     `day` Date,
-    `timestamp` UInt64,
+    `timestamp` DateTime,
     `dash_id` Int32,
     `hostname` String,
     `logname` String,
