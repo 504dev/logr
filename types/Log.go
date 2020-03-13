@@ -11,6 +11,9 @@ type Log struct {
 	Logname   string `db:"logname"   json:"logname"`
 	Level     string `db:"level"     json:"level"`
 	Message   string `db:"message"   json:"message"`
+	Pid       int    `db:"pid"       json:"pid"`
+	Version   string `db:"version"   json:"version,omitempty"`
+	Initiator string `db:"initiator" json:"initiator,omitempty"`
 }
 
 type Logs []*Log

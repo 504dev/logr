@@ -70,6 +70,7 @@ func ListenUDP() error {
 		}
 
 		if lp.CipherLog != "" {
+			logger.Inc("udp:l", 1)
 			err = lp.DecryptLog(dash.PrivateKey)
 			if err != nil {
 				fmt.Println("UDP decrypt log error:", err)
@@ -85,6 +86,7 @@ func ListenUDP() error {
 		}
 
 		if lp.CipherCount != "" {
+			logger.Inc("udp:c", 1)
 			err = lp.DecryptCount(dash.PrivateKey)
 			if err != nil {
 				fmt.Println("UDP decrypt count error:", err)
