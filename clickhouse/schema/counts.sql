@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS counts
     `hostname` String,
     `logname` String,
     `keyname` String,
+    `version` String,
     `inc` Nullable(Float32),
     `max` Nullable(Float32),
     `min` Nullable(Float32),

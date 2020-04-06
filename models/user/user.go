@@ -6,15 +6,29 @@ import (
 	"github.com/504dev/kidlog/types"
 )
 
-func findOneByField(fieldname string, val interface{}) (*types.User, error) {
+func findAllByField(fieldname string, val interface{}, limit int) (types.Users, error) {
 	conn := mysql.Conn()
-	user := types.User{}
-	sql := fmt.Sprintf("SELECT id, github_id, username, role FROM users WHERE %v = ? LIMIT 1", fieldname)
-	err := conn.Get(&user, sql, val)
+	users := types.Users{}
+	sql := fmt.Sprintf("SELECT id, github_id, username, role FROM users WHERE %v = ?", fieldname)
+	if limit > 0 {
+		sql = fmt.Sprintf("%v LIMIT %v", sql, limit)
+	}
+	err := conn.Select(&users, sql, val)
 	if err != nil {
 		return nil, err
 	}
-	return &user, nil
+	return users, nil
+}
+
+func findOneByField(fieldname string, val interface{}) (*types.User, error) {
+	users, err := findAllByField(fieldname, val, 1)
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, nil
+	}
+	return users[0], nil
 }
 
 func GetAll() (types.Users, error) {

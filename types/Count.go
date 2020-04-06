@@ -11,6 +11,7 @@ type Count struct {
 	Hostname  string `json:"hostname"`
 	Logname   string `json:"logname"`
 	Keyname   string `json:"keyname"`
+	Version   string `json:"version"`
 	Metrics   struct {
 		*Inc
 		*Avg

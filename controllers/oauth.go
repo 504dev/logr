@@ -45,6 +45,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 
 	tok, err := conf.Exchange(c, code)
 	if err != nil {
+		logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -52,6 +53,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 	client := github.NewClient(conf.Client(c, tok))
 	userGithub, _, err := client.Users.Get(c, "")
 	if err != nil {
+		logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -59,10 +61,12 @@ func (_ AuthController) Callback(c *gin.Context) {
 
 	userDb, err := user.GetByGithubId(*userGithub.ID)
 	if err != nil {
+		logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if userDb == nil {
+		logger.Error(err)
 		userDb, err = user.Create(*userGithub.ID, *userGithub.Login)
 		if err != nil {
 			c.AbortWithStatus(http.StatusInternalServerError)

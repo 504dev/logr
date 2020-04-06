@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS logs
     `hostname` String,
     `logname` String,
     `level` String,
-    `message` String
+    `message` String,
+    `pid` Int32,
+    `version` String
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMM(day)

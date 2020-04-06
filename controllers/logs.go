@@ -69,11 +69,17 @@ func (_ LogsController) Find(c *gin.Context) {
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	offset, _ := strconv.ParseInt(c.Query("offset"), 10, 64)
 
-	from, _ := strconv.ParseInt(c.Query("timestamp.from"), 10, 64)
-	to, _ := strconv.ParseInt(c.Query("timestamp.to"), 10, 64)
+	timestamp := [2]int64{0, 0}
+	for k, v := range c.QueryArray("timestamp[]") {
+		if k > 1 {
+			break
+		}
+		t, _ := strconv.ParseInt(v, 10, 64)
+		timestamp[k] = t
+	}
 
 	filter := types.Filter{
-		Timestamp: [2]int64{from, to},
+		Timestamp: timestamp,
 		DashId:    dashId,
 		Logname:   logname,
 		Hostname:  hostname,
