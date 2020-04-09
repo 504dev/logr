@@ -66,6 +66,8 @@ func (_ LogsController) Find(c *gin.Context) {
 	hostname := c.Query("hostname")
 	message := c.Query("message")
 	level := c.Query("level")
+	version := c.Query("version")
+	pid, _ := strconv.Atoi(c.Query("pid"))
 	limit, _ := strconv.Atoi(c.Query("limit"))
 	offset, _ := strconv.ParseInt(c.Query("offset"), 10, 64)
 
@@ -84,6 +86,8 @@ func (_ LogsController) Find(c *gin.Context) {
 		Logname:   logname,
 		Hostname:  hostname,
 		Level:     level,
+		Version:   version,
+		Pid:       pid,
 		Message:   message,
 		Offset:    offset,
 		Limit:     limit,

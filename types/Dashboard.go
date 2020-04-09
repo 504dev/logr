@@ -38,6 +38,7 @@ type DashStatRow struct {
 	Hostname string `db:"hostname" json:"hostname"`
 	Logname  string `db:"logname"  json:"logname"`
 	Level    string `db:"level"    json:"level"`
+	Version  string `db:"version"  json:"version"`
 	Cnt      int    `db:"cnt"      json:"cnt"`
 	Updated  string `db:"updated"  json:"updated"`
 }

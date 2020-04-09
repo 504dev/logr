@@ -23,6 +23,10 @@ func (wc WsController) Reader(w *websocket.Conn) {
 	query := cfg.Location.Query()
 	token := query.Get("token")
 	sockId := query.Get("sock_id")
+	paused := false
+	if query.Get("paused") == "true" {
+		paused = true
+	}
 
 	if token == "" || sockId == "" {
 		return
@@ -49,6 +53,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 		SockId: sockId,
 		User:   usr,
 		Conn:   w,
+		Paused: paused,
 	}
 	ws.SockMap.Set(sock)
 

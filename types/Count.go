@@ -11,7 +11,7 @@ type Count struct {
 	Hostname  string `json:"hostname"`
 	Logname   string `json:"logname"`
 	Keyname   string `json:"keyname"`
-	Version   string `json:"version"`
+	Version   string `json:"version,omitempty"`
 	Metrics   struct {
 		*Inc
 		*Avg
@@ -34,7 +34,7 @@ func (c *Count) Encrypt(priv string) (string, error) {
 func (c *Count) AsVector() []interface{} {
 	dt := time.Unix(0, c.Timestamp)
 	day := dt.Format("2006-01-02")
-	values := []interface{}{day, dt, c.DashId, c.Hostname, c.Logname, c.Keyname}
+	values := []interface{}{day, dt, c.DashId, c.Hostname, c.Logname, c.Keyname, c.Version}
 	if c.Metrics.Inc == nil {
 		values = append(values, nil)
 	} else {

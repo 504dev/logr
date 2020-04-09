@@ -7,6 +7,8 @@ type Filter struct {
 	Hostname  string   `json:"hostname"`
 	Logname   string   `json:"logname"`
 	Level     string   `json:"level"`
+	Pid       int      `json:"pid"`
+	Version   string   `json:"version"`
 	Message   string   `json:"message"`
 	Timestamp [2]int64 `json:"timestamp"`
 	Offset    int64    `json:"offset"`
@@ -24,6 +26,12 @@ func (f *Filter) Match(log *Log) bool {
 		return false
 	}
 	if f.Level != "" && f.Level != log.Level {
+		return false
+	}
+	if f.Version != "" && f.Version != log.Version {
+		return false
+	}
+	if f.Pid != 0 && f.Pid != log.Pid {
 		return false
 	}
 	if f.Timestamp[0] != 0 && log.Timestamp < f.Timestamp[0] {
@@ -52,6 +60,14 @@ func (f *Filter) ToSql() (string, []interface{}) {
 	if f.Level != "" {
 		sql += " AND level = ?"
 		values = append(values, f.Level)
+	}
+	if f.Version != "" {
+		sql += " AND version = ?"
+		values = append(values, f.Version)
+	}
+	if f.Pid != 0 {
+		sql += " AND pid = ?"
+		values = append(values, f.Pid)
 	}
 	if f.Timestamp[0] != 0 {
 		sql += " AND timestamp > ?"

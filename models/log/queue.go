@@ -10,9 +10,13 @@ import (
 var Queue *queue.Queue
 
 func RunQueue() {
+	sql := `
+        INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `
 	Queue = queue.NewQueue(&queue.Config{
 		DB:            clickhouse.Conn(),
-		Sql:           "INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		Sql:           sql,
 		FlushInterval: time.Second,
 		FlushCount:    1000,
 	})
@@ -25,7 +29,7 @@ func StopQueue() error {
 
 func PushToQueue(log *types.Log) error {
 	day := time.Unix(0, log.Timestamp).Format("2006-01-02")
-	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message}
+	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message, log.Pid, log.Version}
 	Queue.Push(values)
 	return nil
 }

@@ -11,8 +11,8 @@ var Queue *queue.Queue
 
 func RunQueue() {
 	sql := `
-		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, version, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	`
 	Queue = queue.NewQueue(&queue.Config{
 		DB:            clickhouse.Conn(),

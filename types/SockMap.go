@@ -1,10 +1,16 @@
 package types
 
-type SockMap map[int]map[string]*Sock
+import "sync"
 
-func (sm SockMap) PushLog(lg *Log) int {
+type SockMap struct {
+	sync.RWMutex
+	data map[int]map[string]*Sock
+}
+
+func (sm *SockMap) PushLog(lg *Log) int {
 	cnt := 0
-	for _, m := range sm {
+	sm.Lock()
+	for _, m := range sm.data {
 		for _, s := range m {
 			if s.Filter == nil || s.Paused || s.Listeners == nil || s.Listeners["/log"] == 0 {
 				continue
@@ -12,16 +18,17 @@ func (sm SockMap) PushLog(lg *Log) int {
 			if s.Filter.Match(lg) {
 				err := s.SendLog(lg)
 				if err != nil {
-					sm.Delete(s.User.Id, s.SockId)
+					sm.delete(s.User.Id, s.SockId)
 				}
 				cnt += 1
 			}
 		}
 	}
+	sm.Unlock()
 	return cnt
 }
 
-func (sm SockMap) SetFilter(userId int, sockId string, filter *Filter) bool {
+func (sm *SockMap) SetFilter(userId int, sockId string, filter *Filter) bool {
 	s := sm.Get(userId, sockId)
 	if s != nil {
 		s.SetFilter(filter)
@@ -30,7 +37,7 @@ func (sm SockMap) SetFilter(userId int, sockId string, filter *Filter) bool {
 	return false
 }
 
-func (sm SockMap) SetPaused(userId int, sockId string, state bool) bool {
+func (sm *SockMap) SetPaused(userId int, sockId string, state bool) bool {
 	s := sm.Get(userId, sockId)
 	if s != nil {
 		s.SetPaused(state)
@@ -39,27 +46,45 @@ func (sm SockMap) SetPaused(userId int, sockId string, state bool) bool {
 	return false
 }
 
-func (sm SockMap) Get(userId int, sockId string) *Sock {
-	if _, ok := sm[userId]; ok {
-		return sm[userId][sockId]
+func (sm *SockMap) Get(userId int, sockId string) *Sock {
+	sm.RLock()
+	defer sm.RUnlock()
+	if _, ok := sm.data[userId]; ok {
+		return sm.data[userId][sockId]
 	}
 	return nil
 }
 
-func (sm SockMap) Set(s *Sock) {
-	if _, ok := sm[s.User.Id]; !ok {
-		sm[s.User.Id] = make(map[string]*Sock)
+func (sm *SockMap) init() {
+	if sm.data == nil {
+		sm.data = make(map[int]map[string]*Sock)
 	}
-	sm[s.User.Id][s.SockId] = s
 }
 
-func (sm SockMap) Delete(userId int, uid string) bool {
-	if _, ok := sm[userId]; !ok {
+func (sm *SockMap) Set(s *Sock) {
+	sm.Lock()
+	sm.init()
+	if _, ok := sm.data[s.User.Id]; !ok {
+		sm.data[s.User.Id] = make(map[string]*Sock)
+	}
+	sm.data[s.User.Id][s.SockId] = s
+	sm.Unlock()
+}
+
+func (sm *SockMap) delete(userId int, uid string) bool {
+	if _, ok := sm.data[userId]; !ok {
 		return false
 	}
-	if _, ok := sm[userId][uid]; !ok {
+	if _, ok := sm.data[userId][uid]; !ok {
 		return false
 	}
-	delete(sm[userId], uid)
+	delete(sm.data[userId], uid)
 	return true
+}
+
+func (sm *SockMap) Delete(userId int, uid string) bool {
+	sm.Lock()
+	flag := sm.delete(userId, uid)
+	sm.Unlock()
+	return flag
 }
