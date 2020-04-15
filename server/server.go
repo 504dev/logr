@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/504dev/kidlog/config"
-	"github.com/504dev/kidlog/logger"
+	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/count"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
@@ -19,7 +19,7 @@ import (
 func ListenHTTP() error {
 	gin.ForceConsoleColor()
 
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, logger.Gin)
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, Logger.Gin)
 
 	r := NewRouter()
 
@@ -45,7 +45,7 @@ func ListenUDP() error {
 			continue
 		}
 
-		logger.Inc("udp", 1)
+		Logger.Inc("udp", 1)
 
 		lp := types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
@@ -70,7 +70,7 @@ func ListenUDP() error {
 		}
 
 		if lp.CipherLog != "" {
-			logger.Inc("udp:l", 1)
+			Logger.Inc("udp:l", 1)
 			err = lp.DecryptLog(dash.PrivateKey)
 			if err != nil {
 				fmt.Println("UDP decrypt log error:", err)
@@ -86,7 +86,7 @@ func ListenUDP() error {
 		}
 
 		if lp.CipherCount != "" {
-			logger.Inc("udp:c", 1)
+			Logger.Inc("udp:c", 1)
 			err = lp.DecryptCount(dash.PrivateKey)
 			if err != nil {
 				fmt.Println("UDP decrypt count error:", err)

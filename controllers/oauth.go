@@ -3,7 +3,7 @@ package controllers
 import (
 	"fmt"
 	"github.com/504dev/kidlog/config"
-	"github.com/504dev/kidlog/logger"
+	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/types"
 	"github.com/dgrijalva/jwt-go"
@@ -45,7 +45,7 @@ func (_ AuthController) Callback(c *gin.Context) {
 
 	tok, err := conf.Exchange(c, code)
 	if err != nil {
-		logger.Error(err)
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -53,27 +53,27 @@ func (_ AuthController) Callback(c *gin.Context) {
 	client := github.NewClient(conf.Client(c, tok))
 	userGithub, _, err := client.Users.Get(c, "")
 	if err != nil {
-		logger.Error(err)
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	logger.Info(userGithub)
+	Logger.Info(userGithub)
 
 	userDb, err := user.GetByGithubId(*userGithub.ID)
 	if err != nil {
-		logger.Error(err)
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	if userDb == nil {
-		logger.Error(err)
+		Logger.Error(err)
 		userDb, err = user.Create(*userGithub.ID, *userGithub.Login)
 		if err != nil {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}
-	logger.Debug(userDb)
+	Logger.Debug(userDb)
 
 	JWT_LIFETIME := 60 * 60
 	claims := types.Claims{
@@ -154,7 +154,7 @@ func (_ AuthController) EnsureJWT(c *gin.Context) {
 func (_ AuthController) EnsureAdmin(c *gin.Context) {
 	claims, _ := c.Get("claims")
 	role := claims.(*types.Claims).Role
-	logger.Debug(role, types.RoleAdmin)
+	Logger.Debug(role, types.RoleAdmin)
 	if role != types.RoleAdmin {
 		c.AbortWithStatus(http.StatusForbidden)
 		return

@@ -13,3 +13,4 @@ CREATE TABLE IF NOT EXISTS logs
 ENGINE = MergeTree()
 PARTITION BY toYYYYMM(day)
 ORDER BY (dash_id, logname, day, timestamp)
+TTL day + INTERVAL 1 DAY

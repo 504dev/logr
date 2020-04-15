@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"encoding/json"
-	"github.com/504dev/kidlog/logger"
+	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/models/ws"
@@ -26,7 +26,7 @@ func (_ LogsController) Stats(c *gin.Context) {
 	}
 	ids := dashboards.Ids()
 	stats, err := log.GetDashStats(ids)
-	logger.Error(err)
+	Logger.Error(err)
 	c.JSON(http.StatusOK, stats)
 }
 
@@ -96,7 +96,7 @@ func (_ LogsController) Find(c *gin.Context) {
 		ws.SockMap.SetFilter(userId, sockId, &filter)
 	}
 	f, _ := json.Marshal(filter)
-	logger.Info(string(f))
+	Logger.Info(string(f))
 
 	logs, err := log.GetByFilter(filter)
 	if err != nil {

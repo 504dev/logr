@@ -29,7 +29,7 @@ func Init() {
 
 func Schema() {
 	var err error
-	tables := []string{"dashboards", "dashboard_members", "users"}
+	tables := []string{"users", "dashboards", "dashboard_members"}
 	for _, table := range tables {
 		path := fmt.Sprintf("../../mysql/schema/%v.sql", table)
 		sql, _ := ioutil.ReadFile(path)

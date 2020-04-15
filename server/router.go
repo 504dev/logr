@@ -2,7 +2,7 @@ package server
 
 import (
 	"github.com/504dev/kidlog/controllers"
-	"github.com/504dev/kidlog/logger"
+	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -39,7 +39,7 @@ func NewRouter() *gin.Engine {
 		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
 		r.GET("/logs/freq", func(c *gin.Context) {
 			stats, err := log.GetFrequentDashboards(1000)
-			logger.Error(err)
+			Logger.Error(err)
 			c.JSON(http.StatusOK, stats)
 		})
 	}

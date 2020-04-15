@@ -3,7 +3,7 @@ package log
 import (
 	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
-	"github.com/504dev/kidlog/logger"
+	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/types"
 	"time"
 )
@@ -22,15 +22,15 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
       ORDER BY day DESC, timestamp DESC
       LIMIT ` + fmt.Sprint(limit)
 
-	logger.Debug("%v %v", sql, values)
+	Logger.Debug("%v %v", sql, values)
 	logs := types.Logs{}
 	err := conn.Select(&logs, sql, values...)
 	if err != nil {
 		return nil, err
 	}
 	delta := time.Now().Sub(ts).Seconds()
-	logger.Avg("/logs:time", delta).Max(delta).Min(delta)
-	logger.Inc("/logs:cnt", 1)
+	Logger.Avg("/logs:time", delta).Max(delta).Min(delta)
+	Logger.Inc("/logs:cnt", 1)
 	return logs, nil
 }
 

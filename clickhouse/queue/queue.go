@@ -1,7 +1,7 @@
 package queue
 
 import (
-	"github.com/504dev/kidlog/logger"
+	. "github.com/504dev/kidlog/logger"
 	"github.com/jmoiron/sqlx"
 	"sync"
 	"time"
@@ -45,7 +45,7 @@ func (q *Queue) Run() {
 			<-q.Ticker.C
 			err := q.Flush()
 			if err != nil {
-				logger.Error(err)
+				Logger.Error(err)
 			}
 		}
 	})()

@@ -1,6 +1,9 @@
 package types
 
-import "sync"
+import (
+	"encoding/json"
+	"sync"
+)
 
 type SockMap struct {
 	sync.RWMutex
@@ -87,4 +90,9 @@ func (sm *SockMap) Delete(userId int, uid string) bool {
 	flag := sm.delete(userId, uid)
 	sm.Unlock()
 	return flag
+}
+
+func (sm *SockMap) Info() string {
+	j, _ := json.Marshal(sm.data)
+	return string(j)
 }
