@@ -24,12 +24,6 @@ type confT struct {
 	} `yaml:"oauth"`
 	Clickhouse string `yaml:"clickhouse"`
 	Mysql      string `yaml:"mysql"`
-	Logger     struct {
-		Udp        string `yaml:"udp"`
-		DashId     int    `yaml:"dash_id"`
-		PublicKey  string `yaml:"public_key"`
-		PrivateKey string `yaml:"private_key"`
-	} `yaml:"logger"`
 }
 
 var args argsT

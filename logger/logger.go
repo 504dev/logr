@@ -2,6 +2,7 @@ package logger
 
 import (
 	"github.com/504dev/kidlog/config"
+	"github.com/504dev/kidlog/models/dashboard"
 	lgc "github.com/504dev/logr-go-client"
 	"strconv"
 )
@@ -13,11 +14,13 @@ type logger struct {
 }
 
 func (lg *logger) Init() {
-	var options = config.Get().Logger
-	var conf = lgc.Config{
-		Udp:        options.Udp,
-		DashId:     options.DashId,
-		PrivateKey: options.PrivateKey,
+	conf := lgc.Config{
+		Udp: config.Get().Bind.Udp,
+	}
+	dash, _ := dashboard.GetById(1)
+	if dash != nil {
+		conf.DashId = dash.Id
+		conf.PrivateKey = dash.PrivateKey
 	}
 	lg.Logger, _ = conf.NewLogger("main.log")
 	lg.Counter, _ = conf.NewCounter("main.cnt")

@@ -16,9 +16,9 @@ import (
 
 func main() {
 	config.Init()
-	Logger.Init()
 	clickhouse.Init()
 	mysql.Init()
+	Logger.Init()
 	log.RunQueue()
 	count.RunQueue()
 	go (func() {
