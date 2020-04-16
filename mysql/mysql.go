@@ -2,7 +2,9 @@ package mysql
 
 import (
 	"fmt"
+	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/config"
+	"github.com/504dev/kidlog/types"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 	"io/ioutil"
@@ -25,6 +27,26 @@ func Init() {
 		panic(err)
 	}
 	Schema()
+	SeedUsers()
+	SeedDashboards()
+}
+
+func SeedUsers() {
+	values := []interface{}{1, 0, "admin", types.RoleAdmin}
+	sql := "INSERT INTO users (id, github_id, username, role) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE username=username"
+	_, err := db.Exec(sql, values...)
+	if err != nil {
+		panic(err)
+	}
+}
+func SeedDashboards() {
+	pub, priv, _ := cipher.GenerateKeyPairBase64(32)
+	values := []interface{}{1, 1, "System", pub, priv}
+	sql := "INSERT INTO dashboards (id, owner_id, name, public_key, private_key) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
+	_, err := db.Exec(sql, values...)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Schema() {

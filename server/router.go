@@ -29,6 +29,7 @@ func NewRouter() *gin.Engine {
 	{
 		r.GET("/me", auth.EnsureJWT, me.Me)
 		r.GET("/me/dashboards", auth.EnsureJWT, me.Dashboards)
+		r.GET("/me/dashboards/shared", auth.EnsureJWT, me.Shared)
 		r.POST("/me/dashboard", auth.EnsureJWT, me.AddDashboard)
 		r.POST("/me/dashboard/share", auth.EnsureJWT, me.ShareDashboard)
 	}

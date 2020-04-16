@@ -17,6 +17,13 @@ func (ds Dashboards) Ids() []int {
 	}
 	return ids
 }
+func (ds Dashboards) ByPrimary() map[int]*Dashboard {
+	res := make(map[int]*Dashboard, len(ds))
+	for _, v := range ds {
+		res[v.Id] = v
+	}
+	return res
+}
 
 type DashKey struct {
 	Id         int    `db:"id"          json:"id"`

@@ -54,6 +54,10 @@ func GetUserDashboards(id int) (types.Dashboards, error) {
 	return findAllByField("owner_id", id, 0)
 }
 
+func GetShared(id int) (types.Dashboards, error) {
+	return findAllByField("id", 1, 0)
+}
+
 func Create(ownerId int, name string) (*types.Dashboard, error) {
 	conn := mysql.Conn()
 
@@ -80,7 +84,7 @@ func Create(ownerId int, name string) (*types.Dashboard, error) {
 	return dashboard, err
 }
 
-func Share(m *types.DashMember) error {
+func AddMember(m *types.DashMember) error {
 	conn := mysql.Conn()
 
 	values := []interface{}{m.DashId, m.UserId}

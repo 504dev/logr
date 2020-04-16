@@ -51,13 +51,20 @@ func (_ LogsController) Find(c *gin.Context) {
 
 	userId := c.GetInt("userId")
 	dash, err := dashboard.GetById(dashId)
-
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	if dash.OwnerId != userId {
+	shared, err := dashboard.GetShared(userId)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	Logger.Warn(shared.Ids(), dashId, shared.ByPrimary()[dashId], err)
+	Logger.Warn(dash.OwnerId != userId, shared.ByPrimary()[dashId] == nil)
+
+	if dash.OwnerId != userId && shared.ByPrimary()[dashId] == nil {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}

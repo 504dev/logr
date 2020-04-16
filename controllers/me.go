@@ -39,7 +39,7 @@ func (_ MeController) ShareDashboard(c *gin.Context) {
 		DashId: dash.Id,
 		UserId: member.Id,
 	}
-	err := dashboard.Share(&membership)
+	err := dashboard.AddMember(&membership)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -50,7 +50,29 @@ func (_ MeController) ShareDashboard(c *gin.Context) {
 
 func (_ MeController) Dashboards(c *gin.Context) {
 	id := c.GetInt("userId")
-	dashboards, _ := dashboard.GetUserDashboards(id)
+	dashboards, err := dashboard.GetUserDashboards(id)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	shared, err := dashboard.GetShared(id)
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	dashboards = append(dashboards, shared...)
+
+	c.JSON(http.StatusOK, dashboards)
+}
+
+func (_ MeController) Shared(c *gin.Context) {
+	id := c.GetInt("userId")
+	dashboards, err := dashboard.GetShared(id)
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
 	c.JSON(http.StatusOK, dashboards)
 }
 
