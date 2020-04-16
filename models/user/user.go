@@ -46,6 +46,10 @@ func GetById(id int) (*types.User, error) {
 	return findOneByField("id", id)
 }
 
+func GetByUsername(username string) (*types.User, error) {
+	return findOneByField("username", username)
+}
+
 func GetByGithubId(id int64) (*types.User, error) {
 	return findOneByField("github_id", id)
 }

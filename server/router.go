@@ -30,6 +30,7 @@ func NewRouter() *gin.Engine {
 		r.GET("/me", auth.EnsureJWT, me.Me)
 		r.GET("/me/dashboards", auth.EnsureJWT, me.Dashboards)
 		r.POST("/me/dashboard", auth.EnsureJWT, me.AddDashboard)
+		r.POST("/me/dashboard/share", auth.EnsureJWT, me.ShareDashboard)
 	}
 
 	logsController := controllers.LogsController{}

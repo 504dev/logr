@@ -20,6 +20,7 @@ func (lg *logger) Init() {
 	dash, _ := dashboard.GetById(1)
 	if dash != nil {
 		conf.DashId = dash.Id
+		conf.PublicKey = dash.PublicKey
 		conf.PrivateKey = dash.PrivateKey
 	}
 	lg.Logger, _ = conf.NewLogger("main.log")

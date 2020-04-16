@@ -79,3 +79,25 @@ func Create(ownerId int, name string) (*types.Dashboard, error) {
 
 	return dashboard, err
 }
+
+func Share(m *types.DashMember) error {
+	conn := mysql.Conn()
+
+	values := []interface{}{m.DashId, m.UserId}
+	sql := "INSERT INTO dashboard_members (dash_id, user_id) VALUES (?, ?)"
+
+	res, err := conn.Exec(sql, values...)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	m.Id = int(id)
+
+	return nil
+}
