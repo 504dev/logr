@@ -76,30 +76,63 @@ func GetShared(id int) (types.Dashboards, error) {
 	return dashboards, nil
 }
 
-func Create(ownerId int, name string) (*types.Dashboard, error) {
+func Create(dash *types.Dashboard) error {
 	conn := mysql.Conn()
 
-	pubkey, privkey, err := cipher.GenerateKeyPairBase64(256)
+	var err error
+	dash.PublicKey, dash.PrivateKey, err = cipher.GenerateKeyPairBase64(256)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	values := []interface{}{ownerId, name, pubkey, privkey}
-	sql := "INSERT INTO dashboards (owner_id, name, public_key, private_key) VALUES (?, ?, ?, ?)"
+	values := []interface{}{dash.OwnerId, dash.Name, dash.PublicKey, dash.PrivateKey}
+	sql := "INSERT INTO dashboards (owner_id, name, public_key, private_key) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
 
 	res, err := conn.Exec(sql, values...)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	dashboard, err := GetById(int(id))
+	dash.Id = int(id)
 
-	return dashboard, err
+	return nil
+}
+
+func Update(dash *types.Dashboard) error {
+	conn := mysql.Conn()
+
+	values := []interface{}{dash.Name, dash.Id}
+	sql := "UPDATE dashboards SET name = ? where id = ?"
+
+	_, err := conn.Exec(sql, values...)
+	if err != nil {
+		return err
+	}
+
+	item, err := GetById(dash.Id)
+	if err != nil {
+		return err
+	}
+
+	*dash = *item
+
+	return nil
+}
+
+func Delete(id int) error {
+	conn := mysql.Conn()
+
+	_, err := conn.Exec("DELETE FROM dashboards where id = ?", id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func AddMember(m *types.DashMember) error {

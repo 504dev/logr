@@ -12,7 +12,7 @@ import (
 func NewRouter() *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
-		AllowMethods:    []string{"GET", "PUT", "POST"},
+		AllowMethods:    []string{"GET", "PUT", "POST", "DELETE"},
 		AllowHeaders:    []string{"Authorization", "Content-Type"},
 		AllowAllOrigins: true,
 	}))
@@ -31,7 +31,9 @@ func NewRouter() *gin.Engine {
 		r.GET("/me/dashboards", auth.EnsureJWT, me.Dashboards)
 		r.GET("/me/dashboards/shared", auth.EnsureJWT, me.Shared)
 		r.POST("/me/dashboard", auth.EnsureJWT, me.AddDashboard)
-		r.POST("/me/dashboard/share", auth.EnsureJWT, me.ShareDashboard)
+		r.POST("/me/dashboard/share/:dashid/to/:username", auth.EnsureJWT, me.IsMyDash, me.ShareDashboard)
+		r.PUT("/me/dashboard/:dashid", auth.EnsureJWT, me.IsMyDash, me.EditDashboard)
+		r.DELETE("/me/dashboard/:dashid", auth.EnsureJWT, me.IsMyDash, me.DeleteDashboard)
 	}
 
 	logsController := controllers.LogsController{}
