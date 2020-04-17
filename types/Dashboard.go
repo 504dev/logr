@@ -38,7 +38,15 @@ type DashMember struct {
 	DashId int `db:"dash_id" json:"dash_id"`
 	UserId int `db:"user_id" json:"user_id"`
 }
-type DashMembers []*DashMembers
+type DashMembers []*DashMember
+
+func (dm DashMembers) DashIds() []int {
+	ids := make([]int, len(dm))
+	for k, v := range dm {
+		ids[k] = v.DashId
+	}
+	return ids
+}
 
 type DashStatRow struct {
 	DashId   int    `db:"dash_id" json:"dash_id"`

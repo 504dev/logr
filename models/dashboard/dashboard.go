@@ -5,6 +5,7 @@ import (
 	"github.com/504dev/kidlog/cipher"
 	"github.com/504dev/kidlog/mysql"
 	"github.com/504dev/kidlog/types"
+	"strings"
 )
 
 func GetAll() (types.Dashboards, error) {
@@ -55,7 +56,24 @@ func GetUserDashboards(id int) (types.Dashboards, error) {
 }
 
 func GetShared(id int) (types.Dashboards, error) {
-	return findAllByField("id", 1, 0)
+	conn := mysql.Conn()
+	members := types.DashMembers{}
+	sql := "SELECT id, dash_id, user_id FROM dashboard_members WHERE user_id = ?"
+	err := conn.Select(&members, sql, id)
+	if err != nil {
+		return nil, err
+	}
+	ids := append(members.DashIds(), 1)
+	dashboards := types.Dashboards{}
+	if len(ids) == 0 {
+		return dashboards, nil
+	}
+	sql = fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]"))
+	err = conn.Select(&dashboards, sql)
+	if err != nil {
+		return nil, err
+	}
+	return dashboards, nil
 }
 
 func Create(ownerId int, name string) (*types.Dashboard, error) {

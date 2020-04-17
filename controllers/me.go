@@ -30,14 +30,18 @@ func (_ MeController) ShareDashboard(c *gin.Context) {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	member, _ := user.GetByUsername(body.Username)
-	if member == nil {
+	userTo, _ := user.GetByUsername(body.Username)
+	if userTo == nil {
 		c.AbortWithStatus(http.StatusNotFound)
+		return
+	}
+	if ownerId == userTo.Id {
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 	membership := types.DashMember{
 		DashId: dash.Id,
-		UserId: member.Id,
+		UserId: userTo.Id,
 	}
 	err := dashboard.AddMember(&membership)
 	if err != nil {
