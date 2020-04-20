@@ -3,6 +3,7 @@ package controllers
 import (
 	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
+	"github.com/504dev/kidlog/models/dashkey"
 	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
@@ -52,11 +53,16 @@ func (_ MeController) Dashboards(c *gin.Context) {
 	id := c.GetInt("userId")
 	dashboards, err := dashboard.GetUserDashboards(id)
 	if err != nil {
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	for _, dash := range dashboards {
+		dash.Keys, err = dashkey.GetByDashId(dash.Id)
+	}
 	shared, err := dashboard.GetShared(id)
 	if err != nil {
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -90,6 +96,7 @@ func (_ MeController) AddDashboard(c *gin.Context) {
 	dash.OwnerId = c.GetInt("userId")
 	err := dashboard.Create(dash)
 	if err != nil {
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -141,6 +148,7 @@ func (_ MeController) EditDashboard(c *gin.Context) {
 func (_ MeController) DeleteDashboard(c *gin.Context) {
 	err := dashboard.Delete(c.GetInt("dashId"))
 	if err != nil {
+		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

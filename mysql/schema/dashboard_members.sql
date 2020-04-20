@@ -4,6 +4,6 @@ CREATE TABLE IF NOT EXISTS dashboard_members (
     user_id INT,
     PRIMARY KEY (id),
     UNIQUE (dash_id, user_id),
-    FOREIGN KEY (dash_id) REFERENCES dashboards(id),
+    FOREIGN KEY (dash_id) REFERENCES dashboards(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

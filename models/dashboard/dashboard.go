@@ -2,7 +2,7 @@ package dashboard
 
 import (
 	"fmt"
-	"github.com/504dev/kidlog/cipher"
+	"github.com/504dev/kidlog/models/dashkey"
 	"github.com/504dev/kidlog/mysql"
 	"github.com/504dev/kidlog/types"
 	"strings"
@@ -11,7 +11,7 @@ import (
 func GetAll() (types.Dashboards, error) {
 	conn := mysql.Conn()
 	dashboards := types.Dashboards{}
-	err := conn.Select(&dashboards, "SELECT id, owner_id, name, public_key, private_key FROM dashboards")
+	err := conn.Select(&dashboards, "SELECT id, owner_id, name FROM dashboards")
 	if err != nil {
 		return nil, err
 	}
@@ -21,11 +21,11 @@ func GetAll() (types.Dashboards, error) {
 func findAllByField(fieldname string, val interface{}, limit int) (types.Dashboards, error) {
 	conn := mysql.Conn()
 	dashboards := types.Dashboards{}
-	sql := fmt.Sprintf("SELECT id, owner_id, name, public_key, private_key FROM dashboards WHERE %v = ?", fieldname)
+	sqltext := fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE %v = ?", fieldname)
 	if limit > 0 {
-		sql = fmt.Sprintf("%v LIMIT %v", sql, limit)
+		sqltext = fmt.Sprintf("%v LIMIT %v", sqltext, limit)
 	}
-	err := conn.Select(&dashboards, sql, val)
+	err := conn.Select(&dashboards, sqltext, val)
 	if err != nil {
 		return nil, err
 	}
@@ -47,10 +47,6 @@ func GetById(id int) (*types.Dashboard, error) {
 	return findOneByField("id", id)
 }
 
-func GetByPub(pub string) (*types.Dashboard, error) {
-	return findOneByField("public_key", pub)
-}
-
 func GetUserDashboards(id int) (types.Dashboards, error) {
 	return findAllByField("owner_id", id, 0)
 }
@@ -58,8 +54,8 @@ func GetUserDashboards(id int) (types.Dashboards, error) {
 func GetShared(id int) (types.Dashboards, error) {
 	conn := mysql.Conn()
 	members := types.DashMembers{}
-	sql := "SELECT id, dash_id, user_id FROM dashboard_members WHERE user_id = ?"
-	err := conn.Select(&members, sql, id)
+	sqltext := "SELECT id, dash_id, user_id FROM dashboard_members WHERE user_id = ?"
+	err := conn.Select(&members, sqltext, id)
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +64,9 @@ func GetShared(id int) (types.Dashboards, error) {
 	if len(ids) == 0 {
 		return dashboards, nil
 	}
-	sql = fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]"))
-	err = conn.Select(&dashboards, sql)
+	inString := strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]")
+	sqltext = fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", inString)
+	err = conn.Select(&dashboards, sqltext)
 	if err != nil {
 		return nil, err
 	}
@@ -80,25 +77,45 @@ func Create(dash *types.Dashboard) error {
 	conn := mysql.Conn()
 
 	var err error
-	dash.PublicKey, dash.PrivateKey, err = cipher.GenerateKeyPairBase64(256)
+	var values []interface{}
+	var sqltext string
+
+	tx, err := conn.Begin()
 	if err != nil {
 		return err
 	}
 
-	values := []interface{}{dash.OwnerId, dash.Name, dash.PublicKey, dash.PrivateKey}
-	sql := "INSERT INTO dashboards (owner_id, name, public_key, private_key) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
+	values = []interface{}{dash.OwnerId, dash.Name}
+	sqltext = "INSERT INTO dashboards (owner_id, name) VALUES (?, ?)"
 
-	res, err := conn.Exec(sql, values...)
+	res, err := tx.Exec(sqltext, values...)
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
+		tx.Rollback()
 		return err
 	}
 
-	dash.Id = int(id)
+	dashId := int(id)
+
+	dk := &types.DashKey{DashId: dashId, Name: "Default"}
+	err = dashkey.Create(dk, tx)
+	if err != nil {
+		tx.Rollback()
+		return err
+	}
+
+	dash.Id = dashId
+	dash.Keys = types.DashKeys{dk}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -107,9 +124,9 @@ func Update(dash *types.Dashboard) error {
 	conn := mysql.Conn()
 
 	values := []interface{}{dash.Name, dash.Id}
-	sql := "UPDATE dashboards SET name = ? where id = ?"
+	sqltext := "UPDATE dashboards SET name = ? where id = ?"
 
-	_, err := conn.Exec(sql, values...)
+	_, err := conn.Exec(sqltext, values...)
 	if err != nil {
 		return err
 	}
@@ -139,9 +156,9 @@ func AddMember(m *types.DashMember) error {
 	conn := mysql.Conn()
 
 	values := []interface{}{m.DashId, m.UserId}
-	sql := "INSERT INTO dashboard_members (dash_id, user_id) VALUES (?, ?)"
+	sqltext := "INSERT INTO dashboard_members (dash_id, user_id) VALUES (?, ?)"
 
-	res, err := conn.Exec(sql, values...)
+	res, err := conn.Exec(sqltext, values...)
 
 	if err != nil {
 		return err
