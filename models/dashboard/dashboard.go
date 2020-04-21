@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+const (
+	SystemId = 1
+	DemoId   = 2
+)
+
 func GetAll() (types.Dashboards, error) {
 	conn := mysql.Conn()
 	dashboards := types.Dashboards{}
@@ -51,7 +56,7 @@ func GetUserDashboards(id int) (types.Dashboards, error) {
 	return findAllByField("owner_id", id, 0)
 }
 
-func GetShared(id int) (types.Dashboards, error) {
+func GetShared(id int, role int) (types.Dashboards, error) {
 	conn := mysql.Conn()
 	members := types.DashMembers{}
 	sqltext := "SELECT id, dash_id, user_id FROM dashboard_members WHERE user_id = ?"
@@ -59,7 +64,13 @@ func GetShared(id int) (types.Dashboards, error) {
 	if err != nil {
 		return nil, err
 	}
-	ids := append(members.DashIds(), 1)
+	ids := members.DashIds()
+	if role != 0 {
+		ids = append(ids, DemoId)
+	}
+	if role == types.RoleAdmin {
+		ids = append(ids, SystemId)
+	}
 	dashboards := types.Dashboards{}
 	if len(ids) == 0 {
 		return dashboards, nil

@@ -14,20 +14,41 @@ func SeedUsers() {
 	}
 }
 func SeedDashboards() {
-	values := []interface{}{1, 1, "System"}
-	sql := "INSERT INTO dashboards (id, owner_id, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
-	_, err := db.Exec(sql, values...)
+	sqltext := "INSERT INTO dashboards (id, owner_id, name) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
+	stmt, err := db.Prepare(sqltext)
 	if err != nil {
 		panic(err)
+	}
+	defer stmt.Close()
+	batch := [][]interface{}{
+		{1, 1, "System"},
+		{2, 1, "Demo"},
+	}
+	for _, v := range batch {
+		_, err = stmt.Exec(v...)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
 func SeedKeys() {
-	pub, priv, _ := cipher.GenerateKeyPairBase64(32)
-	values := []interface{}{1, 1, "Default", pub, priv}
-	sql := "INSERT INTO dashboard_keys (id, dash_id, name, public_key, private_key) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
-	_, err := db.Exec(sql, values...)
+	sqltext := "INSERT INTO dashboard_keys (id, dash_id, name, public_key, private_key) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
+	stmt, err := db.Prepare(sqltext)
 	if err != nil {
 		panic(err)
+	}
+	defer stmt.Close()
+	batch := [][]interface{}{
+		{1, 1, "Default"},
+		{2, 2, "Default"},
+	}
+	for _, v := range batch {
+		pub, priv, _ := cipher.GenerateKeyPairBase64(32)
+		v = append(v, pub, priv)
+		_, err = stmt.Exec(v...)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

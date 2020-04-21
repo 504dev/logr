@@ -56,7 +56,7 @@ func (_ LogsController) Find(c *gin.Context) {
 		return
 	}
 
-	shared, err := dashboard.GetShared(userId)
+	shared, err := dashboard.GetShared(userId, c.GetInt("role"))
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

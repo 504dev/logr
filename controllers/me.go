@@ -4,6 +4,7 @@ import (
 	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/dashkey"
+	"github.com/504dev/kidlog/models/dashmember"
 	"github.com/504dev/kidlog/models/user"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
@@ -58,9 +59,10 @@ func (_ MeController) Dashboards(c *gin.Context) {
 		return
 	}
 	for _, dash := range dashboards {
-		dash.Keys, err = dashkey.GetByDashId(dash.Id)
+		dash.Keys, _ = dashkey.GetByDashId(dash.Id)
+		dash.Members, _ = dashmember.GetByDashId(dash.Id)
 	}
-	shared, err := dashboard.GetShared(id)
+	shared, err := dashboard.GetShared(id, c.GetInt("role"))
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -73,7 +75,7 @@ func (_ MeController) Dashboards(c *gin.Context) {
 
 func (_ MeController) Shared(c *gin.Context) {
 	id := c.GetInt("userId")
-	dashboards, err := dashboard.GetShared(id)
+	dashboards, err := dashboard.GetShared(id, c.GetInt("role"))
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
