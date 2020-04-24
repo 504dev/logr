@@ -19,6 +19,7 @@ func main() {
 	clickhouse.Init()
 	mysql.Init()
 	Logger.Init()
+	go Logger.Demo()
 	log.RunQueue()
 	count.RunQueue()
 	go (func() {

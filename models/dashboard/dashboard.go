@@ -8,11 +8,6 @@ import (
 	"strings"
 )
 
-const (
-	SystemId = 1
-	DemoId   = 2
-)
-
 func GetAll() (types.Dashboards, error) {
 	conn := mysql.Conn()
 	dashboards := types.Dashboards{}
@@ -66,10 +61,10 @@ func GetShared(id int, role int) (types.Dashboards, error) {
 	}
 	ids := members.DashIds()
 	if role != 0 {
-		ids = append(ids, DemoId)
+		ids = append(ids, types.DashboardDemoId)
 	}
 	if role == types.RoleAdmin {
-		ids = append(ids, SystemId)
+		ids = append(ids, types.DashboardSystemId)
 	}
 	dashboards := types.Dashboards{}
 	if len(ids) == 0 {

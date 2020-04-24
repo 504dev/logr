@@ -1,5 +1,10 @@
 package types
 
+const (
+	DashboardSystemId = 1
+	DashboardDemoId   = 2
+)
+
 type Dashboard struct {
 	Id      int         `db:"id"          json:"id"`
 	OwnerId int         `db:"owner_id"    json:"owner_id"`

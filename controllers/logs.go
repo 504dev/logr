@@ -15,16 +15,22 @@ import (
 type LogsController struct{}
 
 func (_ LogsController) Stats(c *gin.Context) {
-	dashboards, err := dashboard.GetUserDashboards(c.GetInt("userId"))
+	userId := c.GetInt("userId")
+	dashboards, err := dashboard.GetUserDashboards(userId)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	if len(dashboards) == 0 {
+	shared, err := dashboard.GetShared(userId, c.GetInt("role"))
+	if err != nil {
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	ids := append(dashboards.Ids(), shared.Ids()...)
+	if len(ids) == 0 {
 		c.JSON(http.StatusOK, []int{})
 		return
 	}
-	ids := dashboards.Ids()
 	stats, err := log.GetDashStats(ids)
 	Logger.Error(err)
 	c.JSON(http.StatusOK, stats)

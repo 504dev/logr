@@ -21,8 +21,8 @@ func SeedDashboards() {
 	}
 	defer stmt.Close()
 	batch := [][]interface{}{
-		{1, 1, "System"},
-		{2, 1, "Demo"},
+		{types.DashboardSystemId, 1, "System"},
+		{types.DashboardSystemId, 1, "Demo"},
 	}
 	for _, v := range batch {
 		_, err = stmt.Exec(v...)
@@ -40,8 +40,8 @@ func SeedKeys() {
 	}
 	defer stmt.Close()
 	batch := [][]interface{}{
-		{1, 1, "Default"},
-		{2, 2, "Default"},
+		{1, types.DashboardSystemId, "Default"},
+		{2, types.DashboardDemoId, "Default"},
 	}
 	for _, v := range batch {
 		pub, priv, _ := cipher.GenerateKeyPairBase64(32)
