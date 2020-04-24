@@ -60,7 +60,6 @@ func (_ MeController) Dashboards(c *gin.Context) {
 	}
 	for _, dash := range dashboards {
 		dash.Keys, _ = dashkey.GetByDashId(dash.Id)
-		dash.Members, _ = dashmember.GetByDashId(dash.Id)
 	}
 	shared, err := dashboard.GetShared(id, c.GetInt("role"))
 	if err != nil {
@@ -69,18 +68,14 @@ func (_ MeController) Dashboards(c *gin.Context) {
 		return
 	}
 	dashboards = append(dashboards, shared...)
-
-	c.JSON(http.StatusOK, dashboards)
-}
-
-func (_ MeController) Shared(c *gin.Context) {
-	id := c.GetInt("userId")
-	dashboards, err := dashboard.GetShared(id, c.GetInt("role"))
-	if err != nil {
-		Logger.Error(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+	for _, dash := range dashboards {
+		dash.Owner, _ = user.GetById(dash.OwnerId)
+		dash.Members, _ = dashmember.GetMembersByDashId(dash.Id)
+		for _, member := range dash.Members {
+			member.User, _ = user.GetById(member.UserId)
+		}
 	}
+
 	c.JSON(http.StatusOK, dashboards)
 }
 

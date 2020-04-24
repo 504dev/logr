@@ -35,6 +35,6 @@ func GetById(id int) (*types.DashMember, error) {
 	return findOneByField("id", id)
 }
 
-func GetByDashId(id int) (types.DashMembers, error) {
+func GetMembersByDashId(id int) (types.DashMembers, error) {
 	return findAllByField("dash_id", id, 0)
 }
