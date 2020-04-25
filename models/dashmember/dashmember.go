@@ -9,7 +9,7 @@ import (
 func findAllByField(fieldname string, val interface{}, limit int) (types.DashMembers, error) {
 	conn := mysql.Conn()
 	members := types.DashMembers{}
-	sqltext := fmt.Sprintf("SELECT id, dash_id, user_id FROM dashboard_members WHERE %v = ?", fieldname)
+	sqltext := fmt.Sprintf("SELECT id, dash_id, user_id, status FROM dashboard_members WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sqltext = fmt.Sprintf("%v LIMIT %v", sqltext, limit)
 	}
@@ -35,6 +35,32 @@ func GetById(id int) (*types.DashMember, error) {
 	return findOneByField("id", id)
 }
 
-func GetMembersByDashId(id int) (types.DashMembers, error) {
+func GetAllByDashId(id int) (types.DashMembers, error) {
 	return findAllByField("dash_id", id, 0)
+}
+
+func GetAllByUserId(id int) (types.DashMembers, error) {
+	return findAllByField("user_id", id, 0)
+}
+
+func Create(m *types.DashMember) error {
+	conn := mysql.Conn()
+
+	values := []interface{}{m.DashId, m.UserId, types.MemberStatusApproved}
+	sqltext := "INSERT INTO dashboard_members (dash_id, user_id, status) VALUES (?, ?, ?)"
+
+	res, err := conn.Exec(sqltext, values...)
+
+	if err != nil {
+		return err
+	}
+
+	id, err := res.LastInsertId()
+	if err != nil {
+		return err
+	}
+
+	m.Id = int(id)
+
+	return nil
 }

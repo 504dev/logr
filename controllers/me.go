@@ -41,7 +41,7 @@ func (_ MeController) ShareDashboard(c *gin.Context) {
 		DashId: dash.Id,
 		UserId: userTo.Id,
 	}
-	err := dashboard.AddMember(&membership)
+	err := dashmember.Create(&membership)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -51,8 +51,8 @@ func (_ MeController) ShareDashboard(c *gin.Context) {
 }
 
 func (_ MeController) Dashboards(c *gin.Context) {
-	id := c.GetInt("userId")
-	dashboards, err := dashboard.GetUserDashboards(id)
+	userId := c.GetInt("userId")
+	dashboards, err := dashboard.GetUserDashboards(userId)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -61,7 +61,7 @@ func (_ MeController) Dashboards(c *gin.Context) {
 	for _, dash := range dashboards {
 		dash.Keys, _ = dashkey.GetByDashId(dash.Id)
 	}
-	shared, err := dashboard.GetShared(id, c.GetInt("role"))
+	shared, err := dashboard.GetShared(userId, c.GetInt("role"))
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -70,7 +70,7 @@ func (_ MeController) Dashboards(c *gin.Context) {
 	dashboards = append(dashboards, shared...)
 	for _, dash := range dashboards {
 		dash.Owner, _ = user.GetById(dash.OwnerId)
-		dash.Members, _ = dashmember.GetMembersByDashId(dash.Id)
+		dash.Members, _ = dashmember.GetAllByDashId(dash.Id)
 		for _, member := range dash.Members {
 			member.User, _ = user.GetById(member.UserId)
 		}

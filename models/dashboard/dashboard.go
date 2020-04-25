@@ -3,6 +3,7 @@ package dashboard
 import (
 	"fmt"
 	"github.com/504dev/kidlog/models/dashkey"
+	"github.com/504dev/kidlog/models/dashmember"
 	"github.com/504dev/kidlog/mysql"
 	"github.com/504dev/kidlog/types"
 	"strings"
@@ -51,28 +52,35 @@ func GetUserDashboards(id int) (types.Dashboards, error) {
 	return findAllByField("owner_id", id, 0)
 }
 
-func GetShared(id int, role int) (types.Dashboards, error) {
-	conn := mysql.Conn()
-	members := types.DashMembers{}
-	sqltext := "SELECT id, dash_id, user_id FROM dashboard_members WHERE user_id = ?"
-	err := conn.Select(&members, sqltext, id)
-	if err != nil {
-		return nil, err
-	}
-	ids := members.DashIds()
+func GetSystemIds(role int) []int {
+	ids := make([]int, 0, 2)
 	if role != 0 {
 		ids = append(ids, types.DashboardDemoId)
 	}
 	if role == types.RoleAdmin {
 		ids = append(ids, types.DashboardSystemId)
 	}
-	dashboards := types.Dashboards{}
-	if len(ids) == 0 {
-		return dashboards, nil
+	return ids
+}
+func GetShared(id int, role int) (types.Dashboards, error) {
+	members, err := dashmember.GetAllByUserId(id)
+	if err != nil {
+		return nil, err
 	}
+	ids := members.DashIds()
+	ids = append(ids, GetSystemIds(role)...)
+	if len(ids) == 0 {
+		return types.Dashboards{}, nil
+	}
+	return GetByIds(ids)
+}
+
+func GetByIds(ids []int) (types.Dashboards, error) {
+	conn := mysql.Conn()
+	dashboards := types.Dashboards{}
 	inString := strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]")
-	sqltext = fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", inString)
-	err = conn.Select(&dashboards, sqltext)
+	sqltext := fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", inString)
+	err := conn.Select(&dashboards, sqltext)
 	if err != nil {
 		return nil, err
 	}
@@ -154,28 +162,6 @@ func Delete(id int) error {
 	if err != nil {
 		return err
 	}
-
-	return nil
-}
-
-func AddMember(m *types.DashMember) error {
-	conn := mysql.Conn()
-
-	values := []interface{}{m.DashId, m.UserId}
-	sqltext := "INSERT INTO dashboard_members (dash_id, user_id) VALUES (?, ?)"
-
-	res, err := conn.Exec(sqltext, values...)
-
-	if err != nil {
-		return err
-	}
-
-	id, err := res.LastInsertId()
-	if err != nil {
-		return err
-	}
-
-	m.Id = int(id)
 
 	return nil
 }

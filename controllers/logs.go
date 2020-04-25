@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
+	"github.com/504dev/kidlog/models/dashmember"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/types"
@@ -56,23 +57,32 @@ func (_ LogsController) Find(c *gin.Context) {
 	}
 
 	userId := c.GetInt("userId")
+	role := c.GetInt("role")
 	dash, err := dashboard.GetById(dashId)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	shared, err := dashboard.GetShared(userId, c.GetInt("role"))
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	Logger.Warn(shared.Ids(), dashId, shared.ByPrimary()[dashId], err)
-	Logger.Warn(dash.OwnerId != userId, shared.ByPrimary()[dashId] == nil)
-
-	if dash.OwnerId != userId && shared.ByPrimary()[dashId] == nil {
-		c.AbortWithStatus(http.StatusForbidden)
-		return
+	if dash.OwnerId != userId {
+		allowed := false
+		for _, id := range dashboard.GetSystemIds(role) {
+			if dashId == id {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			members, err := dashmember.GetAllByUserId(userId)
+			if err != nil {
+				c.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+			if members.ApprovedOnly().ByDashId()[dashId] == nil {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
+			}
+		}
 	}
 
 	logname := c.Query("logname")
