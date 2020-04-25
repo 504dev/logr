@@ -54,16 +54,14 @@ func GetUserDashboards(id int) (types.Dashboards, error) {
 
 func GetSystemIds(role int) []int {
 	ids := make([]int, 0, 2)
-	if role != 0 {
-		ids = append(ids, types.DashboardDemoId)
-	}
 	if role == types.RoleAdmin {
 		ids = append(ids, types.DashboardSystemId)
 	}
+	ids = append(ids, types.DashboardDemoId)
 	return ids
 }
-func GetShared(id int, role int) (types.Dashboards, error) {
-	members, err := dashmember.GetAllByUserId(id)
+func GetShared(userId int, role int) (types.Dashboards, error) {
+	members, err := dashmember.GetAllByUserId(userId)
 	if err != nil {
 		return nil, err
 	}

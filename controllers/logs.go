@@ -10,6 +10,7 @@ import (
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sort"
 	"strconv"
 )
 
@@ -65,20 +66,14 @@ func (_ LogsController) Find(c *gin.Context) {
 	}
 
 	if dash.OwnerId != userId {
-		allowed := false
-		for _, id := range dashboard.GetSystemIds(role) {
-			if dashId == id {
-				allowed = true
-				break
-			}
-		}
-		if !allowed {
+		systemIds := dashboard.GetSystemIds(role)
+		if sort.SearchInts(systemIds, dashId) == len(systemIds) {
 			members, err := dashmember.GetAllByUserId(userId)
 			if err != nil {
 				c.AbortWithStatus(http.StatusInternalServerError)
 				return
 			}
-			if members.ApprovedOnly().ByDashId()[dashId] == nil {
+			if members.ApprovedOnly().HasDash(dashId) == nil {
 				c.AbortWithStatus(http.StatusForbidden)
 				return
 			}

@@ -49,3 +49,21 @@ func (ds DashMembers) ByDashId() map[int]*DashMember {
 	}
 	return res
 }
+
+func (ds DashMembers) HasUser(userId int) *DashMember {
+	for _, v := range ds {
+		if v.UserId == userId {
+			return v
+		}
+	}
+	return nil
+}
+
+func (ds DashMembers) HasDash(dashId int) *DashMember {
+	for _, v := range ds {
+		if v.DashId == dashId {
+			return v
+		}
+	}
+	return nil
+}
