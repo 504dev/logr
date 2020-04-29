@@ -31,15 +31,7 @@ type loggerT struct {
 }
 
 func (lg *loggerT) Init() {
-	conf := lgc.Config{
-		Udp: config.Get().Bind.Udp,
-	}
-	dk, _ := dashkey.GetById(types.DashboardSystemId)
-	if dk != nil {
-		conf.DashId = dk.DashId
-		conf.PublicKey = dk.PublicKey
-		conf.PrivateKey = dk.PrivateKey
-	}
+	conf, _ := createConfig(types.DashboardSystemId)
 	lg.Logger, _ = conf.NewLogger("main.log")
 	lg.Counter, _ = conf.NewCounter("main.cnt")
 	gin, _ := conf.NewLogger("gin.log")
