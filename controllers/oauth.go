@@ -12,7 +12,6 @@ import (
 	"golang.org/x/oauth2"
 	"math/rand"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -112,16 +111,6 @@ func (a *AuthController) Callback(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-
-	REDIRECT_URL := config.Get().OAuth.RedirectUrl
-	u, _ := url.Parse(REDIRECT_URL)
-	http.SetCookie(c.Writer, &http.Cookie{
-		Name:   "jwt-token",
-		Value:  tokenString,
-		Path:   "/",
-		Domain: u.Hostname(),
-		MaxAge: JWT_LIFETIME,
-	})
 
 	if callback != "" {
 		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", callback, tokenString))
