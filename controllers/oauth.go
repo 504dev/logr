@@ -38,7 +38,7 @@ func (a *AuthController) Init() {
 func (a *AuthController) Authorize(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
-	callback := c.Query("callback_url")
+	callback := c.Query("callback")
 	a.states[state] = callback
 	authorizeUrl := a.Config.AuthCodeURL(state)
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
