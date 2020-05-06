@@ -19,6 +19,7 @@ func NewRouter() *gin.Engine {
 
 	// oauth
 	auth := controllers.AuthController{}
+	auth.Init()
 	{
 		r.GET("/oauth/authorize", auth.Authorize)
 		r.GET("/oauth/callback", auth.Callback)

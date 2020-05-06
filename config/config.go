@@ -18,6 +18,10 @@ type confT struct {
 		Udp  string `yaml:"udp"`
 	} `yaml:"bind"`
 	OAuth struct {
+		Github struct {
+			ClientId     string `yaml:"client_id"`
+			ClientSecret string `yaml:"client_secret"`
+		} `yaml:"github"`
 		JwtSecret   string `yaml:"jwt_secret"`
 		StateSecret string `yaml:"state_secret"`
 		RedirectUrl string `yaml:"redirect_url"`

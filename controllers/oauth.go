@@ -16,25 +16,29 @@ import (
 	"time"
 )
 
-var conf = &oauth2.Config{
-	ClientID:     "a3e0eabef800cd0e7a84",
-	ClientSecret: "95344c1682df6e82e71652398dcf9f44b1c6ed8d",
-	Scopes:       []string{"user"},
-	Endpoint: oauth2.Endpoint{
-		AuthURL:  "https://github.com/login/oauth/authorize",
-		TokenURL: "https://github.com/login/oauth/access_token",
-	},
+type AuthController struct {
+	*oauth2.Config
 }
 
-type AuthController struct{}
+func (a AuthController) Init() {
+	a.Config = &oauth2.Config{
+		ClientID:     "a3e0eabef800cd0e7a84",
+		ClientSecret: "95344c1682df6e82e71652398dcf9f44b1c6ed8d",
+		Scopes:       []string{"user"},
+		Endpoint: oauth2.Endpoint{
+			AuthURL:  "https://github.com/login/oauth/authorize",
+			TokenURL: "https://github.com/login/oauth/access_token",
+		},
+	}
+}
 
-func (_ AuthController) Authorize(c *gin.Context) {
-	authorizeUrl := conf.AuthCodeURL(config.Get().OAuth.StateSecret)
+func (a AuthController) Authorize(c *gin.Context) {
+	authorizeUrl := a.Config.AuthCodeURL(config.Get().OAuth.StateSecret)
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
 	c.Abort()
 }
 
-func (_ AuthController) Callback(c *gin.Context) {
+func (a AuthController) Callback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
@@ -43,14 +47,14 @@ func (_ AuthController) Callback(c *gin.Context) {
 		return
 	}
 
-	tok, err := conf.Exchange(c, code)
+	tok, err := a.Config.Exchange(c, code)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	client := github.NewClient(conf.Client(c, tok))
+	client := github.NewClient(a.Config.Client(c, tok))
 	userGithub, _, err := client.Users.Get(c, "")
 	if err != nil {
 		Logger.Error(err)
