@@ -21,9 +21,10 @@ type AuthController struct {
 }
 
 func (a AuthController) Init() {
+	github := config.Get().OAuth.Github
 	a.Config = &oauth2.Config{
-		ClientID:     "a3e0eabef800cd0e7a84",
-		ClientSecret: "95344c1682df6e82e71652398dcf9f44b1c6ed8d",
+		ClientID:     github.ClientId,
+		ClientSecret: github.ClientSecret,
 		Scopes:       []string{"user"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
