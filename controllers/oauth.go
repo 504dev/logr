@@ -20,11 +20,11 @@ type AuthController struct {
 	*oauth2.Config
 }
 
-func (a AuthController) Init() {
-	github := config.Get().OAuth.Github
+func (a *AuthController) Init() {
+	conf := config.Get().OAuth.Github
 	a.Config = &oauth2.Config{
-		ClientID:     github.ClientId,
-		ClientSecret: github.ClientSecret,
+		ClientID:     conf.ClientId,
+		ClientSecret: conf.ClientSecret,
 		Scopes:       []string{"user"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
@@ -33,13 +33,13 @@ func (a AuthController) Init() {
 	}
 }
 
-func (a AuthController) Authorize(c *gin.Context) {
+func (a *AuthController) Authorize(c *gin.Context) {
 	authorizeUrl := a.Config.AuthCodeURL(config.Get().OAuth.StateSecret)
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
 	c.Abort()
 }
 
-func (a AuthController) Callback(c *gin.Context) {
+func (a *AuthController) Callback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
@@ -118,7 +118,7 @@ func (a AuthController) Callback(c *gin.Context) {
 	c.Abort()
 }
 
-func (_ AuthController) EnsureJWT(c *gin.Context) {
+func (_ *AuthController) EnsureJWT(c *gin.Context) {
 	var token string
 	splitted := strings.Split(c.Request.Header.Get("Authorization"), " ")
 	if len(splitted) == 2 {
@@ -157,7 +157,7 @@ func (_ AuthController) EnsureJWT(c *gin.Context) {
 	c.Next()
 }
 
-func (_ AuthController) EnsureAdmin(c *gin.Context) {
+func (_ *AuthController) EnsureAdmin(c *gin.Context) {
 	role := c.GetInt("role")
 	if role != types.RoleAdmin {
 		c.AbortWithStatus(http.StatusForbidden)

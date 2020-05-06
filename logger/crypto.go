@@ -25,7 +25,6 @@ func crypto(conf *logr.Config) {
 
 func request(path string) (string, error) {
 	url := fmt.Sprintf("http://212.224.113.196:5554%v", path)
-	fmt.Println(url)
 	resp, err := http.Get(url)
 	if err != nil {
 		return "", err
