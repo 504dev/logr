@@ -5,8 +5,6 @@ oauth:
   github:
     client_id: "client_id"
     client_secret: "client_secret"
-  redirect_url: "http://localhost:8080/jwt/"
-  state_secret: "state-secret"
   jwt_secret: "jwt-secret"
 clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
 mysql: "logr:logr@/logr"

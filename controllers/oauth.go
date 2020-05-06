@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v29/github"
 	"golang.org/x/oauth2"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"strings"
@@ -18,6 +19,7 @@ import (
 
 type AuthController struct {
 	*oauth2.Config
+	states map[string]string
 }
 
 func (a *AuthController) Init() {
@@ -31,10 +33,15 @@ func (a *AuthController) Init() {
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
 	}
+	a.states = make(map[string]string)
 }
 
 func (a *AuthController) Authorize(c *gin.Context) {
-	authorizeUrl := a.Config.AuthCodeURL(config.Get().OAuth.StateSecret)
+	c.Header("Cache-Control", "no-cache")
+	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
+	callback := c.Query("callback_url")
+	a.states[state] = callback
+	authorizeUrl := a.Config.AuthCodeURL(state)
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
 	c.Abort()
 }
@@ -43,10 +50,12 @@ func (a *AuthController) Callback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
-	if state != config.Get().OAuth.StateSecret {
+	callback, ok := a.states[state]
+	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "incorrect state"})
 		return
 	}
+	delete(a.states, state)
 
 	tok, err := a.Config.Exchange(c, code)
 	if err != nil {
@@ -114,7 +123,11 @@ func (a *AuthController) Callback(c *gin.Context) {
 		MaxAge: JWT_LIFETIME,
 	})
 
-	c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", REDIRECT_URL, tokenString))
+	if callback != "" {
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", callback, tokenString))
+	} else {
+		c.JSON(http.StatusOK, tokenString)
+	}
 	c.Abort()
 }
 

@@ -22,9 +22,7 @@ type confT struct {
 			ClientId     string `yaml:"client_id"`
 			ClientSecret string `yaml:"client_secret"`
 		} `yaml:"github"`
-		JwtSecret   string `yaml:"jwt_secret"`
-		StateSecret string `yaml:"state_secret"`
-		RedirectUrl string `yaml:"redirect_url"`
+		JwtSecret string `yaml:"jwt_secret"`
 	} `yaml:"oauth"`
 	Clickhouse string `yaml:"clickhouse"`
 	Mysql      string `yaml:"mysql"`

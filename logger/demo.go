@@ -14,7 +14,7 @@ func (lg *loggerT) Demo() {
 		for {
 			c := crowls[i%len(crowls)]
 			l.Warn(color.New(color.Bold).SprintFunc()(c.title))
-			time.Sleep(time.Second)
+			time.Sleep(3 * time.Second)
 			for _, t := range c.text {
 				l.Info(t)
 				time.Sleep(1 * time.Second)
