@@ -31,7 +31,7 @@ func Schema() {
 	var err error
 	tables := []string{"logs", "counts"}
 	for _, table := range tables {
-		path := fmt.Sprintf("../../clickhouse/schema/%v.sql", table)
+		path := fmt.Sprintf("./clickhouse/schema/%v.sql", table)
 		sql, _ := ioutil.ReadFile(path)
 		_, err = db.Exec(string(sql))
 		if err != nil {

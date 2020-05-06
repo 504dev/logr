@@ -1,5 +1,9 @@
 bind:
-  http: "localhost:7778"
-  udp: "localhost:7776"
-clickhouse: "tcp:/localhost:9000?database=kidlog&username=kidlog&password=kidlog"
-mysql: "kidlog:kidlog@/kidlog"
+  http: ":7778"
+  udp: ":7776"
+oauth:
+  redirect_url: "http://localhost:8080/jwt/"
+  state_secret: "state-secret"
+  jwt_secret: "jwt-secret"
+clickhouse: "tcp://127.0.0.1:9000?database=logr&username=logr&password=logr"
+mysql: "logr:logr@/logr"

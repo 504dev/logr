@@ -3,4 +3,4 @@
 .DS_Store
 vendor/
 config.yml
-cmd/server/server
+logr-server

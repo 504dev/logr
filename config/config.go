@@ -30,7 +30,7 @@ var args argsT
 var config confT
 
 func ParseArgs() {
-	flag.StringVar(&args.Configpath, "config", "", "set service config file")
+	flag.StringVar(&args.Configpath, "config", "./config.yml", "set service config file")
 	flag.Parse()
 }
 
