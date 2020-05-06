@@ -98,6 +98,8 @@ func (_ MeController) AddDashboard(c *gin.Context) {
 		return
 	}
 
+	dash.Owner, _ = user.GetById(dash.OwnerId)
+
 	c.JSON(http.StatusOK, dash)
 }
 

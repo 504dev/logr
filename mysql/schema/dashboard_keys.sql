@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS dashboard_keys (
     private_key VARCHAR(1024),
     PRIMARY KEY (id),
     UNIQUE (public_key),
-    FOREIGN KEY (dash_id) REFERENCES dashboards(id)
+    FOREIGN KEY (dash_id) REFERENCES dashboards(id) ON DELETE CASCADE
 );
