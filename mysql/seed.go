@@ -22,7 +22,7 @@ func SeedDashboards() {
 	defer stmt.Close()
 	batch := [][]interface{}{
 		{types.DashboardSystemId, 1, "System"},
-		{types.DashboardSystemId, 1, "Demo"},
+		{types.DashboardDemoId, 1, "Demo"},
 	}
 	for _, v := range batch {
 		_, err = stmt.Exec(v...)
