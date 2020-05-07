@@ -141,6 +141,8 @@ func (_ MeController) EditDashboard(c *gin.Context) {
 		return
 	}
 
+	dash.Owner, _ = user.GetById(dash.OwnerId)
+
 	c.JSON(http.StatusOK, dash)
 }
 
