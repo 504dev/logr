@@ -4,13 +4,11 @@ import (
 	"encoding/json"
 	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
-	"github.com/504dev/kidlog/models/dashmember"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
-	"sort"
 	"strconv"
 )
 
@@ -50,35 +48,8 @@ func (_ LogsController) Pause(c *gin.Context) {
 }
 
 func (_ LogsController) Find(c *gin.Context) {
-	dashId, _ := strconv.Atoi(c.Query("dash_id"))
-	sockId := c.Query("sock_id")
-	if dashId == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"msg": "dash_id required"})
-		return
-	}
-
+	dashId := c.GetInt("dashId")
 	userId := c.GetInt("userId")
-	role := c.GetInt("role")
-	dash, err := dashboard.GetById(dashId)
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	if dash.OwnerId != userId {
-		systemIds := dashboard.GetSystemIds(role)
-		if sort.SearchInts(systemIds, dashId) == len(systemIds) {
-			members, err := dashmember.GetAllByUserId(userId)
-			if err != nil {
-				c.AbortWithStatus(http.StatusInternalServerError)
-				return
-			}
-			if members.ApprovedOnly().HasDash(dashId) == nil {
-				c.AbortWithStatus(http.StatusForbidden)
-				return
-			}
-		}
-	}
 
 	logname := c.Query("logname")
 	hostname := c.Query("hostname")
@@ -110,6 +81,7 @@ func (_ LogsController) Find(c *gin.Context) {
 		Offset:    offset,
 		Limit:     limit,
 	}
+	sockId := c.Query("sock_id")
 	if sockId != "" {
 		ws.SockMap.SetFilter(userId, sockId, &filter)
 	}

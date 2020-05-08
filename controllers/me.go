@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/dashboard"
 	"github.com/504dev/kidlog/models/dashkey"
@@ -9,17 +10,18 @@ import (
 	"github.com/504dev/kidlog/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"sort"
 	"strconv"
 )
 
 type MeController struct{}
 
-func (_ MeController) Me(c *gin.Context) {
+func (_ *MeController) Me(c *gin.Context) {
 	id := c.GetInt("userId")
 	usr, _ := user.GetById(id)
 	c.JSON(http.StatusOK, usr)
 }
-func (_ MeController) ShareDashboard(c *gin.Context) {
+func (_ *MeController) ShareDashboard(c *gin.Context) {
 	ownerId := c.GetInt("userId")
 	dashId := c.GetInt("dashId")
 	dash, _ := dashboard.GetById(dashId)
@@ -50,7 +52,7 @@ func (_ MeController) ShareDashboard(c *gin.Context) {
 	c.JSON(http.StatusOK, membership)
 }
 
-func (_ MeController) Dashboards(c *gin.Context) {
+func (_ *MeController) Dashboards(c *gin.Context) {
 	userId := c.GetInt("userId")
 	dashboards, err := dashboard.GetUserDashboards(userId)
 	if err != nil {
@@ -79,7 +81,7 @@ func (_ MeController) Dashboards(c *gin.Context) {
 	c.JSON(http.StatusOK, dashboards)
 }
 
-func (_ MeController) AddDashboard(c *gin.Context) {
+func (_ *MeController) AddDashboard(c *gin.Context) {
 	var dash *types.Dashboard
 	if err := c.BindJSON(&dash); err != nil {
 		return
@@ -103,31 +105,63 @@ func (_ MeController) AddDashboard(c *gin.Context) {
 	c.JSON(http.StatusOK, dash)
 }
 
-func (_ MeController) IsMyDash(c *gin.Context) {
+func (_ *MeController) DashRequired(name string) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		dashId, _ := strconv.Atoi(c.Param(name))
+		if dashId == 0 {
+			dashId, _ = strconv.Atoi(c.Query(name))
+		}
+		if dashId == 0 {
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": fmt.Sprintf("%v required", name)})
+			return
+		}
+		dash, err := dashboard.GetById(dashId)
+		if err != nil {
+			Logger.Error(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		if dash == nil {
+			c.AbortWithStatus(http.StatusNotFound)
+			return
+		}
+		c.Set("dashId", dashId)
+		c.Set("dash", dash)
+	}
+}
+
+func (_ *MeController) MyDash(c *gin.Context) {
+	tmp, _ := c.Get("dash")
+	dash := tmp.(*types.Dashboard)
 	ownerId := c.GetInt("userId")
-	dashId, _ := strconv.Atoi(c.Param("dashid"))
-	if dashId == 0 {
-		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	dash, err := dashboard.GetById(dashId)
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	if dash == nil {
-		c.AbortWithStatus(http.StatusNotFound)
-		return
-	}
 	if dash.OwnerId != ownerId {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	c.Set("dashId", dashId)
-	c.Set("dash", dash)
 }
 
-func (_ MeController) EditDashboard(c *gin.Context) {
+func (_ *MeController) MyDashOrShared(c *gin.Context) {
+	tmp, _ := c.Get("dash")
+	dash := tmp.(*types.Dashboard)
+	userId := c.GetInt("userId")
+	role := c.GetInt("role")
+	if dash.OwnerId != userId {
+		systemIds := dashboard.GetSystemIds(role)
+		if sort.SearchInts(systemIds, dash.Id) == len(systemIds) {
+			members, err := dashmember.GetAllByUserId(userId)
+			if err != nil {
+				c.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+			if members.ApprovedOnly().HasDash(dash.Id) == nil {
+				c.AbortWithStatus(http.StatusForbidden)
+				return
+			}
+		}
+	}
+}
+
+func (_ *MeController) EditDashboard(c *gin.Context) {
 	var dash *types.Dashboard
 	if err := c.BindJSON(&dash); err != nil {
 		return
@@ -146,7 +180,7 @@ func (_ MeController) EditDashboard(c *gin.Context) {
 	c.JSON(http.StatusOK, dash)
 }
 
-func (_ MeController) DeleteDashboard(c *gin.Context) {
+func (_ *MeController) DeleteDashboard(c *gin.Context) {
 	err := dashboard.Delete(c.GetInt("dashId"))
 	if err != nil {
 		Logger.Error(err)

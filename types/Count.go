@@ -6,19 +6,22 @@ import (
 )
 
 type Count struct {
-	DashId    int    `json:"dash_id"`
+	DashId    int    `json:"dash_id,omitempty"`
 	Timestamp int64  `json:"timestamp"`
 	Hostname  string `json:"hostname"`
 	Logname   string `json:"logname"`
 	Keyname   string `json:"keyname"`
 	Version   string `json:"version,omitempty"`
-	Metrics   struct {
-		*Inc
-		*Avg
-		*Max
-		*Min
-		*Per
-	} `json:"metrics"`
+	Metrics   `json:"metrics"`
+}
+
+type Metrics struct {
+	*Inc
+	*Avg
+	*Max
+	*Min
+	*Per
+	*Time
 }
 
 type Counts []*Count
@@ -116,48 +119,47 @@ func (c *Count) Per(taken float64, total float64) *Count {
 	return c
 }
 
+func (c *Count) Time(duration time.Duration) func() time.Duration {
+	if c.Metrics.Time == nil {
+		c.Metrics.Time = &Time{}
+	}
+	c.Metrics.Time.Duration += duration.Nanoseconds()
+	c.now()
+	ts := time.Now()
+	var delta *time.Duration
+	return func() time.Duration {
+		if delta == nil {
+			tmp := time.Since(ts)
+			delta = &tmp
+			num := float64(time.Since(ts).Nanoseconds()) / float64(duration.Nanoseconds())
+			c.Avg(num).Min(num).Max(num)
+		}
+		return *delta
+	}
+}
+
 type Inc struct {
-	Val float64 `json:"inc"`
+	Val float64 `json:"inc,omitempty"`
 }
 
 type Max struct {
-	Val float64 `json:"max"`
+	Val float64 `json:"max,omitempty"`
 }
 
 type Min struct {
-	Val float64 `json:"min"`
+	Val float64 `json:"min,omitempty"`
 }
 
 type Avg struct {
-	Sum float64 `json:"avg_sum"`
-	Num int     `json:"avg_num"`
+	Sum float64 `json:"avg_sum,omitempty"`
+	Num int     `json:"avg_num,omitempty"`
 }
 
 type Per struct {
-	Taken float64 `json:"per_tkn"`
-	Total float64 `json:"per_ttl"`
+	Taken float64 `json:"per_tkn,omitempty"`
+	Total float64 `json:"per_ttl,omitempty"`
 }
 
-type Valuer interface {
-	Value() float64
-}
-
-func (i *Inc) Value() float64 {
-	return i.Val
-}
-
-func (m *Max) Value() float64 {
-	return m.Val
-}
-
-func (m *Min) Value() float64 {
-	return m.Val
-}
-
-func (a *Avg) Value() float64 {
-	return a.Sum / float64(a.Num)
-}
-
-func (p *Per) Value() float64 {
-	return p.Taken / p.Total * 100
+type Time struct {
+	Duration int64 `json:"time_dur,omitempty"`
 }

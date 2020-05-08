@@ -9,7 +9,7 @@ import (
 )
 
 func GetByFilter(f types.Filter) (types.Logs, error) {
-	ts := time.Now()
+	duration := Logger.Time("/logs:time", time.Millisecond)
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
 	limit := f.Limit
@@ -28,8 +28,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	if err != nil {
 		return nil, err
 	}
-	delta := time.Now().Sub(ts).Seconds()
-	Logger.Avg("/logs:time", delta).Max(delta).Min(delta)
+	duration()
 	Logger.Inc("/logs:cnt", 1)
 	return logs, nil
 }

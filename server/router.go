@@ -31,14 +31,14 @@ func NewRouter() *gin.Engine {
 		r.GET("/me", auth.EnsureJWT, me.Me)
 		r.GET("/me/dashboards", auth.EnsureJWT, me.Dashboards)
 		r.POST("/me/dashboard", auth.EnsureJWT, me.AddDashboard)
-		r.POST("/me/dashboard/share/:dashid/to/:username", auth.EnsureJWT, me.IsMyDash, me.ShareDashboard)
-		r.PUT("/me/dashboard/:dashid", auth.EnsureJWT, me.IsMyDash, me.EditDashboard)
-		r.DELETE("/me/dashboard/:dashid", auth.EnsureJWT, me.IsMyDash, me.DeleteDashboard)
+		r.POST("/me/dashboard/share/:dash_id/to/:username", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.ShareDashboard)
+		r.PUT("/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.EditDashboard)
+		r.DELETE("/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.DeleteDashboard)
 	}
 
 	logsController := controllers.LogsController{}
 	{
-		r.GET("/logs", auth.EnsureJWT, logsController.Find)
+		r.GET("/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
 		r.GET("/logs/pause", auth.EnsureJWT, logsController.Pause)
 		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
 		r.GET("/logs/freq", func(c *gin.Context) {
@@ -46,6 +46,11 @@ func NewRouter() *gin.Engine {
 			Logger.Error(err)
 			c.JSON(http.StatusOK, stats)
 		})
+	}
+
+	countsController := controllers.CountsController{}
+	{
+		r.GET("/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
 	}
 
 	adminController := controllers.AdminController{}
