@@ -36,17 +36,6 @@ func (_ LogsController) Stats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-func (_ LogsController) Pause(c *gin.Context) {
-	userId := c.GetInt("userId")
-	sockId := c.Query("sock_id")
-	state := false
-	if c.Query("state") == "true" {
-		state = true
-	}
-	ws.SockMap.SetPaused(userId, sockId, state)
-	c.Status(http.StatusOK)
-}
-
 func (_ LogsController) Find(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	userId := c.GetInt("userId")

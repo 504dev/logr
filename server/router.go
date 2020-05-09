@@ -39,7 +39,6 @@ func NewRouter() *gin.Engine {
 	logsController := controllers.LogsController{}
 	{
 		r.GET("/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
-		r.GET("/logs/pause", auth.EnsureJWT, logsController.Pause)
 		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
 		r.GET("/logs/freq", func(c *gin.Context) {
 			stats, err := log.GetFrequentDashboards(1000)

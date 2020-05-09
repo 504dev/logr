@@ -10,10 +10,11 @@ CREATE TABLE IF NOT EXISTS counts
     `inc` Nullable(Float32),
     `max` Nullable(Float32),
     `min` Nullable(Float32),
-    `avg_sum` Float32,
-    `avg_num` Int32,
-    `per_tkn` Float32,
-    `per_ttl` Float32
+    `avg_sum` Nullable(Float32),
+    `avg_num` Nullable(Int32),
+    `per_tkn` Nullable(Float32),
+    `per_ttl` Nullable(Float32),
+    `time_dur` Nullable(Int32)
 )
 ENGINE = MergeTree()
 PARTITION BY toYYYYMM(day)

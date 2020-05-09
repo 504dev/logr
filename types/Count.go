@@ -54,14 +54,19 @@ func (c *Count) AsVector() []interface{} {
 		values = append(values, c.Metrics.Min.Val)
 	}
 	if c.Metrics.Avg == nil {
-		values = append(values, 0.0, 0)
+		values = append(values, nil, nil)
 	} else {
 		values = append(values, c.Metrics.Avg.Sum, c.Metrics.Avg.Num)
 	}
 	if c.Metrics.Per == nil {
-		values = append(values, 0.0, 0.0)
+		values = append(values, nil, nil)
 	} else {
 		values = append(values, c.Metrics.Per.Taken, c.Metrics.Per.Total)
+	}
+	if c.Metrics.Time == nil {
+		values = append(values, nil)
+	} else {
+		values = append(values, c.Metrics.Time.Duration)
 	}
 	return values
 }

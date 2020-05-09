@@ -70,6 +70,9 @@ func (wc WsController) Reader(w *websocket.Conn) {
 			sock.AddListener(m.Path)
 		case "unsubscribe":
 			sock.RemoveListener(m.Path)
+		case "pause":
+			paused := m.Payload.(bool)
+			sock.SetPaused(paused)
 		}
 
 		Logger.Debug("Received: %v", m)
