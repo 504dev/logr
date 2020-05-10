@@ -51,7 +51,7 @@ func (s *Sock) SetPaused(state bool) {
 }
 
 type SockMessage struct {
-	Action  string      `json:"action"`
+	Action  string      `json:"action,omitempty"`
 	Path    string      `json:"path"`
 	Payload interface{} `json:"payload"`
 }

@@ -35,7 +35,7 @@ func (c *Count) Encrypt(priv string) (string, error) {
 }
 
 func (c *Count) AsVector() []interface{} {
-	dt := time.Unix(0, c.Timestamp)
+	dt := time.Unix(c.Timestamp, 0)
 	day := dt.Format("2006-01-02")
 	values := []interface{}{day, dt, c.DashId, c.Hostname, c.Logname, c.Keyname, c.Version}
 	if c.Metrics.Inc == nil {
@@ -72,7 +72,7 @@ func (c *Count) AsVector() []interface{} {
 }
 
 func (c *Count) now() {
-	c.Timestamp = time.Now().UnixNano()
+	c.Timestamp = time.Now().Unix()
 }
 
 func (c *Count) Inc(num float64) *Count {
