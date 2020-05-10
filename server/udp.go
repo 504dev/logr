@@ -2,7 +2,6 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/504dev/kidlog/config"
 	. "github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/count"
@@ -28,7 +27,7 @@ func ListenUDP() error {
 		n, _, err := pc.ReadFromUDP(buf)
 
 		if err != nil {
-			fmt.Println("UDP read error:", err)
+			Logger.Error("UDP read error:", err)
 			continue
 		}
 
@@ -38,16 +37,16 @@ func ListenUDP() error {
 		err = json.Unmarshal(buf[0:n], &lp)
 
 		if err != nil {
-			fmt.Println("UDP parse json error:", err, string(buf[0:n]))
+			Logger.Error("UDP parse json error:", err, string(buf[0:n]))
 			continue
 		}
 		dk, err := dashkey.GetByPubCached(lp.PublicKey)
 		if err != nil {
-			fmt.Println("UDP dash error:", err)
+			Logger.Error("UDP dash error:", err)
 			continue
 		}
 		if dk == nil {
-			fmt.Println("UDP unknown dash")
+			Logger.Warn("UDP unknown dash pub=%v", lp.PublicKey)
 			continue
 		}
 
@@ -55,14 +54,13 @@ func ListenUDP() error {
 			Logger.Inc("udp:l", 1)
 			err = lp.DecryptLog(dk.PrivateKey)
 			if err != nil {
-				fmt.Println("UDP decrypt log error:", err)
+				Logger.Error("UDP decrypt log error:", err)
 			} else if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
-				//fmt.Println(lp.Log)
 				ws.SockMap.PushLog(lp.Log)
 				err = log.PushToQueue(lp.Log)
 				if err != nil {
-					fmt.Println("UDP create log error", err)
+					Logger.Error("UDP create log error", err)
 				}
 			}
 		}
@@ -71,13 +69,12 @@ func ListenUDP() error {
 			Logger.Inc("udp:c", 1)
 			err = lp.DecryptCount(dk.PrivateKey)
 			if err != nil {
-				fmt.Println("UDP decrypt count error:", err)
+				Logger.Error("UDP decrypt count error:", err)
 			} else if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
-				fmt.Println("UDP Count", lp.Count)
 				err = count.PushToQueue(lp.Count)
 				if err != nil {
-					fmt.Println("UDP create count error", err)
+					Logger.Error("UDP create count error", err)
 				}
 			}
 		}
