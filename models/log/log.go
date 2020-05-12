@@ -36,7 +36,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
 	conn := clickhouse.Conn()
 	sql := `
-      SELECT dash_id, hostname, logname, level, version, count(*) AS cnt, max(day) AS updated
+      SELECT dash_id, hostname, logname, level, version, count(*) AS cnt, max(timestamp) AS updated
       FROM logs WHERE dash_id IN (?)
       GROUP BY dash_id, hostname, logname, level, version
     `

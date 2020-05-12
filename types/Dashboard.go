@@ -1,5 +1,7 @@
 package types
 
+import "time"
+
 const (
 	DashboardSystemId = 1
 	DashboardDemoId   = 2
@@ -31,13 +33,13 @@ func (ds Dashboards) ByPrimary() map[int]*Dashboard {
 }
 
 type DashStatRow struct {
-	DashId   int    `db:"dash_id" json:"dash_id"`
-	Hostname string `db:"hostname" json:"hostname"`
-	Logname  string `db:"logname"  json:"logname"`
-	Level    string `db:"level"    json:"level"`
-	Version  string `db:"version"  json:"version"`
-	Cnt      int    `db:"cnt"      json:"cnt"`
-	Updated  string `db:"updated"  json:"updated"`
+	DashId   int       `db:"dash_id" json:"dash_id"`
+	Hostname string    `db:"hostname" json:"hostname"`
+	Logname  string    `db:"logname"  json:"logname"`
+	Level    string    `db:"level"    json:"level"`
+	Version  string    `db:"version"  json:"version"`
+	Cnt      int       `db:"cnt"      json:"cnt"`
+	Updated  time.Time `db:"updated"  json:"updated"`
 }
 
 type DashStatRows []*DashStatRow
