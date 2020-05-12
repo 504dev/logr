@@ -76,6 +76,6 @@ func GetByDashId(id int) (types.DashKeys, error) {
 	return findAllByField("dash_id", id, 0)
 }
 
-func GetByPub(id int) (*types.DashKey, error) {
-	return findOneByField("public_key", id)
+func GetByPub(pub string) (*types.DashKey, error) {
+	return findOneByField("public_key", pub)
 }

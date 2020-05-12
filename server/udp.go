@@ -40,7 +40,7 @@ func ListenUDP() error {
 			Logger.Error("UDP parse json error:", err, string(buf[0:n]))
 			continue
 		}
-		dk, err := dashkey.GetByPubCached(lp.PublicKey)
+		dk, err := dashkey.GetByPub(lp.PublicKey)
 		if err != nil {
 			Logger.Error("UDP dash error:", err)
 			continue
