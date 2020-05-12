@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/504dev/kidlog/clickhouse"
 	"github.com/504dev/kidlog/config"
 	. "github.com/504dev/kidlog/logger"
@@ -16,7 +15,6 @@ import (
 )
 
 func main() {
-	fmt.Println(os.Environ())
 	config.Init()
 	clickhouse.Init()
 	mysql.Init()

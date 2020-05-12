@@ -13,6 +13,7 @@ import (
 func crypto(conf *logr.Config) {
 	l, _ := conf.NewLogger("crypto.log")
 	for {
+		time.Sleep(60 * time.Second)
 		day := time.Now().Format("2006-01-02")
 		path := fmt.Sprintf("/get-day-snapshot?day=%v&uni=1&format=ohlcv", day)
 		bytes, err := request(path)
@@ -52,7 +53,6 @@ func crypto(conf *logr.Config) {
 		}
 
 		l.Debug(string(bytes))
-		time.Sleep(60 * time.Second)
 	}
 }
 
