@@ -72,6 +72,7 @@ func ListenUDP() error {
 				Logger.Error("UDP decrypt count error:", err)
 			} else if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
+				Logger.Debug("UDP %v", lp.Count)
 				err = count.PushToQueue(lp.Count)
 				if err != nil {
 					Logger.Error("UDP create count error", err)
