@@ -42,6 +42,7 @@ func main() {
 		}
 	})()
 	Logger.Debug(os.Environ())
+	color.NoColor = false
 	a := "I \033[31mlove\033[0m Stack Overflow"
 	b := "I " + color.RedString("love") + " Stack Overflow"
 	ja, _ := json.Marshal(a)
