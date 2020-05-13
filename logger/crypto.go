@@ -33,21 +33,21 @@ func crypto(conf *logr.Config) {
 			l.Info(
 				"%v price: %v %v$, %v %v$, %v %v$",
 				color.New(color.Bold).SprintFunc()(base),
-				color.New(color.FgCyan).SprintFunc()("HitBTC"),
+				color.CyanString("HitBTC"),
 				prices["hitbtc"][sym]["c"],
-				color.New(color.FgYellow).SprintFunc()("Binance"),
+				color.YellowString("Binance"),
 				prices["binance"][sym]["c"],
-				color.New(color.FgGreen).SprintFunc()("Bitfinex"),
+				color.GreenString("Bitfinex"),
 				prices["bitfinex"][sym]["c"],
 			)
 			l.Info(
 				"%v volume: %v %.0f$, %v %.0f$, %v %.0f$",
 				color.New(color.Bold).SprintFunc()(base),
-				color.New(color.FgCyan).SprintFunc()("HitBTC"),
+				color.CyanString("HitBTC"),
 				prices["hitbtc"][sym]["v"],
-				color.New(color.FgYellow).SprintFunc()("Binance"),
+				color.YellowString("Binance"),
 				prices["binance"][sym]["v"],
-				color.New(color.FgGreen).SprintFunc()("Bitfinex"),
+				color.GreenString("Bitfinex"),
 				prices["bitfinex"][sym]["v"],
 			)
 		}
