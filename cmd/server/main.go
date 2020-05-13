@@ -9,7 +9,6 @@ import (
 	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/mysql"
 	"github.com/504dev/kidlog/server"
-	"github.com/fatih/color"
 	"os"
 	"os/signal"
 	"time"
@@ -38,9 +37,9 @@ func main() {
 		for {
 			time.Sleep(10 * time.Second)
 			Logger.Info(ws.SockMap.Info())
-			color.Cyan("Prints text in cyan.")
 		}
 	})()
+	Logger.Debug(os.Environ())
 	HandleExit()
 }
 
