@@ -40,6 +40,7 @@ func main() {
 		}
 	})()
 	Logger.Debug(os.Environ())
+	Logger.Debug("I \033[0;31mlove\033[0m Stack Overflow")
 	HandleExit()
 }
 
