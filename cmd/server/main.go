@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"github.com/504dev/kidlog/clickhouse"
 	"github.com/504dev/kidlog/config"
 	. "github.com/504dev/kidlog/logger"
@@ -9,6 +10,7 @@ import (
 	"github.com/504dev/kidlog/models/ws"
 	"github.com/504dev/kidlog/mysql"
 	"github.com/504dev/kidlog/server"
+	"github.com/fatih/color"
 	"os"
 	"os/signal"
 	"time"
@@ -40,7 +42,15 @@ func main() {
 		}
 	})()
 	Logger.Debug(os.Environ())
-	Logger.Debug("I \033[0;31mlove\033[0m Stack Overflow")
+	a := "I \033[31mlove\033[0m Stack Overflow"
+	b := "I " + color.RedString("love") + " Stack Overflow"
+	ja, _ := json.Marshal(a)
+	jb, _ := json.Marshal(b)
+	Logger.Debug(a)
+	Logger.Debug(b)
+	Logger.Debug(string(ja))
+	Logger.Debug(string(jb))
+	Logger.Debug(string(ja) == string(jb))
 	HandleExit()
 }
 
