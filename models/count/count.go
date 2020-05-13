@@ -69,7 +69,6 @@ func Find(dashId int, logname string, hostname string) (types.Counts, error) {
 		}
 		counts = append(counts, &types.Count{
 			Timestamp: timestamp.Unix(),
-			Logname:   logname,
 			Hostname:  hostname,
 			Keyname:   keyname,
 			Metrics:   metrics,

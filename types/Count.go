@@ -8,8 +8,8 @@ import (
 type Count struct {
 	DashId    int    `json:"dash_id,omitempty"`
 	Timestamp int64  `json:"timestamp"`
-	Hostname  string `json:"hostname"`
-	Logname   string `json:"logname"`
+	Hostname  string `json:"hostname,omitempty"`
+	Logname   string `json:"logname,omitempty"`
 	Keyname   string `json:"keyname"`
 	Version   string `json:"version,omitempty"`
 	Metrics   `json:"metrics"`
@@ -23,6 +23,8 @@ type Metrics struct {
 	*Per
 	*Time
 }
+
+type CountMap map[string]map[string]Metrics
 
 type Counts []*Count
 

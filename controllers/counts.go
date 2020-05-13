@@ -14,6 +14,11 @@ func (_ *CountsController) Find(c *gin.Context) {
 	logname := c.Query("logname")
 	hostname := c.Query("hostname")
 
+	if logname == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "logname required"})
+		return
+	}
+
 	logs, err := count.Find(dashId, logname, hostname)
 	if err != nil {
 		Logger.Error(err)
