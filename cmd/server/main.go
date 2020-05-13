@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/504dev/kidlog/clickhouse"
 	"github.com/504dev/kidlog/config"
 	. "github.com/504dev/kidlog/logger"
@@ -17,6 +16,7 @@ import (
 )
 
 func main() {
+	color.NoColor = false
 	config.Init()
 	clickhouse.Init()
 	mysql.Init()
@@ -41,17 +41,6 @@ func main() {
 			Logger.Info(ws.SockMap.Info())
 		}
 	})()
-	Logger.Debug(os.Environ())
-	color.NoColor = false
-	a := "I \033[31mlove\033[0m Stack Overflow"
-	b := "I " + color.RedString("love") + " Stack Overflow"
-	ja, _ := json.Marshal(a)
-	jb, _ := json.Marshal(b)
-	Logger.Debug(a)
-	Logger.Debug(b)
-	Logger.Debug(string(ja))
-	Logger.Debug(string(jb))
-	Logger.Debug(string(ja) == string(jb))
 	HandleExit()
 }
 
