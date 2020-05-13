@@ -8,7 +8,13 @@ import (
 	"time"
 )
 
-func Find(dashId int, logname string, hostname string) (types.Counts, error) {
+const (
+	AggMinute = "m"
+	AggHour   = "h"
+	AggDay    = "d"
+)
+
+func Find(dashId int, logname string, hostname string, agg string) (types.Counts, error) {
 	duration := Logger.Time("/logs:time", time.Millisecond)
 	where := `dash_id = ? and logname = ? and timestamp > now() - interval 7 day`
 	values := []interface{}{dashId, logname}
@@ -16,9 +22,18 @@ func Find(dashId int, logname string, hostname string) (types.Counts, error) {
 		where += ` and hostname = ?`
 		values = append(values, hostname)
 	}
+	aggmap := map[string]string{
+		AggMinute: "toStartOfMinute",
+		AggHour:   "toStartOfHour",
+		AggDay:    "toStartOfDay",
+	}
+	aggfunc := aggmap[agg]
+	if aggfunc == "" {
+		aggfunc = aggmap[AggMinute]
+	}
 	sql := `
       select
-        toStartOfMinute(timestamp),
+        ` + aggfunc + `(timestamp),
         hostname,
         keyname,
         sum(inc),
