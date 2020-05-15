@@ -1,32 +1,52 @@
 package types
 
 import (
+	"fmt"
 	"github.com/504dev/kidlog/cipher"
 	"time"
 )
 
 type Count struct {
-	DashId    int    `json:"dash_id,omitempty"`
-	Timestamp int64  `json:"timestamp"`
-	Hostname  string `json:"hostname,omitempty"`
-	Logname   string `json:"logname,omitempty"`
-	Keyname   string `json:"keyname"`
-	Version   string `json:"version,omitempty"`
+	DashId    int    `db:"dash_id"   json:"dash_id,omitempty"`
+	Timestamp int64  `db:"timestamp" json:"timestamp"`
+	Hostname  string `db:"hostname"  json:"hostname,omitempty"`
+	Logname   string `db:"logname"   json:"logname,omitempty"`
+	Keyname   string `db:"keyname"   json:"keyname"`
+	Version   string `db:"version"   json:"version,omitempty"`
 	Metrics   `json:"metrics"`
 }
 
 type Metrics struct {
 	*Inc
-	*Avg
 	*Max
 	*Min
+	*Avg
 	*Per
 	*Time
 }
 
-type CountMap map[string]map[string]Metrics
-
-type Counts []*Count
+func (m Metrics) ToMap() map[string]interface{} {
+	res := map[string]interface{}{}
+	if m.Inc != nil {
+		res["inc"] = m.Inc.Value()
+	}
+	if m.Max != nil {
+		res["max"] = m.Max.Value()
+	}
+	if m.Min != nil {
+		res["min"] = m.Min.Value()
+	}
+	if m.Avg != nil {
+		res["avg"] = m.Avg.Value()
+	}
+	if m.Per != nil {
+		res["per"] = m.Per.Value()
+	}
+	if m.Time != nil {
+		res["time"] = m.Time.Value()
+	}
+	return res
+}
 
 func (c *Count) Decrypt(cipherText string, priv string) error {
 	return cipher.DecodeAesJson(cipherText, priv, c)
@@ -145,28 +165,80 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 	}
 }
 
+type Counts []*Count
+
+type Serie struct {
+	Hostname string           `json:"hostname"`
+	Keyname  string           `json:"keyname"`
+	Type     string           `json:"type"`
+	Data     [][2]interface{} `json:"data"`
+}
+type Series []*Serie
+
+func (cs Counts) Format() Series {
+	m := map[string]*Serie{}
+	for _, c := range cs {
+		for t, v := range c.ToMap() {
+			key := fmt.Sprintf("%v:%v:%v", t, c.Keyname, c.Hostname)
+			if _, ok := m[key]; !ok {
+				m[key] = &Serie{Hostname: c.Hostname, Keyname: c.Keyname, Type: t}
+			}
+			m[key].Data = append(m[key].Data, [2]interface{}{c.Timestamp, v})
+		}
+	}
+	res := make(Series, 0, len(m))
+	for _, s := range m {
+		res = append(res, s)
+	}
+	return res
+}
+
 type Inc struct {
-	Val float64 `json:"inc,omitempty"`
+	Val float64 `db:"inc,omitempty" json:"inc,omitempty"`
 }
 
 type Max struct {
-	Val float64 `json:"max,omitempty"`
+	Val float64 `db:"max,omitempty" json:"max,omitempty"`
 }
 
 type Min struct {
-	Val float64 `json:"min,omitempty"`
+	Val float64 `db:"min,omitempty" json:"min,omitempty"`
 }
 
 type Avg struct {
-	Sum float64 `json:"avg_sum,omitempty"`
-	Num int     `json:"avg_num,omitempty"`
+	Sum float64 `db:"avg_sum" json:"avg_sum,omitempty"`
+	Num int     `db:"avg_num" json:"avg_num,omitempty"`
 }
 
 type Per struct {
-	Taken float64 `json:"per_tkn,omitempty"`
-	Total float64 `json:"per_ttl,omitempty"`
+	Taken float64 `db:"per_tkn" json:"per_tkn,omitempty"`
+	Total float64 `db:"per_ttl" json:"per_ttl,omitempty"`
 }
 
 type Time struct {
-	Duration int64 `json:"time_dur,omitempty"`
+	Duration int64 `db:"time_dur" json:"time_dur,omitempty"`
+}
+
+func (i *Inc) Value() float64 {
+	return i.Val
+}
+
+func (m *Max) Value() float64 {
+	return m.Val
+}
+
+func (m *Min) Value() float64 {
+	return m.Val
+}
+
+func (a *Avg) Value() float64 {
+	return a.Sum / float64(a.Num)
+}
+
+func (p *Per) Value() float64 {
+	return p.Taken / p.Total * 100
+}
+
+func (t *Time) Value() int64 {
+	return t.Duration
 }

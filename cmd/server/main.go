@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/504dev/kidlog/clickhouse"
 	"github.com/504dev/kidlog/config"
-	. "github.com/504dev/kidlog/logger"
+	"github.com/504dev/kidlog/logger"
 	"github.com/504dev/kidlog/models/count"
 	"github.com/504dev/kidlog/models/log"
 	"github.com/504dev/kidlog/models/ws"
@@ -20,7 +20,7 @@ func main() {
 	config.Init()
 	clickhouse.Init()
 	mysql.Init()
-	Logger.Init()
+	logger.Init()
 	log.RunQueue()
 	count.RunQueue()
 	go (func() {
@@ -38,7 +38,7 @@ func main() {
 	go (func() {
 		for {
 			time.Sleep(10 * time.Second)
-			Logger.Info(ws.SockMap.Info())
+			logger.Logger.Info(ws.SockMap.Info())
 		}
 	})()
 	HandleExit()
@@ -48,7 +48,7 @@ func HandleExit() {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	sig := <-c
-	Logger.Warn("Exit with code: %v", sig)
+	logger.Logger.Warn("Exit with code: %v", sig)
 	log.StopQueue()
 	count.StopQueue()
 	os.Exit(0)

@@ -3,7 +3,7 @@ module github.com/504dev/kidlog
 go 1.12
 
 require (
-	github.com/504dev/logr-go-client v0.0.36
+	github.com/504dev/logr-go-client v0.0.37
 	github.com/ClickHouse/clickhouse-go v1.3.12
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.9.0

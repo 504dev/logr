@@ -39,8 +39,12 @@ func (a *AuthController) Authorize(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
 	callback := c.Query("callback")
+	login := c.Query("login")
 	a.states[state] = callback
 	authorizeUrl := a.Config.AuthCodeURL(state)
+	if login != "" {
+		authorizeUrl += "&login=" + login
+	}
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
 	c.Abort()
 }

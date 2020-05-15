@@ -14,7 +14,7 @@ import (
 
 type LogsController struct{}
 
-func (_ LogsController) Stats(c *gin.Context) {
+func (_ *LogsController) Stats(c *gin.Context) {
 	userId := c.GetInt("userId")
 	dashboards, err := dashboard.GetUserDashboards(userId)
 	if err != nil {
@@ -36,7 +36,7 @@ func (_ LogsController) Stats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-func (_ LogsController) Find(c *gin.Context) {
+func (_ *LogsController) Find(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	userId := c.GetInt("userId")
 

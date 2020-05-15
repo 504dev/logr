@@ -18,6 +18,7 @@ github.com/504dev/kidlog v0.0.0-20200313090716-e2776b9d5a04/go.mod h1:FY58H0Ydc/
 github.com/504dev/kidlog v0.0.0-20200313221337-e1ebab884b48/go.mod h1:vLIgZa0f7SCv7i0KaMuCNTMyhSxBILOflfyxtoEtwqU=
 github.com/504dev/kidlog v0.0.2/go.mod h1:svVaUhfhXYie9uI5OdkXDYjGEGEUPvfp9kvIpvf2c1c=
 github.com/504dev/kidlog v0.0.3/go.mod h1:kFYo5g+i3V7a2zG0SB6mG/5t0Px5vfA/yL3Ko+maeOo=
+github.com/504dev/kidlog v0.0.5/go.mod h1:kFYo5g+i3V7a2zG0SB6mG/5t0Px5vfA/yL3Ko+maeOo=
 github.com/504dev/logr-go-client v0.0.0-20200205152417-03024b70c741 h1:BkmJPi68SL0ULhrNjVXfNE24zNGKIU9x2b5xx37ugns=
 github.com/504dev/logr-go-client v0.0.0-20200205152417-03024b70c741/go.mod h1:XIRDn17bvv0qZGPBlUaURfi8t8MgGUZRusqk3Ul04AU=
 github.com/504dev/logr-go-client v0.0.1 h1:nKSsL33mCWpW/9fG01cu3IzR2lhgagHQgIIaqzFxahs=
@@ -70,6 +71,8 @@ github.com/504dev/logr-go-client v0.0.34 h1:PyotzMfrXuQ4a55r5+T8hUSfVhuLA0TKoaU3
 github.com/504dev/logr-go-client v0.0.34/go.mod h1:zVv5mS5gA6O2Jt/7iF94KIlPjlP8D3BEST6k1cc1LmY=
 github.com/504dev/logr-go-client v0.0.36 h1:dH+1uwB1YjSHy737W15RI3VXolP4dcG05m50YXLKBhE=
 github.com/504dev/logr-go-client v0.0.36/go.mod h1:fkRjLrVs4Bgn4Fw7KIP+oS4zb0HVi1FbX1nWpWDMxHw=
+github.com/504dev/logr-go-client v0.0.37 h1:yTT8fkEouhj5p+TjrOfIJRgmIbuZqr2Y9BEmqWbAu3s=
+github.com/504dev/logr-go-client v0.0.37/go.mod h1:G22IM9sDgANNkxR7uL3VACpwxRRG8B3s3LrUtqzIKng=
 github.com/ClickHouse/clickhouse-go v1.3.12 h1:HvD2NhKPLSeO3Ots6YV0ePgs4l3wO0bLqa9Uk1yeMOs=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/allegro/bigcache v1.2.1 h1:hg1sY1raCwic3Vnsvje6TT7/pnZba83LeFck5NrFKSc=

@@ -76,10 +76,10 @@ func Find(dashId int, logname string, hostname string, agg string) (types.Counts
 		if min != nil {
 			metrics.Min = &types.Min{Val: *min}
 		}
-		if avgNum != nil {
+		if avgNum != nil && avgSum != nil {
 			metrics.Avg = &types.Avg{Sum: *avgSum, Num: *avgNum}
 		}
-		if perTotal != nil {
+		if perTaken != nil && perTotal != nil {
 			metrics.Per = &types.Per{Total: *perTotal, Taken: *perTaken}
 		}
 		counts = append(counts, &types.Count{
@@ -92,4 +92,67 @@ func Find(dashId int, logname string, hostname string, agg string) (types.Counts
 	duration()
 	Logger.Inc("/logs:cnt", 1)
 	return counts, nil
+}
+
+func Find2(dashId int, logname string, hostname string, agg string) (types.Counts, error) {
+	duration := Logger.Time("/logs:time", time.Millisecond)
+	where := `dash_id = ? and logname = ? and timestamp > now() - interval 7 day`
+	values := []interface{}{dashId, logname}
+	if hostname != "" {
+		where += ` and hostname = ?`
+		values = append(values, hostname)
+	}
+	aggmap := map[string]string{
+		AggMinute: "toStartOfMinute",
+		AggHour:   "toStartOfHour",
+		AggDay:    "toStartOfDay",
+	}
+	aggfunc := aggmap[agg]
+	if aggfunc == "" {
+		aggfunc = aggmap[AggMinute]
+	}
+	sql := `
+      select
+        toUnixTimestamp(` + aggfunc + `(timestamp)) as timestamp,
+        hostname,
+        keyname,
+        sum(inc) as inc,
+        max(max) as max,
+        min(min) as min,
+        sum(avg_sum) as avg_sum,
+        sum(avg_num) as avg_num,
+        sum(per_tkn) as per_tkn,
+        sum(per_ttl) as per_ttl
+      from counts
+      where ` + where + `
+      group by
+        timestamp, hostname, keyname
+      order by
+        timestamp desc, hostname, keyname
+    `
+	fmt.Println(sql)
+
+	counts := types.Counts{}
+	err := clickhouse.Conn().Select(&counts, sql, values...)
+	if err != nil {
+		return nil, err
+	}
+	duration()
+	Logger.Inc("/logs:cnt", 1)
+	return counts, nil
+}
+
+func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
+	conn := clickhouse.Conn()
+	sql := `
+      SELECT dash_id, hostname, logname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
+      FROM counts WHERE dash_id IN (?)
+      GROUP BY dash_id, hostname, logname, version
+    `
+	stats := types.DashStatRows{}
+	err := conn.Select(&stats, sql, dashIds)
+	if err != nil {
+		return nil, err
+	}
+	return stats, nil
 }

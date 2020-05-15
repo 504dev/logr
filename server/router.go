@@ -2,11 +2,8 @@ package server
 
 import (
 	"github.com/504dev/kidlog/controllers"
-	. "github.com/504dev/kidlog/logger"
-	"github.com/504dev/kidlog/models/log"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 func NewRouter() *gin.Engine {
@@ -40,16 +37,13 @@ func NewRouter() *gin.Engine {
 	{
 		r.GET("/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
 		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
-		r.GET("/logs/freq", func(c *gin.Context) {
-			stats, err := log.GetFrequentDashboards(1000)
-			Logger.Error(err)
-			c.JSON(http.StatusOK, stats)
-		})
 	}
 
 	countsController := controllers.CountsController{}
 	{
 		r.GET("/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
+		r.GET("/counts/stats", auth.EnsureJWT, countsController.Stats)
+
 	}
 
 	adminController := controllers.AdminController{}

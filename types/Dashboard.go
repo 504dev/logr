@@ -31,10 +31,10 @@ func (ds Dashboards) ByPrimary() map[int]*Dashboard {
 }
 
 type DashStatRow struct {
-	DashId   int    `db:"dash_id" json:"dash_id"`
+	DashId   int    `db:"dash_id"  json:"dash_id"`
 	Hostname string `db:"hostname" json:"hostname"`
 	Logname  string `db:"logname"  json:"logname"`
-	Level    string `db:"level"    json:"level"`
+	Level    string `db:"level"    json:"level,omitempty"`
 	Version  string `db:"version"  json:"version"`
 	Cnt      int    `db:"cnt"      json:"cnt"`
 	Updated  uint64 `db:"updated"  json:"updated"`

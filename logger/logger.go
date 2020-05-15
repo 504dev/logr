@@ -24,18 +24,11 @@ func createConfig(dashId int) (*logr.Config, error) {
 	return &conf, err
 }
 
-type loggerT struct {
-	*logr.Logger
-	*logr.Counter
-	Gin *logr.Writter
-}
-
-func (lg *loggerT) Init() {
+func Init() {
 	conf, _ := createConfig(types.DashboardSystemId)
-	lg.Logger, _ = conf.NewLogger("main.log")
-	lg.Counter, _ = conf.NewCounter("main.cnt")
+	Logger, _ = conf.NewLogger("main.log")
 	gin, _ := conf.NewLogger("gin.log")
-	lg.Gin = gin.CustomWritter(func(log *logr.Log) {
+	GinWritter = gin.CustomWritter(func(log *logr.Log) {
 		codestr := log.Message[38:41]
 		code, _ := strconv.Atoi(codestr)
 		if code >= 400 && code <= 499 {
@@ -44,7 +37,8 @@ func (lg *loggerT) Init() {
 			log.Level = logr.LevelError
 		}
 	})
-	go lg.Demo()
+	go Demo()
 }
 
-var Logger = &loggerT{}
+var Logger *logr.Logger
+var GinWritter *logr.Writter

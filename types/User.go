@@ -14,3 +14,8 @@ const (
 	RoleUser   = 2
 	RoleViewer = 3
 )
+
+const (
+	ProviderGithub = 1
+	ProviderGoogle = 2
+)

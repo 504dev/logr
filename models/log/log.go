@@ -47,31 +47,3 @@ func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
 	}
 	return stats, nil
 }
-
-func GetFrequentDashboards(len int) ([]int, error) {
-	conn := clickhouse.Conn()
-	sql := `
-      SELECT dash_id, count(*) AS cnt
-      FROM logs WHERE timestamp > ?
-      GROUP BY dash_id
-      ORDER BY cnt DESC
-      LIMIT ?
-    `
-	ts := time.Now().Add(-3 * time.Hour)
-	rows, err := conn.Queryx(sql, ts, len)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	res := make([]int, 0, len)
-
-	for rows.Next() {
-		var id, cnt int
-		err := rows.Scan(&id, &cnt)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, id)
-	}
-	return res, nil
-}

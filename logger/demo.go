@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func (lg *loggerT) Demo() {
+func Demo() {
 	conf, _ := createConfig(types.DashboardDemoId)
 	go (func() {
 		l, _ := conf.NewLogger("starwars.log")
