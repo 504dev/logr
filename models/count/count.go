@@ -33,7 +33,7 @@ func Find(dashId int, logname string, hostname string, agg string) (types.Counts
 	}
 	sql := `
       select
-        ` + aggfunc + `(timestamp),
+        ` + aggfunc + `(timestamp) as ts,
         hostname,
         keyname,
         sum(inc),
@@ -46,9 +46,9 @@ func Find(dashId int, logname string, hostname string, agg string) (types.Counts
       from counts
       where ` + where + `
       group by
-        timestamp, hostname, keyname
+        ts, hostname, keyname
       order by
-        timestamp desc, hostname, keyname
+        ts desc, hostname, keyname
     `
 	fmt.Println(sql)
 	rows, err := clickhouse.Conn().Query(sql, values...)
