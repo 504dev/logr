@@ -13,8 +13,8 @@ import (
 func crypto(conf *logr.Config) {
 	l, _ := conf.NewLogger("crypto.log")
 	for {
-		time.Sleep(6 * time.Second)
-		delta := Logger.Time("pricer:/get-day-snapshot", time.Millisecond)
+		time.Sleep(30 * time.Second)
+		delta := l.Time("pricer:/get-day-snapshot", time.Millisecond)
 		day := time.Now().Format("2006-01-02")
 		path := fmt.Sprintf("/get-day-snapshot?day=%v&uni=1&format=ohlcv", day)
 		bytes, err := request(path)
@@ -44,7 +44,7 @@ func crypto(conf *logr.Config) {
 				color.GreenString("Bitfinex"),
 				bitp,
 			)
-			Logger.Avg(fmt.Sprintf("price:%v", sym), hitp).Avg(binp).Avg(bitp).Min(hitp).Min(binp).Min(bitp).Max(hitp).Max(binp).Max(bitp)
+			l.Avg(fmt.Sprintf("price:%v", sym), hitp).Avg(binp).Avg(bitp).Min(hitp).Min(binp).Min(bitp).Max(hitp).Max(binp).Max(bitp)
 			hitv := prices["hitbtc"][sym]["v"]
 			binv := prices["binance"][sym]["v"]
 			bitv := prices["bitfinex"][sym]["v"]
@@ -58,7 +58,7 @@ func crypto(conf *logr.Config) {
 				color.GreenString("Bitfinex"),
 				bitv,
 			)
-			Logger.Inc(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
+			l.Inc(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
 		}
 
 		l.Debug(string(bytes))
