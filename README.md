@@ -1,18 +1,10 @@
-# kidlog
-logger
+# Logr
 
-0) install modules gin, sqlx ... (using go module system)
-1) clickhouse.Init() init conn, create schemas
-2) read log from clickhouse, use sqlx
-3) http and udp handlers
-4) write log to clickhouse
-
-# Build service
-
+## Build service
 1. Create directories:
     `cd $GOPATH/src/github.com && mkdir 504dev && cd $_`
 2. Clone repository:
-    `git clone git@github.com:504dev/kidlog.git && cd kidlog`
+    `git clone git@github.com:504dev/logr.git && cd logr`
 3. Make helper:
     `make`
 4. Init config file:
