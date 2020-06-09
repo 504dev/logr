@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/types"
 	"github.com/fatih/color"
 	"time"
 )

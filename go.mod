@@ -1,8 +1,9 @@
-module github.com/504dev/kidlog
+module github.com/504dev/logr
 
 go 1.12
 
 require (
+	github.com/504dev/kidlog v0.0.6
 	github.com/504dev/logr-go-client v0.0.40
 	github.com/ClickHouse/clickhouse-go v1.3.12
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible

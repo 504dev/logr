@@ -2,13 +2,13 @@ package server
 
 import (
 	"encoding/json"
-	"github.com/504dev/kidlog/config"
-	. "github.com/504dev/kidlog/logger"
-	"github.com/504dev/kidlog/models/count"
-	"github.com/504dev/kidlog/models/dashkey"
-	"github.com/504dev/kidlog/models/log"
-	"github.com/504dev/kidlog/models/ws"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/config"
+	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/models/count"
+	"github.com/504dev/logr/models/dashkey"
+	"github.com/504dev/logr/models/log"
+	"github.com/504dev/logr/models/ws"
+	"github.com/504dev/logr/types"
 	"net"
 )
 

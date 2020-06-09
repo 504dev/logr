@@ -2,8 +2,8 @@ package types
 
 import (
 	"encoding/base64"
-	"github.com/504dev/kidlog/cipher"
-	"github.com/504dev/kidlog/config"
+	"github.com/504dev/logr/cipher"
+	"github.com/504dev/logr/config"
 	"github.com/dgrijalva/jwt-go"
 )
 

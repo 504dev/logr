@@ -1,7 +1,7 @@
 package queue
 
 import (
-	. "github.com/504dev/kidlog/logger"
+	. "github.com/504dev/logr/logger"
 	"github.com/jmoiron/sqlx"
 	"sync"
 	"time"

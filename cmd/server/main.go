@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/504dev/kidlog/clickhouse"
-	"github.com/504dev/kidlog/config"
-	"github.com/504dev/kidlog/logger"
-	"github.com/504dev/kidlog/models/count"
-	"github.com/504dev/kidlog/models/log"
-	"github.com/504dev/kidlog/models/ws"
-	"github.com/504dev/kidlog/mysql"
-	"github.com/504dev/kidlog/server"
+	"github.com/504dev/logr/clickhouse"
+	"github.com/504dev/logr/config"
+	"github.com/504dev/logr/logger"
+	"github.com/504dev/logr/models/count"
+	"github.com/504dev/logr/models/log"
+	"github.com/504dev/logr/models/ws"
+	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/server"
 	"github.com/fatih/color"
 	"os"
 	"os/signal"

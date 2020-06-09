@@ -1,8 +1,8 @@
 package mysql
 
 import (
-	"github.com/504dev/kidlog/cipher"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/cipher"
+	"github.com/504dev/logr/types"
 )
 
 func SeedUsers() {

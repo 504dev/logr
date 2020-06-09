@@ -1,9 +1,9 @@
 package logger
 
 import (
-	"github.com/504dev/kidlog/config"
-	"github.com/504dev/kidlog/models/dashkey"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/config"
+	"github.com/504dev/logr/models/dashkey"
+	"github.com/504dev/logr/types"
 	logr "github.com/504dev/logr-go-client"
 	"strconv"
 )

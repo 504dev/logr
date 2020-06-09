@@ -2,7 +2,7 @@ package clickhouse
 
 import (
 	"fmt"
-	"github.com/504dev/kidlog/config"
+	"github.com/504dev/logr/config"
 	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/jmoiron/sqlx"
 	"io/ioutil"
@@ -16,6 +16,7 @@ func Conn() *sqlx.DB {
 
 func Init() {
 	var err error
+	fmt.Println(config.Get())
 	db, err = sqlx.Open("clickhouse", config.Get().Clickhouse)
 	if err != nil {
 		panic(err)

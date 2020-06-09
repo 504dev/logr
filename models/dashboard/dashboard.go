@@ -2,10 +2,10 @@ package dashboard
 
 import (
 	"fmt"
-	"github.com/504dev/kidlog/models/dashkey"
-	"github.com/504dev/kidlog/models/dashmember"
-	"github.com/504dev/kidlog/mysql"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/models/dashkey"
+	"github.com/504dev/logr/models/dashmember"
+	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/types"
 	"strings"
 )
 

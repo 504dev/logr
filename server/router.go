@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/504dev/kidlog/controllers"
+	"github.com/504dev/logr/controllers"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )

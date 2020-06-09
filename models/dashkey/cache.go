@@ -2,8 +2,8 @@ package dashkey
 
 import (
 	"fmt"
-	"github.com/504dev/kidlog/cachify"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/cachify"
+	"github.com/504dev/logr/types"
 )
 
 func GetByPubCached(pub string) (*types.DashKey, error) {

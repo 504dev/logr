@@ -1,4 +1,4 @@
-PKG            := github.com/504dev/kidlog
+PKG            := github.com/504dev/logr
 PKG_LIST       := $(shell go list ${PKG}/... | grep -v /vendor/)
 SERVICE_SERVER := server
 

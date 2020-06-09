@@ -1,9 +1,9 @@
 package controllers
 
 import (
-	. "github.com/504dev/kidlog/logger"
-	"github.com/504dev/kidlog/models/count"
-	"github.com/504dev/kidlog/models/dashboard"
+	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/models/count"
+	"github.com/504dev/logr/models/dashboard"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )

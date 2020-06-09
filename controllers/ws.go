@@ -1,11 +1,11 @@
 package controllers
 
 import (
-	"github.com/504dev/kidlog/config"
-	. "github.com/504dev/kidlog/logger"
-	"github.com/504dev/kidlog/models/user"
-	"github.com/504dev/kidlog/models/ws"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/config"
+	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/models/ws"
+	"github.com/504dev/logr/types"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/websocket"

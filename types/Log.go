@@ -1,7 +1,7 @@
 package types
 
 import (
-	"github.com/504dev/kidlog/cipher"
+	"github.com/504dev/logr/cipher"
 )
 
 type Log struct {

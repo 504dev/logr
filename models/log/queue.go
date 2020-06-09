@@ -1,9 +1,9 @@
 package log
 
 import (
-	"github.com/504dev/kidlog/clickhouse"
-	"github.com/504dev/kidlog/clickhouse/queue"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/clickhouse"
+	"github.com/504dev/logr/clickhouse/queue"
+	"github.com/504dev/logr/types"
 	"time"
 )
 

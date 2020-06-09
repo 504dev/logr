@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/504dev/kidlog/config"
+	"github.com/504dev/logr/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
 )

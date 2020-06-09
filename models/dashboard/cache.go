@@ -2,8 +2,8 @@ package dashboard
 
 import (
 	"fmt"
-	"github.com/504dev/kidlog/cachify"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/cachify"
+	"github.com/504dev/logr/types"
 )
 
 func GetByIdCached(id int) (*types.Dashboard, error) {

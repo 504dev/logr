@@ -2,8 +2,8 @@ package user
 
 import (
 	"fmt"
-	"github.com/504dev/kidlog/mysql"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/types"
 )
 
 func findAllByField(fieldname string, val interface{}, limit int) (types.Users, error) {

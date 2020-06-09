@@ -3,9 +3,9 @@ package dashkey
 import (
 	"database/sql"
 	"fmt"
-	"github.com/504dev/kidlog/cipher"
-	"github.com/504dev/kidlog/mysql"
-	"github.com/504dev/kidlog/types"
+	"github.com/504dev/logr/cipher"
+	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/types"
 )
 
 func Create(key *types.DashKey, tx *sql.Tx) error {
