@@ -44,7 +44,7 @@ func crypto(conf *logr.Config) {
 				color.GreenString("Bitfinex"),
 				bitp,
 			)
-			l.Avg(fmt.Sprintf("price:%v", sym), hitp).Avg(binp).Avg(bitp).Min(hitp).Min(binp).Min(bitp).Max(hitp).Max(binp).Max(bitp)
+			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitp).Avg(binp).Avg(bitp).Min(hitp).Min(binp).Min(bitp).Max(hitp).Max(binp).Max(bitp)
 			hitv := prices["hitbtc"][sym]["v"]
 			binv := prices["binance"][sym]["v"]
 			bitv := prices["bitfinex"][sym]["v"]
