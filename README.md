@@ -1,5 +1,20 @@
 # Logr
 
+_Logr_ is an open source logger and counter. \
+Get to know your application better.
+
+* logs looks pretty like in your `Terminal`
+* counters looks pretty with `Highcharts`
+* storing data in `ClickHouse`
+* updating data by `WebSocket`
+* `Golang` backend
+* `Vue.js` frontend
+
+## Client libraries
+
+* Golang [github.com/504dev/logr-go-client](https://github.com/504dev/logr-go-client)
+* Node.js [github.com/504dev/logr-node-client](https://github.com/504dev/logr-node-client)
+
 ## Build service
 1. Create directories:
     `cd $GOPATH/src/github.com && mkdir 504dev && cd $_`
