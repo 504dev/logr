@@ -1,10 +1,10 @@
 package logger
 
 import (
+	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/models/dashkey"
 	"github.com/504dev/logr/types"
-	logr "github.com/504dev/logr-go-client"
 	"strconv"
 )
 
