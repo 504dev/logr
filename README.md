@@ -3,8 +3,8 @@
 _Logr_ is an open source logger and counter. \
 Get to know your application better.
 
-* logs looks pretty like in your `Terminal`
-* counters looks pretty with `Highcharts`
+* logs looks like in your `Terminal`
+* counters are drawn with `Highcharts`
 * storing data in `ClickHouse`
 * updating data by `WebSocket`
 * `Golang` backend
