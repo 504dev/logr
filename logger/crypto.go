@@ -58,7 +58,7 @@ func crypto(conf *logr.Config) {
 				color.GreenString("Bitfinex"),
 				bitv,
 			)
-			l.Inc(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
+			l.Avg(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
 		}
 
 		l.Debug(string(bytes))

@@ -59,8 +59,8 @@ func (_ *LogsController) Find(c *gin.Context) {
 	}
 
 	filter := types.Filter{
-		Timestamp: timestamp,
 		DashId:    dashId,
+		Timestamp: timestamp,
 		Logname:   logname,
 		Hostname:  hostname,
 		Level:     level,

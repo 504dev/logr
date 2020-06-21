@@ -14,18 +14,30 @@ const (
 	AggDay    = "d"
 )
 
-func Find(dashId int, logname string, hostname string, agg string) (types.Counts, error) {
+func Find(filter types.Filter, agg string) (types.Counts, error) {
 	duration := Logger.Time("/logs:time", time.Millisecond)
 	where := `dash_id = ? and logname = ?`
-	values := []interface{}{dashId, logname}
-	if hostname != "" {
+	values := []interface{}{filter.DashId, filter.Logname}
+	if filter.Hostname != "" {
 		where += ` and hostname = ?`
-		values = append(values, hostname)
+		values = append(values, filter.Hostname)
+	}
+	if filter.Keyname != "" {
+		where += ` and keyname = ?`
+		values = append(values, filter.Keyname)
+	}
+	if filter.Timestamp[0] != 0 {
+		where += " AND timestamp > ?"
+		values = append(values, filter.Timestamp[0])
+	}
+	if filter.Timestamp[1] != 0 {
+		where += " AND timestamp <= ?"
+		values = append(values, filter.Timestamp[1])
 	}
 	aggmap := map[string][]string{
 		AggMinute: {"toStartOfMinute", "1 day"},
-		AggHour:   {"toStartOfHour", "7 day"},
-		AggDay:    {"toStartOfDay", "30 day"},
+		AggHour:   {"toStartOfHour", "30 day"},
+		AggDay:    {"toStartOfDay", "360 day"},
 	}
 	aggvalues, ok := aggmap[agg]
 	if !ok {
@@ -51,7 +63,8 @@ func Find(dashId int, logname string, hostname string, agg string) (types.Counts
       order by
         ts desc, hostname, keyname
     `
-	fmt.Println(sql)
+	fmt.Println(sql, values)
+
 	rows, err := clickhouse.Conn().Query(sql, values...)
 	if err != nil {
 		return nil, err
@@ -89,54 +102,6 @@ func Find(dashId int, logname string, hostname string, agg string) (types.Counts
 			Keyname:   keyname,
 			Metrics:   metrics,
 		})
-	}
-	duration()
-	Logger.Inc("/logs:cnt", 1)
-	return counts, nil
-}
-
-func Find2(dashId int, logname string, hostname string, agg string) (types.Counts, error) {
-	duration := Logger.Time("/logs:time", time.Millisecond)
-	where := `dash_id = ? and logname = ? and timestamp > now() - interval 7 day`
-	values := []interface{}{dashId, logname}
-	if hostname != "" {
-		where += ` and hostname = ?`
-		values = append(values, hostname)
-	}
-	aggmap := map[string]string{
-		AggMinute: "toStartOfMinute",
-		AggHour:   "toStartOfHour",
-		AggDay:    "toStartOfDay",
-	}
-	aggfunc := aggmap[agg]
-	if aggfunc == "" {
-		aggfunc = aggmap[AggMinute]
-	}
-	sql := `
-      select
-        toUnixTimestamp(` + aggfunc + `(timestamp)) as timestamp,
-        hostname,
-        keyname,
-        sum(inc) as inc,
-        max(max) as max,
-        min(min) as min,
-        sum(avg_sum) as avg_sum,
-        sum(avg_num) as avg_num,
-        sum(per_tkn) as per_tkn,
-        sum(per_ttl) as per_ttl
-      from counts
-      where ` + where + `
-      group by
-        timestamp, hostname, keyname
-      order by
-        timestamp desc, hostname, keyname
-    `
-	fmt.Println(sql)
-
-	counts := types.Counts{}
-	err := clickhouse.Conn().Select(&counts, sql, values...)
-	if err != nil {
-		return nil, err
 	}
 	duration()
 	Logger.Inc("/logs:cnt", 1)

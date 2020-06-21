@@ -42,6 +42,7 @@ func NewRouter() *gin.Engine {
 	countsController := controllers.CountsController{}
 	{
 		r.GET("/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
+		r.GET("/counts/snippet", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.FindSnippet)
 		r.GET("/counts/stats", auth.EnsureJWT, countsController.Stats)
 
 	}

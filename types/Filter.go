@@ -13,6 +13,7 @@ type Filter struct {
 	Timestamp [2]int64 `json:"timestamp"`
 	Offset    int64    `json:"offset"`
 	Limit     int      `json:"limit"`
+	Keyname   string   `json:"keyname"`
 }
 
 func (f *Filter) Match(log *Log) bool {
