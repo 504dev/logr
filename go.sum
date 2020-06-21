@@ -29,6 +29,8 @@ github.com/504dev/logr-go-client v0.0.41 h1:6GaMbDvzaO472JIwA03PRYS2RBWPvsadhqZw
 github.com/504dev/logr-go-client v0.0.41/go.mod h1:xaYUZCqFUXB8AuajgdLQLM8D+cm0JzJrTujdej582vY=
 github.com/504dev/logr-go-client v0.0.43 h1:mG6aWpm6R190dTUvF76pfb/AllBpbJ2q8HGVdQC2wCc=
 github.com/504dev/logr-go-client v0.0.43/go.mod h1:xaYUZCqFUXB8AuajgdLQLM8D+cm0JzJrTujdej582vY=
+github.com/504dev/logr-go-client v0.0.44 h1:XZgBN9yTfZqnKiOOORj/jYyzZjQLRNjCr/e9qg+jDxc=
+github.com/504dev/logr-go-client v0.0.44/go.mod h1:xaYUZCqFUXB8AuajgdLQLM8D+cm0JzJrTujdej582vY=
 github.com/ClickHouse/clickhouse-go v1.3.12 h1:HvD2NhKPLSeO3Ots6YV0ePgs4l3wO0bLqa9Uk1yeMOs=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/allegro/bigcache v1.2.1/go.mod h1:Cb/ax3seSYIx7SuZdm2G2xzfwmv3TPSk2ucNfQESPXM=

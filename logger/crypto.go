@@ -61,6 +61,8 @@ func crypto(conf *logr.Config) {
 			l.Avg(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
 		}
 
+		l.Info("Widget %v", l.Widget("max", "price:BTC_USDT", 30))
+
 		l.Debug(string(bytes))
 	}
 }
