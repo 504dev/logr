@@ -15,6 +15,10 @@ Get to know your application better.
 * Golang [github.com/504dev/logr-go-client](https://github.com/504dev/logr-go-client)
 * Node.js [github.com/504dev/logr-node-client](https://github.com/504dev/logr-node-client)
 
+## Utils
+* Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
+
+
 ## Build service
 1. Create directories:
     `cd $GOPATH/src/github.com && mkdir 504dev && cd $_`
