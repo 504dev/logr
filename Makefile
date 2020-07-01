@@ -14,8 +14,12 @@ config: ## Creating the local config yml.
 	cp config.example.yml config.yml
 
 build: ## Build the executable file of service.
-	echo "Building..."
+	echo "Building backend..."
 	go build -o logr-server ./cmd/$(SERVICE_SERVER)/main.go
+
+front: ## Run service.
+	echo "Building frontend..."
+	cd ./frontend && npm run build
 
 run: build ## Run service.
 	echo "Running..."
