@@ -25,34 +25,34 @@ func NewRouter() *gin.Engine {
 	// me
 	me := controllers.MeController{}
 	{
-		r.GET("/me", auth.EnsureJWT, me.Me)
-		r.GET("/me/dashboards", auth.EnsureJWT, me.Dashboards)
-		r.POST("/me/dashboard", auth.EnsureJWT, me.AddDashboard)
-		r.POST("/me/dashboard/share/:dash_id/to/:username", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.ShareDashboard)
-		r.PUT("/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.EditDashboard)
-		r.DELETE("/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.DeleteDashboard)
+		r.GET("/api/me", auth.EnsureJWT, me.Me)
+		r.GET("/api/me/dashboards", auth.EnsureJWT, me.Dashboards)
+		r.POST("/api/me/dashboard", auth.EnsureJWT, me.AddDashboard)
+		r.POST("/api/me/dashboard/share/:dash_id/to/:username", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.ShareDashboard)
+		r.PUT("/api/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.EditDashboard)
+		r.DELETE("/api/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.DeleteDashboard)
 	}
 
 	logsController := controllers.LogsController{}
 	{
-		r.GET("/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
-		r.GET("/logs/stats", auth.EnsureJWT, logsController.Stats)
+		r.GET("/api/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
+		r.GET("/api/logs/stats", auth.EnsureJWT, logsController.Stats)
 	}
 
 	countsController := controllers.CountsController{}
 	{
-		r.GET("/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
-		r.GET("/counts/snippet", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.FindSnippet)
-		r.GET("/counts/stats", auth.EnsureJWT, countsController.Stats)
+		r.GET("/api/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
+		r.GET("/api/counts/snippet", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.FindSnippet)
+		r.GET("/api/counts/stats", auth.EnsureJWT, countsController.Stats)
 
 	}
 
 	adminController := controllers.AdminController{}
 	{
-		r.GET("/dashboards", auth.EnsureJWT, auth.EnsureAdmin, adminController.Dashboards)
-		r.GET("/dashboard/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.DashboardById)
-		r.GET("/users", auth.EnsureJWT, auth.EnsureAdmin, adminController.Users)
-		r.GET("/user/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.UserById)
+		r.GET("/api/dashboards", auth.EnsureJWT, auth.EnsureAdmin, adminController.Dashboards)
+		r.GET("/api/dashboard/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.DashboardById)
+		r.GET("/api/users", auth.EnsureJWT, auth.EnsureAdmin, adminController.Users)
+		r.GET("/api/user/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.UserById)
 	}
 
 	wsController := controllers.WsController{}
