@@ -8,7 +8,8 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/fatih/color v1.9.0
 	github.com/gin-contrib/cors v1.3.0
-	github.com/gin-gonic/gin v1.4.0
+	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
+	github.com/gin-gonic/gin v1.5.0
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/google/go-github/v29 v29.0.2
 	github.com/jmoiron/sqlx v1.2.0
