@@ -33,16 +33,16 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	return logs, nil
 }
 
-func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
+func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	conn := clickhouse.Conn()
 	sql := `
-      SELECT dash_id, hostname, logname, level, version, count(*) AS cnt, max(timestamp) AS updated
+      SELECT hostname, logname, level, version, count(*) AS cnt, max(timestamp) AS updated
       FROM logs
-      WHERE dash_id IN (?) AND day > toDate(now() - INTERVAL 7 day)
-      GROUP BY dash_id, hostname, logname, level, version
+      WHERE dash_id = ?
+      GROUP BY hostname, logname, level, version
     `
 	stats := types.DashStatRows{}
-	err := conn.Select(&stats, sql, dashIds)
+	err := conn.Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}

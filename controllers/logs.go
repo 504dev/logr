@@ -3,7 +3,6 @@ package controllers
 import (
 	"encoding/json"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/models/dashboard"
 	"github.com/504dev/logr/models/log"
 	"github.com/504dev/logr/models/ws"
 	"github.com/504dev/logr/types"
@@ -15,24 +14,11 @@ import (
 type LogsController struct{}
 
 func (_ *LogsController) Stats(c *gin.Context) {
-	userId := c.GetInt("userId")
-	dashboards, err := dashboard.GetUserDashboards(userId)
+	dashId := c.GetInt("dashId")
+	stats, err := log.GetDashStats(dashId)
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
+		Logger.Error(err)
 	}
-	shared, err := dashboard.GetShared(userId, c.GetInt("role"))
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	ids := append(dashboards.Ids(), shared.Ids()...)
-	if len(ids) == 0 {
-		c.JSON(http.StatusOK, []int{})
-		return
-	}
-	stats, err := log.GetDashStats(ids)
-	Logger.Error(err)
 	c.JSON(http.StatusOK, stats)
 }
 

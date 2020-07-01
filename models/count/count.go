@@ -108,16 +108,16 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 	return counts, nil
 }
 
-func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
+func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	conn := clickhouse.Conn()
 	sql := `
-      SELECT dash_id, hostname, logname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
+      SELECT hostname, logname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
       FROM counts
-      WHERE dash_id IN (?)
-      GROUP BY dash_id, hostname, logname, version
+      WHERE dash_id = ?
+      GROUP BY hostname, logname, version
     `
 	stats := types.DashStatRows{}
-	err := conn.Select(&stats, sql, dashIds)
+	err := conn.Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}
