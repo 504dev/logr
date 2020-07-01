@@ -112,7 +112,8 @@ func GetDashStats(dashIds []int) ([]*types.DashStatRow, error) {
 	conn := clickhouse.Conn()
 	sql := `
       SELECT dash_id, hostname, logname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
-      FROM counts WHERE dash_id IN (?)
+      FROM counts
+      WHERE dash_id IN (?)
       GROUP BY dash_id, hostname, logname, version
     `
 	stats := types.DashStatRows{}
