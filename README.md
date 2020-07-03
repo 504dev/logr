@@ -4,11 +4,35 @@ _Logr_ is an open source logger and counter. \
 Get to know your application better.
 
 * logs looks like in your `Terminal`
-* counters are drawn with `Highcharts`
 * storing data in `ClickHouse`
-* updating data by `WebSocket`
+* transport data by `WebSocket`
 * `Golang` backend
 * `Vue.js` frontend
+
+## Build service
+1. Clone repository:
+    `git clone git@github.com:504dev/logr.git && cd logr`
+2. Init config file:
+    `make config`
+3. Fill config, see Config part
+4. Build frontend:
+    `make front`
+5. Run:
+    `make run`
+
+## Config
+```yaml
+bind:
+  http: ":7778"
+  udp: ":7776"
+oauth:
+  github:
+    client_id: "client_id"
+    client_secret: "client_secret"
+  jwt_secret: "jwt-secret"
+clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
+mysql: "logr:logr@/logr"
+```
 
 ## Client libraries
 
@@ -18,15 +42,3 @@ Get to know your application better.
 ## Utils
 * Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
 
-
-## Build service
-1. Create directories:
-    `cd $GOPATH/src/github.com && mkdir 504dev && cd $_`
-2. Clone repository:
-    `git clone git@github.com:504dev/logr.git && cd logr`
-3. Make helper:
-    `make`
-4. Init config file:
-    `make config`
-5. Build & run:
-    `make run`

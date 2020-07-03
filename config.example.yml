@@ -2,9 +2,9 @@ bind:
   http: ":7778"
   udp: ":7776"
 oauth:
-  github:
+  jwt_secret: "jwt-secret"
+  github: # create OAuth App https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
     client_id: "client_id"
     client_secret: "client_secret"
-  jwt_secret: "jwt-secret"
 clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
 mysql: "logr:logr@/logr"
