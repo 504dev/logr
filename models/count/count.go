@@ -26,6 +26,10 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 		where += ` and keyname = ?`
 		values = append(values, filter.Keyname)
 	}
+	if filter.Version != "" {
+		where += ` and version = ?`
+		values = append(values, filter.Version)
+	}
 	if filter.Timestamp[0] != 0 {
 		where += " AND timestamp > ?"
 		values = append(values, filter.Timestamp[0])

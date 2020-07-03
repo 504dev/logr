@@ -15,6 +15,7 @@ func (_ *CountsController) Find(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	logname := c.Query("logname")
 	hostname := c.Query("hostname")
+	version := c.Query("version")
 	agg := c.Query("agg")
 
 	if logname == "" {
@@ -26,6 +27,7 @@ func (_ *CountsController) Find(c *gin.Context) {
 		DashId:   dashId,
 		Logname:  logname,
 		Hostname: hostname,
+		Version: version,
 	}
 
 	counts, err := count.Find(filter, agg)
