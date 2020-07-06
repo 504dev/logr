@@ -9,12 +9,19 @@ Get to know your application better.
 * `Golang` backend
 * `Vue.js` frontend
 
+## Requirements
+* Node.js `v12`
+* Npm `v6`
+* Golang `v1.13`
+* ClickHouse `v20`
+* Mysql `v5.7`
+
 ## Build service
-1. Clone repository:
-    `git clone git@github.com:504dev/logr.git && cd logr`
+1. Clone repository: \
+    `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
 2. Init config file:
     `make config`
-3. Fill config, see Config part
+3. Fill config, see **Config**
 4. Build frontend:
     `make front`
 5. Run:
