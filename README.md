@@ -43,7 +43,7 @@ mysql: "logr:logr@/logr"
 
 * Create Github OAuth App, set `client_id` and `client_secret` \
 https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
-* `jwt_secret` is random string (using to sign temporary authorization token)
+* `jwt_secret` is random string (using to sign temporary authorization tokens)
 
 
 ## Client libraries
