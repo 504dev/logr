@@ -8,6 +8,7 @@ Get to know your application better.
 * transport data by `WebSocket`
 * `Golang` backend
 * `Vue.js` frontend
+* Authorization by `GitHub`
 
 ## Requirements
 * Node.js `v12`
@@ -42,7 +43,7 @@ mysql: "logr:logr@/logr"
 ```
 
 * Create Github OAuth App, set `client_id` and `client_secret` \
-https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/
+https://docs.github.com/en/developers/apps/creating-an-oauth-app/
 * `jwt_secret` is random string (using to sign temporary authorization tokens)
 
 
