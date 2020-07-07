@@ -117,7 +117,7 @@ func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT hostname, logname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
       FROM counts
-      WHERE dash_id = ?
+      WHERE dash_id = ? AND day > toDate(now() - interval 7 day)
       GROUP BY hostname, logname, version
     `
 	stats := types.DashStatRows{}
