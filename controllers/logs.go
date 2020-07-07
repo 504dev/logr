@@ -29,6 +29,7 @@ func (_ *LogsController) Find(c *gin.Context) {
 	logname := c.Query("logname")
 	hostname := c.Query("hostname")
 	message := c.Query("message")
+	pattern := c.Query("pattern")
 	level := c.Query("level")
 	version := c.Query("version")
 	pid, _ := strconv.Atoi(c.Query("pid"))
@@ -47,6 +48,7 @@ func (_ *LogsController) Find(c *gin.Context) {
 	filter := types.Filter{
 		DashId:    dashId,
 		Timestamp: timestamp,
+		Pattern:   pattern,
 		Logname:   logname,
 		Hostname:  hostname,
 		Level:     level,

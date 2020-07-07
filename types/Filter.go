@@ -1,6 +1,10 @@
 package types
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+	"time"
+)
 
 type Filter struct {
 	DashId    int      `json:"dash_id"`
@@ -11,6 +15,7 @@ type Filter struct {
 	Version   string   `json:"version"`
 	Message   string   `json:"message"`
 	Timestamp [2]int64 `json:"timestamp"`
+	Pattern   string   `json:"pattern"`
 	Offset    int64    `json:"offset"`
 	Limit     int      `json:"limit"`
 	Keyname   string   `json:"keyname"`
@@ -44,6 +49,18 @@ func (f *Filter) Match(log *Log) bool {
 	if f.Message != "" && !regexp.MustCompile(f.Message).MatchString(log.Message) {
 		return false
 	}
+	if f.Pattern != "" {
+		s := strings.Split(f.Pattern, "T")
+		dt := time.Unix(0, log.Timestamp).UTC()
+		day := dt.Format("2006-01-02")
+		tm := dt.Format("15:04:05")
+		if !regexp.MustCompile("^" + s[0]).MatchString(day) {
+			return false
+		}
+		if len(s) > 1 && !regexp.MustCompile("^"+s[1]).MatchString(tm) {
+			return false
+		}
+	}
 	return true
 }
 
@@ -69,6 +86,15 @@ func (f *Filter) ToSql() (string, []interface{}) {
 	if f.Pid != 0 {
 		sql += " AND pid = ?"
 		values = append(values, f.Pid)
+	}
+	if f.Pattern != "" {
+		s := strings.Split(f.Pattern, "T")
+		sql += " AND match(formatDateTime(day, '%F', 'UTC'), ?)"
+		values = append(values, "^"+s[0])
+		if len(s) > 1 {
+			sql += " AND match(formatDateTime(toDateTime(timestamp/1e9), '%T', 'UTC'), ?)"
+			values = append(values, "^"+s[1])
+		}
 	}
 	if f.Timestamp[0] != 0 {
 		sql += " AND timestamp > ?"
