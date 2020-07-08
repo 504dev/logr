@@ -21,19 +21,19 @@ func (wc WsController) Index(c *gin.Context) {
 func (wc WsController) Reader(w *websocket.Conn) {
 	cfg := w.Config()
 	query := cfg.Location.Query()
-	token := query.Get("token")
+	tokenstring := query.Get("token")
 	sockId := query.Get("sock_id")
 	paused := false
 	if query.Get("paused") == "true" {
 		paused = true
 	}
 
-	if token == "" || sockId == "" {
+	if tokenstring == "" || sockId == "" {
 		return
 	}
 
 	claims := &types.Claims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+	tkn, err := jwt.ParseWithClaims(tokenstring, claims, func(token *jwt.Token) (interface{}, error) {
 		return []byte(config.Get().OAuth.JwtSecret), nil
 	})
 
@@ -54,6 +54,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 		User:   usr,
 		Conn:   w,
 		Paused: paused,
+		Claims: claims,
 	}
 	ws.SockMap.Set(sock)
 
@@ -61,7 +62,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 		var m types.SockMessage
 
 		if err := websocket.JSON.Receive(w, &m); err != nil {
-			Logger.Error("websocket.JSON.Receive: %v", err)
+			Logger.Error("websocket.JSON.Receive: userId=%v, sockId=%v, err=%v", usr.Id, sockId, err)
 			ws.SockMap.Delete(usr.Id, sockId)
 			break
 		}

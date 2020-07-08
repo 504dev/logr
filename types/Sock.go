@@ -12,6 +12,7 @@ type Sock struct {
 	Paused          bool           `json:"paused"`
 	*User           `json:"user"`
 	*Filter         `json:"filter"`
+	*Claims         `json:"claims"`
 	*websocket.Conn `json:"conn"`
 }
 

@@ -3,6 +3,7 @@ package types
 import (
 	"encoding/json"
 	"sync"
+	"time"
 )
 
 type SockMap struct {
@@ -13,9 +14,14 @@ type SockMap struct {
 func (sm *SockMap) PushLog(lg *Log) int {
 	cnt := 0
 	sm.Lock()
+	now := time.Now().Unix()
 	for _, m := range sm.data {
 		for _, s := range m {
 			if s.Filter == nil || s.Paused || s.Listeners == nil || s.Listeners["/log"] == 0 {
+				continue
+			}
+			if s.ExpiresAt < now {
+				sm.delete(s.User.Id, s.SockId)
 				continue
 			}
 			if s.Filter.Match(lg) {
@@ -81,6 +87,7 @@ func (sm *SockMap) delete(userId int, uid string) bool {
 	if _, ok := sm.data[userId][uid]; !ok {
 		return false
 	}
+	sm.data[userId][uid].Close()
 	delete(sm.data[userId], uid)
 	return true
 }
