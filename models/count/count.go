@@ -3,7 +3,6 @@ package count
 import (
 	"fmt"
 	"github.com/504dev/logr/clickhouse"
-	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"
 )
@@ -15,7 +14,6 @@ const (
 )
 
 func Find(filter types.Filter, agg string) (types.Counts, error) {
-	duration := Logger.Time("response:/counts", time.Millisecond)
 	where := `dash_id = ? and logname = ?`
 	values := []interface{}{filter.DashId, filter.Logname}
 	if filter.Hostname != "" {
@@ -107,13 +105,10 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 			Metrics:   metrics,
 		})
 	}
-	duration()
-	Logger.Inc("/logs:cnt", 1)
 	return counts, nil
 }
 
 func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
-	conn := clickhouse.Conn()
 	sql := `
       SELECT hostname, logname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
       FROM counts
@@ -121,7 +116,7 @@ func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
       GROUP BY hostname, logname, version
     `
 	stats := types.DashStatRows{}
-	err := conn.Select(&stats, sql, dashId)
+	err := clickhouse.Conn().Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}

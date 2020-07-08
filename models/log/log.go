@@ -5,11 +5,9 @@ import (
 	"github.com/504dev/logr/clickhouse"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
-	"time"
 )
 
 func GetByFilter(f types.Filter) (types.Logs, error) {
-	duration := Logger.Time("response:/logs", time.Millisecond)
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
 	limit := f.Limit
@@ -28,8 +26,6 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	if err != nil {
 		return nil, err
 	}
-	duration()
-	Logger.Inc("/logs:cnt", 1)
 	return logs, nil
 }
 

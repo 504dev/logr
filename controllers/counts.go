@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type CountsController struct{}
@@ -30,12 +31,15 @@ func (_ *CountsController) Find(c *gin.Context) {
 		Version:  version,
 	}
 
+	duration := Logger.Time("response:/counts", time.Millisecond)
 	counts, err := count.Find(filter, agg)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	duration()
+	Logger.Inc("count:/counts", 1)
 	c.JSON(http.StatusOK, counts.Format())
 }
 
@@ -89,9 +93,11 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 
 func (_ *CountsController) Stats(c *gin.Context) {
 	dashId := c.GetInt("dashId")
+	duration := Logger.Time("response:/counts/stats", time.Millisecond)
 	stats, err := count.GetDashStats(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}
+	duration()
 	c.JSON(http.StatusOK, stats)
 }

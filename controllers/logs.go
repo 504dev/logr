@@ -9,16 +9,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type LogsController struct{}
 
 func (_ *LogsController) Stats(c *gin.Context) {
 	dashId := c.GetInt("dashId")
+	duration := Logger.Time("response:/logs/stats", time.Millisecond)
 	stats, err := log.GetDashStats(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}
+	duration()
 	c.JSON(http.StatusOK, stats)
 }
 
@@ -65,10 +68,13 @@ func (_ *LogsController) Find(c *gin.Context) {
 	f, _ := json.Marshal(filter)
 	Logger.Info(string(f))
 
+	duration := Logger.Time("response:/logs", time.Millisecond)
 	logs, err := log.GetByFilter(filter)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	duration()
+	Logger.Inc("count:/logs", 1)
 	c.JSON(http.StatusOK, logs)
 }
