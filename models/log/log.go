@@ -9,7 +9,7 @@ import (
 )
 
 func GetByFilter(f types.Filter) (types.Logs, error) {
-	duration := Logger.Time("/logs:time", time.Millisecond)
+	duration := Logger.Time("response:/logs", time.Millisecond)
 	conn := clickhouse.Conn()
 	where, values := f.ToSql()
 	limit := f.Limit

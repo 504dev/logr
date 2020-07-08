@@ -15,7 +15,7 @@ const (
 )
 
 func Find(filter types.Filter, agg string) (types.Counts, error) {
-	duration := Logger.Time("response:/logs", time.Millisecond)
+	duration := Logger.Time("response:/counts", time.Millisecond)
 	where := `dash_id = ? and logname = ?`
 	values := []interface{}{filter.DashId, filter.Logname}
 	if filter.Hostname != "" {
