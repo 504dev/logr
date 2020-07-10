@@ -3,6 +3,8 @@
 _Logr_ is an open source logger and counter. \
 Get to know your application better.
 
+![Logr](https://i.ibb.co/BLf8X6H/photo-2020-07-09-15-59-10.jpg)
+
 * logs looks like in your `Terminal`
 * storing data in `ClickHouse`
 * transport data by `WebSocket`
