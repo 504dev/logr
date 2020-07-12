@@ -48,7 +48,7 @@ func GetDashLognames(dashId int) (map[string]int64, error) {
       SELECT
         logname, count(*) AS cnt FROM logs
       WHERE
-        dash_id = ? AND day > toDate(now() - interval 1 day) AND timestamp > toUnixTimestamp(now() - interval 1 hour) * 1e9
+        dash_id = ? AND day >= toDate(now() - interval 1 day) AND timestamp > toUnixTimestamp(now() - interval 1 hour) * 1e9
       GROUP BY
         logname
     `
