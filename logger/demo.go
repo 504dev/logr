@@ -22,6 +22,9 @@ func Demo() {
 				if strings.Contains(t, "Jedi") {
 					logger.Inc("count:Jedi", 1)
 				}
+				if strings.Contains(t, "Leia") {
+					logger.Inc("count:Leia", 1)
+				}
 
 				time.Sleep(1 * time.Second)
 			}
