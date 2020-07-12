@@ -16,7 +16,7 @@ func crypto(conf *logr.Config) {
 		time.Sleep(30 * time.Second)
 		delta := l.Time("pricer:/get-day-snapshot", time.Millisecond)
 		day := time.Now().Format("2006-01-02")
-		path := fmt.Sprintf("/get-day-snapshot?day=%v&uni=1&format=ohlcv", day)
+		path := fmt.Sprintf("/get-day-snapshot?day=%v&uni=1&format=ohlcv&quote=USDT", day)
 		bytes, err := request(path)
 		if err != nil {
 			l.Error(err)
