@@ -6,12 +6,13 @@ const (
 )
 
 type Dashboard struct {
-	Id      int         `db:"id"          json:"id"`
-	OwnerId int         `db:"owner_id"    json:"owner_id"`
-	Name    string      `db:"name"        json:"name"`
-	Keys    DashKeys    `json:"keys"`
-	Members DashMembers `json:"members"`
-	Owner   *User       `json:"owner"`
+	Id       int         `db:"id"          json:"id"`
+	OwnerId  int         `db:"owner_id"    json:"owner_id"`
+	Name     string      `db:"name"        json:"name"`
+	Keys     DashKeys    `json:"keys"`
+	Members  DashMembers `json:"members"`
+	Owner    *User       `json:"owner"`
+	Lognames interface{} `json:"lognames,omitempty"`
 }
 type Dashboards []*Dashboard
 

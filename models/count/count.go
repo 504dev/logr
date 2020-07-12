@@ -122,3 +122,29 @@ func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	}
 	return stats, nil
 }
+
+func GetDashLognames(dashId int) (map[string]int64, error) {
+	sql := `
+      SELECT
+        logname, count(*) AS cnt FROM counts
+      WHERE
+        dash_id = ? AND day > toDate(now() - interval 1 day) AND timestamp > now() - interval 1 hour
+      GROUP BY
+        logname
+    `
+	rows, err := clickhouse.Conn().Query(sql, dashId)
+	if err != nil {
+		return nil, err
+	}
+	res := make(map[string]int64)
+	for rows.Next() {
+		var cnt int64
+		var logname string
+		err = rows.Scan(&logname, &cnt)
+		if err != nil {
+			return nil, err
+		}
+		res[logname] = cnt
+	}
+	return res, nil
+}
