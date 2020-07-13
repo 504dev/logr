@@ -6,7 +6,7 @@ import (
 
 type Log struct {
 	DashId    int    `db:"dash_id"   json:"dash_id"`
-	Timestamp int64  `db:"timestamp" json:"timestamp"`
+	Timestamp int64  `db:"timestamp" json:"timestamp,string"`
 	Hostname  string `db:"hostname"  json:"hostname"`
 	Logname   string `db:"logname"   json:"logname"`
 	Level     string `db:"level"     json:"level"`

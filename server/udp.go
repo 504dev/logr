@@ -27,7 +27,7 @@ func ListenUDP() error {
 		n, _, err := pc.ReadFromUDP(buf)
 
 		if err != nil {
-			Logger.Error("UDP read error:", err)
+			Logger.Error("UDP read error: %v", err)
 			continue
 		}
 
@@ -37,12 +37,12 @@ func ListenUDP() error {
 		err = json.Unmarshal(buf[0:n], &lp)
 
 		if err != nil {
-			Logger.Error("UDP parse json error:", err, string(buf[0:n]))
+			Logger.Error("UDP parse json error: %v", err, string(buf[0:n]))
 			continue
 		}
 		dk, err := dashkey.GetByPubCached(lp.PublicKey)
 		if err != nil {
-			Logger.Error("UDP dash error:", err)
+			Logger.Error("UDP dash error: %v", err)
 			continue
 		}
 		if dk == nil {
@@ -54,13 +54,13 @@ func ListenUDP() error {
 			Logger.Inc("udp:l", 1)
 			err = lp.DecryptLog(dk.PrivateKey)
 			if err != nil {
-				Logger.Error("UDP decrypt log error:", err)
+				Logger.Error("UDP decrypt log error: %v", err)
 			} else if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
 				ws.SockMap.PushLog(lp.Log)
 				err = log.PushToQueue(lp.Log)
 				if err != nil {
-					Logger.Error("UDP create log error", err)
+					Logger.Error("UDP create log error: %v", err)
 				}
 			}
 		}
@@ -69,13 +69,13 @@ func ListenUDP() error {
 			Logger.Inc("udp:c", 1)
 			err = lp.DecryptCount(dk.PrivateKey)
 			if err != nil {
-				Logger.Error("UDP decrypt count error:", err)
+				Logger.Error("UDP decrypt count error: %v", err)
 			} else if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
 				//Logger.Debug("UDP %v", lp.Count)
 				err = count.PushToQueue(lp.Count)
 				if err != nil {
-					Logger.Error("UDP create count error", err)
+					Logger.Error("UDP create count error: %v", err)
 				}
 			}
 		}
