@@ -1,4 +1,4 @@
-git pull origin master --recurse-submodules
+git pull origin master --tags --recurse-submodules
 make front
 make build
 sudo systemctl restart logr
