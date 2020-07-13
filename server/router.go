@@ -2,8 +2,10 @@ package server
 
 import (
 	"github.com/504dev/logr/controllers"
+	. "github.com/504dev/logr/logger"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func NewRouter() *gin.Engine {
@@ -13,6 +15,10 @@ func NewRouter() *gin.Engine {
 		AllowHeaders:    []string{"Authorization", "Content-Type"},
 		AllowAllOrigins: true,
 	}))
+
+	r.GET("/api/version", func(c *gin.Context) {
+		c.JSON(http.StatusOK, Logger.GetVersion())
+	})
 
 	// oauth
 	auth := controllers.AuthController{}
