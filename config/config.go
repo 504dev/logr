@@ -21,6 +21,7 @@ type confT struct {
 		Github struct {
 			ClientId     string `yaml:"client_id"`
 			ClientSecret string `yaml:"client_secret"`
+			Org          string `yaml:"org"`
 		} `yaml:"github"`
 		JwtSecret string `yaml:"jwt_secret"`
 	} `yaml:"oauth"`

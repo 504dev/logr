@@ -13,11 +13,13 @@ import (
 	"math/rand"
 	"net/http"
 	"strings"
+	"sync"
 	"time"
 )
 
 type AuthController struct {
 	*oauth2.Config
+	sync.Mutex
 	states map[string]string
 }
 
@@ -26,7 +28,7 @@ func (a *AuthController) Init() {
 	a.Config = &oauth2.Config{
 		ClientID:     conf.ClientId,
 		ClientSecret: conf.ClientSecret,
-		Scopes:       []string{"user"},
+		Scopes:       []string{"user", "read:org"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
@@ -38,9 +40,11 @@ func (a *AuthController) Init() {
 func (a *AuthController) Authorize(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
-	callback := c.Query("callback")
 	login := c.Query("login")
+	callback := c.Query("callback")
+	a.Lock()
 	a.states[state] = callback
+	a.Unlock()
 	authorizeUrl := a.Config.AuthCodeURL(state)
 	if login != "" {
 		authorizeUrl += "&login=" + login
@@ -53,12 +57,15 @@ func (a *AuthController) Callback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
+	a.Lock()
 	callback, ok := a.states[state]
+	delete(a.states, state)
+	a.Unlock()
+
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "incorrect state"})
 		return
 	}
-	delete(a.states, state)
 
 	tok, err := a.Config.Exchange(c, code)
 	if err != nil {
@@ -75,6 +82,31 @@ func (a *AuthController) Callback(c *gin.Context) {
 		return
 	}
 	Logger.Info(userGithub)
+	if org := config.Get().OAuth.Github.Org; org != "" {
+		orgs, _, err := client.Organizations.List(c, *userGithub.Login, nil)
+		if err != nil {
+			Logger.Error(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		Logger.Info(orgs)
+		access := false
+		for _, v := range orgs {
+			if *v.Login == org {
+				access = true
+			}
+		}
+		if !access {
+			msg := "organization membership required."
+			if callback != "" {
+				url := fmt.Sprintf("%verror?msg=%v", callback, msg)
+				c.Redirect(http.StatusMovedPermanently, url)
+			} else {
+				c.JSON(http.StatusForbidden, gin.H{"msg": msg})
+			}
+			return
+		}
+	}
 
 	userDb, err := user.GetByGithubId(*userGithub.ID)
 	if err != nil {

@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/controllers"
 	. "github.com/504dev/logr/logger"
 	"github.com/gin-contrib/cors"
@@ -16,8 +17,12 @@ func NewRouter() *gin.Engine {
 		AllowAllOrigins: true,
 	}))
 
-	r.GET("/api/version", func(c *gin.Context) {
-		c.JSON(http.StatusOK, Logger.GetVersion())
+	r.GET("/api/globals", func(c *gin.Context) {
+		res := map[string]string{
+			"version": Logger.GetVersion(),
+			"org":     config.Get().OAuth.Github.Org,
+		}
+		c.JSON(http.StatusOK, res)
 	})
 
 	// oauth

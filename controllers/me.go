@@ -54,6 +54,43 @@ func (_ *MeController) ShareDashboard(c *gin.Context) {
 	c.JSON(http.StatusOK, membership)
 }
 
+func (_ *MeController) DashboardsOwn(c *gin.Context) {
+	userId := c.GetInt("userId")
+	dashboards, err := dashboard.GetUserDashboards(userId)
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	for _, dash := range dashboards {
+		dash.Keys, _ = dashkey.GetByDashId(dash.Id)
+		dash.Owner, _ = user.GetById(dash.OwnerId)
+		dash.Members, _ = dashmember.GetAllByDashId(dash.Id)
+		for _, member := range dash.Members {
+			member.User, _ = user.GetById(member.UserId)
+		}
+	}
+	c.JSON(http.StatusOK, dashboards)
+}
+
+func (_ *MeController) DashboardsShared(c *gin.Context) {
+	userId := c.GetInt("userId")
+	shared, err := dashboard.GetShared(userId, c.GetInt("role"))
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	for _, dash := range shared {
+		dash.Owner, _ = user.GetById(dash.OwnerId)
+		dash.Members, _ = dashmember.GetAllByDashId(dash.Id)
+		for _, member := range dash.Members {
+			member.User, _ = user.GetById(member.UserId)
+		}
+	}
+	c.JSON(http.StatusOK, shared)
+}
+
 func (_ *MeController) Dashboards(c *gin.Context) {
 	userId := c.GetInt("userId")
 	dashboards, err := dashboard.GetUserDashboards(userId)
