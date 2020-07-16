@@ -118,14 +118,14 @@ func (_ *MeController) Dashboards(c *gin.Context) {
 		// trash
 		lstat, _ := log.GetDashLognames(dash.Id)
 		cstat, _ := count.GetDashLognames(dash.Id)
-		lognames := map[string]interface{}{}
+		lognames := make(map[string]interface{})
 		if len(lstat) > 0 {
 			lognames["logs"] = lstat
 		}
 		if len(cstat) > 0 {
 			lognames["counts"] = cstat
 		}
-		dash.Lognames = lognames
+		dash.Stats = lognames
 	}
 
 	c.JSON(http.StatusOK, dashboards)

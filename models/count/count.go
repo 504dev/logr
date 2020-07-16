@@ -123,28 +123,21 @@ func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func GetDashLognames(dashId int) (map[string]int64, error) {
+func GetDashLognames(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT
         logname, count(*) AS cnt FROM counts
       WHERE
-        dash_id = ? AND day >= toDate(now() - interval 1 day) AND timestamp > now() - interval 1 hour
+        dash_id = ? AND
+        day >= toDate(now() - interval 1 day) AND
+        timestamp > now() - interval 1 hour
       GROUP BY
         logname
     `
-	rows, err := clickhouse.Conn().Query(sql, dashId)
+	stats := types.DashStatRows{}
+	err := clickhouse.Conn().Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}
-	res := make(map[string]int64)
-	for rows.Next() {
-		var cnt int64
-		var logname string
-		err = rows.Scan(&logname, &cnt)
-		if err != nil {
-			return nil, err
-		}
-		res[logname] = cnt
-	}
-	return res, nil
+	return stats, nil
 }

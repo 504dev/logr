@@ -6,13 +6,13 @@ const (
 )
 
 type Dashboard struct {
-	Id       int         `db:"id"          json:"id"`
-	OwnerId  int         `db:"owner_id"    json:"owner_id"`
-	Name     string      `db:"name"        json:"name"`
-	Keys     DashKeys    `json:"keys"`
-	Members  DashMembers `json:"members"`
-	Owner    *User       `json:"owner"`
-	Lognames interface{} `json:"lognames,omitempty"`
+	Id      int         `db:"id"          json:"id"`
+	OwnerId int         `db:"owner_id"    json:"owner_id"`
+	Name    string      `db:"name"        json:"name"`
+	Keys    DashKeys    `json:"keys"`
+	Members DashMembers `json:"members"`
+	Owner   *User       `json:"owner"`
+	Stats   interface{} `json:"stats,omitempty"`
 }
 type Dashboards []*Dashboard
 
@@ -32,13 +32,13 @@ func (ds Dashboards) ByPrimary() map[int]*Dashboard {
 }
 
 type DashStatRow struct {
-	DashId   int    `db:"dash_id"  json:"dash_id"`
-	Hostname string `db:"hostname" json:"hostname"`
+	DashId   int    `db:"dash_id"  json:"dash_id,omitempty"`
+	Hostname string `db:"hostname" json:"hostname,omitempty"`
 	Logname  string `db:"logname"  json:"logname"`
 	Level    string `db:"level"    json:"level,omitempty"`
-	Version  string `db:"version"  json:"version"`
+	Version  string `db:"version"  json:"version,omitempty"`
 	Cnt      int    `db:"cnt"      json:"cnt"`
-	Updated  uint64 `db:"updated"  json:"updated"`
+	Updated  int64  `db:"updated"  json:"updated,omitempty"`
 }
 
 type DashStatRows []*DashStatRow
