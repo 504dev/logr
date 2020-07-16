@@ -83,8 +83,7 @@ func (_ *LogsController) Stats(c *gin.Context) {
 func (_ *LogsController) Lognames(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	duration := Logger.Time("response:/logs/lognames", time.Millisecond)
-
-	stats, err := log.GetDashLognames(dashId)
+	stats, err := log.GetDashLognamesCached(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}

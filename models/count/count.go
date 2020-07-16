@@ -1,8 +1,8 @@
 package count
 
 import (
-	"fmt"
 	"github.com/504dev/logr/clickhouse"
+	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"
 )
@@ -65,7 +65,7 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
       order by
         ts desc, hostname, keyname
     `
-	fmt.Println(sql, values)
+	Logger.Debug("%v %v", sql, values)
 
 	rows, err := clickhouse.Conn().Query(sql, values...)
 	if err != nil {
@@ -125,19 +125,19 @@ func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 
 func GetDashLognames(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
-      SELECT
-        logname, count(*) AS cnt FROM counts
+      SELECT logname, count(*) AS cnt
+      FROM counts
       WHERE
         dash_id = ? AND
         day >= toDate(now() - interval 1 day) AND
         timestamp > now() - interval 1 hour
-      GROUP BY
-        logname
+      GROUP BY logname
     `
 	stats := types.DashStatRows{}
 	err := clickhouse.Conn().Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}
+	Logger.Debug("%v %v", sql, dashId)
 	return stats, nil
 }

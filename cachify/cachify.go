@@ -8,7 +8,7 @@ import (
 
 var store = cache.New(15*time.Second, 10*time.Minute)
 
-func Cachify(key string, f func() (interface{}, error)) (interface{}, error) {
+func Cachify(key string, f func() (interface{}, error), expired time.Duration) (interface{}, error) {
 	entry, exist := store.Get(key)
 	if exist {
 		return entry, nil
@@ -17,7 +17,7 @@ func Cachify(key string, f func() (interface{}, error)) (interface{}, error) {
 	entry, exist = store.Get(warming)
 	if exist {
 		time.Sleep(time.Second)
-		return Cachify(key, f)
+		return Cachify(key, f, expired)
 	}
 
 	store.Set(warming, true, 3*time.Second)
@@ -28,7 +28,7 @@ func Cachify(key string, f func() (interface{}, error)) (interface{}, error) {
 		return nil, err
 	}
 
-	store.SetDefault(key, dash)
+	store.Set(key, dash, expired)
 
 	return dash, nil
 }
