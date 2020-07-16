@@ -94,7 +94,7 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 func (_ *CountsController) Stats(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	duration := Logger.Time("response:/counts/stats", time.Millisecond)
-	stats, err := count.GetDashStats(dashId)
+	stats, err := count.GetDashStatsCached(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}
