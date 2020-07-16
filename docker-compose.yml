@@ -5,76 +5,76 @@ volumes:
   mysql-volume:
 
 services:
-    templator:
-     image: bash
-     working_dir: /opt/logr
-     healthcheck:
+  templator:
+    image: bash
+    working_dir: /opt/logr
+    healthcheck:
       test: ps -o comm | grep -q templator && exit 1 || exit 0
       interval: 1s
       timeout: 2s
-      retries: 100
-     volumes:
+      retries: 600
+    volumes:
       - ./:/opt/logr
-     command: bash -c "templates/templator.sh && sleep 5"
+    command: bash -c "templates/templator.sh && sleep 5"
 
-    clickhouse-server:
-     image: yandex/clickhouse-server
-     depends_on:
+  clickhouse-server:
+    image: yandex/clickhouse-server
+    depends_on:
       templator:
         condition: service_started
-     volumes:
+    volumes:
       - clickhouse-volume:/var/lib/clickhouse
       - ./${CLICKHOUSE_USER}.xml:/etc/clickhouse-server/users.d/${CLICKHOUSE_USER}.xml
-     ports:
+    ports:
       - "127.0.0.1:8123:8123"
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9009:9009"
-      
-    clickhouse-client:
-     image: yandex/clickhouse-server
-     depends_on:
+
+  clickhouse-client:
+    image: yandex/clickhouse-server
+    depends_on:
       clickhouse-server:
         condition: service_started
-     command: ['clickhouse-client','--host', 'clickhouse-server', '-q CREATE DATABASE IF NOT EXISTS ${CLICKHOUSE_DATABASE}']
+    command: ['clickhouse-client','--host', 'clickhouse-server', '-q CREATE DATABASE IF NOT EXISTS ${CLICKHOUSE_DATABASE}']
 
-    mysql:
-      image: mysql:5.7
-      command: --default-authentication-plugin=mysql_native_password
-      restart: always
-      ports:
-        - "127.0.0.1:3306:3306"
-      volumes:
-        - mysql-volume:/var/lib/mysql
-      environment:
-        MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-        MYSQL_DATABASE: ${MYSQL_DATABASE}
-        MYSQL_USER: ${MYSQL_USER}
-        MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+  mysql:
+    image: mysql:5.7
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql-volume:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-    frontend:
-      image: node:12-alpine
-      working_dir: /frontend
-      healthcheck:
-        test: ps -o comm | grep -q node && exit 1 || exit 0
-        interval: 1s
-        timeout: 2s
-        retries: 100
-      volumes:
-        - ./frontend:/frontend
-      command: sh -c "npm install && npm run build && sleep 5"
-      
-    logr-server:
-      network_mode: host
-      image: golang:1.13
-      working_dir: /opt/logr
-      depends_on:
-        frontend:
-          condition: service_healthy
-      volumes:
-        - ./:/opt/logr
-      command: >
-        sh -c 'export PKG="github.com/504dev/logr"
-        &&     export PKG_LIST="$$(go list $${PKG}/... | grep -v /vendor/)"
-        &&     export SERVICE_SERVER="server"
-        &&     go build -o logr-server ./cmd/$${SERVICE_SERVER}/main.go
-        &&     ./logr-server'
+  frontend:
+    image: node:12-alpine
+    working_dir: /frontend
+    healthcheck:
+      test: ps -o comm | grep -q node && exit 1 || exit 0
+      interval: 1s
+      timeout: 2s
+      retries: 100
+    volumes:
+      - ./frontend:/frontend
+    command: sh -c "yarn install && yarn build && sleep 5"
+
+  logr-server:
+    network_mode: host
+    image: golang:1.13
+    working_dir: /opt/logr
+    depends_on:
+      frontend:
+        condition: service_healthy
+    volumes:
+      - ./:/opt/logr
+    command: >
+      sh -c 'export PKG="github.com/504dev/logr"
+      &&     export PKG_LIST="$$(go list $${PKG}/... | grep -v /vendor/)"
+      &&     export SERVICE_SERVER="server"
+      &&     go build -o logr-server ./cmd/$${SERVICE_SERVER}/main.go
+      &&     ./logr-server'
