@@ -48,6 +48,7 @@ func NewRouter() *gin.Engine {
 	{
 		r.GET("/api/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
 		r.GET("/api/logs/stats/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Stats)
+		r.GET("/api/logs/lognames/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Lognames)
 	}
 
 	countsController := controllers.CountsController{}
@@ -55,6 +56,7 @@ func NewRouter() *gin.Engine {
 		r.GET("/api/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
 		r.GET("/api/counts/snippet", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.FindSnippet)
 		r.GET("/api/counts/stats/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Stats)
+		r.GET("/api/counts/lognames/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Lognames)
 
 	}
 

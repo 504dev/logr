@@ -12,7 +12,6 @@ type Dashboard struct {
 	Keys    DashKeys    `json:"keys"`
 	Members DashMembers `json:"members"`
 	Owner   *User       `json:"owner"`
-	Stats   interface{} `json:"stats,omitempty"`
 }
 type Dashboards []*Dashboard
 
