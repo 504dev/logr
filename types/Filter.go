@@ -80,7 +80,7 @@ func (f *Filter) Match(log *Log) bool {
 	return true
 }
 
-func (f *Filter) ToSql() (string, []interface{}) {
+func (f *Filter) ToSql() (string, []interface{}, error) {
 	sql := "where dash_id = ?"
 	values := []interface{}{f.DashId}
 	if f.Hostname != "" {
@@ -105,11 +105,19 @@ func (f *Filter) ToSql() (string, []interface{}) {
 	}
 	if f.Pattern != "" {
 		s := strings.Split(f.Pattern, "T")
+		r := "^" + s[0]
+		if _, err := regexp.Compile(r); err != nil {
+			return "", []interface{}{}, err
+		}
 		sql += " AND match(formatDateTime(day, '%F', 'UTC'), ?)"
-		values = append(values, "^"+s[0])
+		values = append(values, r)
 		if len(s) > 1 {
+			r := "^" + s[1]
+			if _, err := regexp.Compile(r); err != nil {
+				return "", []interface{}{}, err
+			}
 			sql += " AND match(formatDateTime(toDateTime(timestamp/1e9), '%T', 'UTC'), ?)"
-			values = append(values, "^"+s[1])
+			values = append(values, r)
 		}
 	}
 	if f.Timestamp[0] != 0 {
@@ -125,8 +133,11 @@ func (f *Filter) ToSql() (string, []interface{}) {
 		values = append(values, to)
 	}
 	if f.Message != "" {
+		if _, err := regexp.Compile(f.Message); err != nil {
+			return "", []interface{}{}, err
+		}
 		sql += " AND match(message, ?)"
 		values = append(values, f.Message)
 	}
-	return sql, values
+	return sql, values, nil
 }

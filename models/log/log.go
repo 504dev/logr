@@ -9,7 +9,10 @@ import (
 
 func GetByFilter(f types.Filter) (types.Logs, error) {
 	conn := clickhouse.Conn()
-	where, values := f.ToSql()
+	where, values, err := f.ToSql()
+	if err != nil {
+		return nil, err
+	}
 	limit := f.Limit
 	if limit == 0 {
 		limit = 100
@@ -22,7 +25,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 
 	Logger.Debug("%v %v", sql, values)
 	logs := types.Logs{}
-	err := conn.Select(&logs, sql, values...)
+	err = conn.Select(&logs, sql, values...)
 	if err != nil {
 		return nil, err
 	}

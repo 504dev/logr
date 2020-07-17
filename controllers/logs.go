@@ -60,7 +60,8 @@ func (_ *LogsController) Find(c *gin.Context) {
 	duration := Logger.Time("response:/logs", time.Millisecond)
 	logs, err := log.GetByFilter(filter)
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		Logger.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()

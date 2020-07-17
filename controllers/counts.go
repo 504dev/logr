@@ -35,7 +35,7 @@ func (_ *CountsController) Find(c *gin.Context) {
 	counts, err := count.Find(filter, agg)
 	if err != nil {
 		Logger.Error(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
@@ -76,7 +76,7 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 	counts, err := count.Find(filter, count.AggMinute)
 	if err != nil {
 		Logger.Error(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 
