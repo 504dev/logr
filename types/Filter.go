@@ -46,19 +46,35 @@ func (f *Filter) Match(log *Log) bool {
 	if f.Timestamp[1] != 0 && log.Timestamp > f.Timestamp[1] {
 		return false
 	}
-	if f.Message != "" && !regexp.MustCompile(f.Message).MatchString(log.Message) {
-		return false
+	if f.Message != "" {
+		re, err := regexp.Compile(f.Message)
+		if err != nil {
+			return false
+		}
+		if !re.MatchString(log.Message) {
+			return false
+		}
 	}
 	if f.Pattern != "" {
 		s := strings.Split(f.Pattern, "T")
 		dt := time.Unix(0, log.Timestamp).UTC()
 		day := dt.Format("2006-01-02")
 		tm := dt.Format("15:04:05")
-		if !regexp.MustCompile("^" + s[0]).MatchString(day) {
+		reDay, err := regexp.Compile("^" + s[0])
+		if err != nil {
 			return false
 		}
-		if len(s) > 1 && !regexp.MustCompile("^"+s[1]).MatchString(tm) {
+		if !reDay.MatchString(day) {
 			return false
+		}
+		if len(s) > 1 {
+			reTime, err := regexp.Compile("^" + s[1])
+			if err != nil {
+				return false
+			}
+			if !reTime.MatchString(tm) {
+				return false
+			}
 		}
 	}
 	return true
