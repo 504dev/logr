@@ -8,9 +8,10 @@ import (
 )
 
 const (
-	AggMinute = "m"
-	AggHour   = "h"
-	AggDay    = "d"
+	AggMinute   = "m"
+	Agg5Minutes = "5m"
+	AggHour     = "h"
+	AggDay      = "d"
 )
 
 func Find(filter types.Filter, agg string) (types.Counts, error) {
@@ -37,9 +38,10 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 		values = append(values, filter.Timestamp[1])
 	}
 	aggmap := map[string][]string{
-		AggMinute: {"toStartOfMinute", "1 day"},
-		AggHour:   {"toStartOfHour", "30 day"},
-		AggDay:    {"toStartOfDay", "360 day"},
+		AggMinute:   {"toStartOfMinute", "6 hour"},
+		Agg5Minutes: {"toStartOfFiveMinute", "1 day"},
+		AggHour:     {"toStartOfHour", "14 day"},
+		AggDay:      {"toStartOfDay", "366 day"},
 	}
 	aggvalues, ok := aggmap[agg]
 	if !ok {
