@@ -3,6 +3,7 @@ package logger
 import (
 	"github.com/504dev/logr/types"
 	"github.com/fatih/color"
+	"math/rand"
 	"strings"
 	"time"
 )
@@ -11,11 +12,12 @@ func Demo() {
 	conf, _ := createConfig(types.DashboardDemoId)
 	go (func() {
 		logger, _ := conf.NewLogger("starwars.log")
-		for i := 0; ; i += 1 {
-			c := crowls[i%len(crowls)]
+		for {
+			c := crowls[rand.Intn(len(crowls))]
 			logger.Warn(color.New(color.Bold).SprintFunc()(c.title))
-			time.Sleep(3 * time.Second)
+			time.Sleep(time.Second)
 			for _, t := range c.text {
+				time.Sleep(900 * time.Millisecond)
 				logger.Info(t)
 				logger.Inc("count:letters", float64(len(t)))
 				logger.Inc("count:words", float64(len(strings.Fields(t))))
@@ -25,10 +27,8 @@ func Demo() {
 				if strings.Contains(t, "Leia") {
 					logger.Inc("count:Leia", 1)
 				}
-
-				time.Sleep(1 * time.Second)
 			}
-
+			time.Sleep(3 * time.Second)
 		}
 	})()
 	go crypto(conf)
