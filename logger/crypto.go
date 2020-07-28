@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	logr "github.com/504dev/logr-go-client"
+	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
 	"io/ioutil"
 	"net/http"
@@ -38,25 +39,25 @@ func crypto(conf *logr.Config) {
 				"%v price: %v %v$, %v %v$, %v %v$",
 				color.New(color.Bold).SprintFunc()(base),
 				color.CyanString("HitBTC"),
-				hitp,
+				humanize.Commaf(hitp),
 				color.YellowString("Binance"),
-				binp,
+				humanize.Commaf(binp),
 				color.GreenString("Bitfinex"),
-				bitp,
+				humanize.Commaf(bitp),
 			)
 			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitp).Avg(binp).Avg(bitp).Min(hitp).Min(binp).Min(bitp).Max(hitp).Max(binp).Max(bitp)
 			hitv := prices["hitbtc"][sym]["v"]
 			binv := prices["binance"][sym]["v"]
 			bitv := prices["bitfinex"][sym]["v"]
 			l.Info(
-				"%v volume: %v %.0f$, %v %.0f$, %v %.0f$",
+				"%v volume: %v %v$, %v %v$, %v %v$",
 				color.New(color.Bold).SprintFunc()(base),
 				color.CyanString("HitBTC"),
-				hitv,
+				humanize.Comma(int64(hitv)),
 				color.YellowString("Binance"),
-				binv,
+				humanize.Comma(int64(binv)),
 				color.GreenString("Bitfinex"),
-				bitv,
+				humanize.Comma(int64(bitv)),
 			)
 			l.Avg(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
 			l.Info(
