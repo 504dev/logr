@@ -65,6 +65,12 @@ func crypto(conf *logr.Config) {
 				color.New(color.Bold).SprintFunc()(base),
 				l.Widget("max", fmt.Sprintf("price:%v", sym), 30),
 			)
+			if sym == "BTC_USDT" {
+				v := hitv + bitv + binv
+				l.Per("volume:BTC_USDT:hitbtc", hitv, v)
+				l.Per("volume:BTC_USDT:bitfinex", bitv, v)
+				l.Per("volume:BTC_USDT:binance", binv, v)
+			}
 		}
 
 		l.Debug(string(bytes))
