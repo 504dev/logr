@@ -6,11 +6,21 @@ import (
 )
 
 func SeedUsers() {
-	values := []interface{}{1, 0, "admin", types.RoleAdmin}
-	sql := "INSERT INTO users (id, github_id, username, role) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE username=username"
-	_, err := db.Exec(sql, values...)
+	sqltext := "INSERT INTO users (id, github_id, username, role) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE username=username"
+	stmt, err := db.Prepare(sqltext)
 	if err != nil {
 		panic(err)
+	}
+	defer stmt.Close()
+	users := [][]interface{}{
+		{1, nil, "admin", types.RoleAdmin},
+		{2, 55717547, "kidlog", types.RoleViewer},
+	}
+	for _, v := range users {
+		_, err = stmt.Exec(v...)
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 func SeedDashboards() {

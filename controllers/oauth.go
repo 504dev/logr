@@ -207,3 +207,12 @@ func (_ *AuthController) EnsureAdmin(c *gin.Context) {
 	}
 	c.Next()
 }
+
+func (_ *AuthController) EnsureUser(c *gin.Context) {
+	role := c.GetInt("role")
+	if role > types.RoleUser {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	c.Next()
+}

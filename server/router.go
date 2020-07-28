@@ -38,10 +38,31 @@ func NewRouter() *gin.Engine {
 	{
 		r.GET("/api/me", auth.EnsureJWT, me.Me)
 		r.GET("/api/me/dashboards", auth.EnsureJWT, me.Dashboards)
-		r.POST("/api/me/dashboard", auth.EnsureJWT, me.AddDashboard)
-		r.POST("/api/me/dashboard/share/:dash_id/to/:username", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.ShareDashboard)
-		r.PUT("/api/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.EditDashboard)
-		r.DELETE("/api/me/dashboard/:dash_id", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDash, me.DeleteDashboard)
+		r.POST("/api/me/dashboard", auth.EnsureJWT, auth.EnsureUser, me.AddDashboard)
+		r.POST(
+			"/api/me/dashboard/share/:dash_id/to/:username",
+			auth.EnsureJWT,
+			auth.EnsureUser,
+			me.DashRequired("dash_id"),
+			me.MyDash,
+			me.ShareDashboard,
+		)
+		r.PUT(
+			"/api/me/dashboard/:dash_id",
+			auth.EnsureJWT,
+			auth.EnsureUser,
+			me.DashRequired("dash_id"),
+			me.MyDash,
+			me.EditDashboard,
+		)
+		r.DELETE(
+			"/api/me/dashboard/:dash_id",
+			auth.EnsureJWT,
+			auth.EnsureUser,
+			me.DashRequired("dash_id"),
+			me.MyDash,
+			me.DeleteDashboard,
+		)
 	}
 
 	logsController := controllers.LogsController{}
