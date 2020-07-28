@@ -3,6 +3,8 @@
 _Logr_ is an open source logger and counter. \
 Get to know your application better.
 
+[Demo](http://212.224.113.196:7778/demo)
+
 ![Logr](https://i.ibb.co/BLf8X6H/photo-2020-07-09-15-59-10.jpg)
 
 * logs looks like in your `Terminal`
