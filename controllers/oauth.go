@@ -128,7 +128,6 @@ func (a *AuthController) Callback(c *gin.Context) {
 	}
 	Logger.Debug(userDb)
 
-	JWT_LIFETIME := 60 * 60
 	claims := types.Claims{
 		Id:          userDb.Id,
 		Role:        userDb.Role,
@@ -136,7 +135,7 @@ func (a *AuthController) Callback(c *gin.Context) {
 		Username:    *userGithub.Login,
 		AccessToken: tok.AccessToken,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Duration(JWT_LIFETIME) * time.Second).Unix(),
+			ExpiresAt: time.Now().Add(time.Hour).Unix(),
 		},
 	}
 	err = claims.EncryptAccessToken()
@@ -184,11 +183,12 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 		return
 	}
 
-	err = claims.DecryptAccessToken()
-
-	if err != nil {
-		c.AbortWithStatus(http.StatusUnauthorized)
-		return
+	if claims.AccessTokenCipher != "" {
+		err = claims.DecryptAccessToken()
+		if err != nil {
+			c.AbortWithStatus(http.StatusUnauthorized)
+			return
+		}
 	}
 
 	c.Set("claims", claims)

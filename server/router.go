@@ -1,12 +1,17 @@
 package server
 
 import (
+	"github.com/504dev/logr/cachify"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/controllers"
 	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/types"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 )
 
 func NewRouter() *gin.Engine {
@@ -23,6 +28,37 @@ func NewRouter() *gin.Engine {
 			"org":     config.Get().OAuth.Github.Org,
 		}
 		c.JSON(http.StatusOK, res)
+	})
+
+	r.GET("/api/free-token", func(c *gin.Context) {
+		usr, err := user.GetById(2)
+		if err != nil {
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		tokenString, err := cachify.Cachify("free-token", func() (interface{}, error) {
+			claims := types.Claims{
+				Id:       usr.Id,
+				Role:     usr.Role,
+				GihubId:  usr.GithubId,
+				Username: usr.Username,
+				StandardClaims: jwt.StandardClaims{
+					ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+				},
+			}
+			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+			tokenString, err := token.SignedString([]byte(config.Get().OAuth.JwtSecret))
+			if err != nil {
+				return nil, err
+			}
+			return tokenString, err
+		}, 4*time.Minute)
+
+		if err != nil {
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		c.JSON(http.StatusOK, tokenString)
 	})
 
 	// oauth
