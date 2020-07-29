@@ -5,7 +5,7 @@ Get to know your application better.
 
 [Demo](http://212.224.113.196:7778/demo)
 
-![Logr](https://i.ibb.co/SK6qfTz/image.png)
+![Logr](https://i.ibb.co/4dsbDdk/image.png)
 
 * logs looks like in your `Terminal`
 * storing data in `ClickHouse`
