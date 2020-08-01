@@ -1,6 +1,6 @@
 # Logr
 
-_Logr_ is an open source logger and counter. \
+_Logr_ is an open source logger and metric service. \
 Get to know your application better.
 
 [Demo](http://212.224.113.196:7778/demo)
@@ -41,13 +41,15 @@ oauth:
   github:
     client_id: "client_id"
     client_secret: "client_secret"
+    org: ""
   jwt_secret: "jwt-secret"
 clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
 mysql: "logr:logr@/logr"
 ```
 
-* Create Github OAuth App, set `client_id` and `client_secret` \
+* `client_id` and `client_secret`, need to create Github OAuth App \
 https://docs.github.com/en/developers/apps/creating-an-oauth-app/
+* `org` is organization restriction (if set, only members can authorize)
 * `jwt_secret` is random string (using to sign temporary authorization tokens)
 
 
