@@ -1,16 +1,17 @@
 package count
 
 import (
-	"fmt"
 	"github.com/504dev/logr/clickhouse"
+	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"
 )
 
 const (
-	AggMinute = "m"
-	AggHour   = "h"
-	AggDay    = "d"
+	AggMinute   = "m"
+	Agg5Minutes = "5m"
+	AggHour     = "h"
+	AggDay      = "d"
 )
 
 func Find(filter types.Filter, agg string) (types.Counts, error) {
@@ -37,9 +38,10 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 		values = append(values, filter.Timestamp[1])
 	}
 	aggmap := map[string][]string{
-		AggMinute: {"toStartOfMinute", "1 day"},
-		AggHour:   {"toStartOfHour", "30 day"},
-		AggDay:    {"toStartOfDay", "360 day"},
+		AggMinute:   {"toStartOfMinute", "6 hour"},
+		Agg5Minutes: {"toStartOfFiveMinute", "1 day"},
+		AggHour:     {"toStartOfHour", "14 day"},
+		AggDay:      {"toStartOfDay", "366 day"},
 	}
 	aggvalues, ok := aggmap[agg]
 	if !ok {
@@ -65,7 +67,7 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
       order by
         ts desc, hostname, keyname
     `
-	fmt.Println(sql, values)
+	Logger.Debug("%v %v", sql, values)
 
 	rows, err := clickhouse.Conn().Query(sql, values...)
 	if err != nil {
@@ -123,28 +125,21 @@ func GetDashStats(dashId int) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func GetDashLognames(dashId int) (map[string]int64, error) {
+func GetDashLognames(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
-      SELECT
-        logname, count(*) AS cnt FROM counts
+      SELECT logname, count(*) AS cnt
+      FROM counts
       WHERE
-        dash_id = ? AND day >= toDate(now() - interval 1 day) AND timestamp > now() - interval 1 hour
-      GROUP BY
-        logname
+        dash_id = ? AND
+        day >= toDate(now() - interval 1 day) AND
+        timestamp > now() - interval 1 hour
+      GROUP BY logname
     `
-	rows, err := clickhouse.Conn().Query(sql, dashId)
+	stats := types.DashStatRows{}
+	err := clickhouse.Conn().Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}
-	res := make(map[string]int64)
-	for rows.Next() {
-		var cnt int64
-		var logname string
-		err = rows.Scan(&logname, &cnt)
-		if err != nil {
-			return nil, err
-		}
-		res[logname] = cnt
-	}
-	return res, nil
+	Logger.Debug("%v %v", sql, dashId)
+	return stats, nil
 }

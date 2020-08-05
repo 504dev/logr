@@ -37,7 +37,7 @@ func ListenUDP() error {
 		err = json.Unmarshal(buf[0:n], &lp)
 
 		if err != nil {
-			Logger.Error("UDP parse json error: %v", err, string(buf[0:n]))
+			Logger.Error("UDP parse json error: %v\n%v", err, string(buf[0:n]))
 			continue
 		}
 		dk, err := dashkey.GetByPubCached(lp.PublicKey)
@@ -46,7 +46,7 @@ func ListenUDP() error {
 			continue
 		}
 		if dk == nil {
-			Logger.Warn("UDP unknown dash pub=%v", lp.PublicKey)
+			Logger.Error("UDP unknown dash pub=%v", lp.PublicKey)
 			continue
 		}
 

@@ -46,25 +46,41 @@ func (f *Filter) Match(log *Log) bool {
 	if f.Timestamp[1] != 0 && log.Timestamp > f.Timestamp[1] {
 		return false
 	}
-	if f.Message != "" && !regexp.MustCompile(f.Message).MatchString(log.Message) {
-		return false
+	if f.Message != "" {
+		re, err := regexp.Compile(f.Message)
+		if err != nil {
+			return false
+		}
+		if !re.MatchString(log.Message) {
+			return false
+		}
 	}
 	if f.Pattern != "" {
 		s := strings.Split(f.Pattern, "T")
 		dt := time.Unix(0, log.Timestamp).UTC()
 		day := dt.Format("2006-01-02")
 		tm := dt.Format("15:04:05")
-		if !regexp.MustCompile("^" + s[0]).MatchString(day) {
+		reDay, err := regexp.Compile("^" + s[0])
+		if err != nil {
 			return false
 		}
-		if len(s) > 1 && !regexp.MustCompile("^"+s[1]).MatchString(tm) {
+		if !reDay.MatchString(day) {
 			return false
+		}
+		if len(s) > 1 {
+			reTime, err := regexp.Compile("^" + s[1])
+			if err != nil {
+				return false
+			}
+			if !reTime.MatchString(tm) {
+				return false
+			}
 		}
 	}
 	return true
 }
 
-func (f *Filter) ToSql() (string, []interface{}) {
+func (f *Filter) ToSql() (string, []interface{}, error) {
 	sql := "where dash_id = ?"
 	values := []interface{}{f.DashId}
 	if f.Hostname != "" {
@@ -89,11 +105,19 @@ func (f *Filter) ToSql() (string, []interface{}) {
 	}
 	if f.Pattern != "" {
 		s := strings.Split(f.Pattern, "T")
+		r := "^" + s[0]
+		if _, err := regexp.Compile(r); err != nil {
+			return "", []interface{}{}, err
+		}
 		sql += " AND match(formatDateTime(day, '%F', 'UTC'), ?)"
-		values = append(values, "^"+s[0])
+		values = append(values, r)
 		if len(s) > 1 {
+			r := "^" + s[1]
+			if _, err := regexp.Compile(r); err != nil {
+				return "", []interface{}{}, err
+			}
 			sql += " AND match(formatDateTime(toDateTime(timestamp/1e9), '%T', 'UTC'), ?)"
-			values = append(values, "^"+s[1])
+			values = append(values, r)
 		}
 	}
 	if f.Timestamp[0] != 0 {
@@ -109,8 +133,11 @@ func (f *Filter) ToSql() (string, []interface{}) {
 		values = append(values, to)
 	}
 	if f.Message != "" {
+		if _, err := regexp.Compile(f.Message); err != nil {
+			return "", []interface{}{}, err
+		}
 		sql += " AND match(message, ?)"
 		values = append(values, f.Message)
 	}
-	return sql, values
+	return sql, values, nil
 }

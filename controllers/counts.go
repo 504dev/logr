@@ -35,7 +35,7 @@ func (_ *CountsController) Find(c *gin.Context) {
 	counts, err := count.Find(filter, agg)
 	if err != nil {
 		Logger.Error(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
@@ -76,7 +76,7 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 	counts, err := count.Find(filter, count.AggMinute)
 	if err != nil {
 		Logger.Error(err)
-		c.AbortWithStatus(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 
@@ -94,7 +94,18 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 func (_ *CountsController) Stats(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	duration := Logger.Time("response:/counts/stats", time.Millisecond)
-	stats, err := count.GetDashStats(dashId)
+	stats, err := count.GetDashStatsCached(dashId)
+	if err != nil {
+		Logger.Error(err)
+	}
+	duration()
+	c.JSON(http.StatusOK, stats)
+}
+
+func (_ *CountsController) Lognames(c *gin.Context) {
+	dashId := c.GetInt("dashId")
+	duration := Logger.Time("response:/counts/lognames", time.Millisecond)
+	stats, err := count.GetDashLognamesCached(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}

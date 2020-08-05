@@ -14,17 +14,6 @@ import (
 
 type LogsController struct{}
 
-func (_ *LogsController) Stats(c *gin.Context) {
-	dashId := c.GetInt("dashId")
-	duration := Logger.Time("response:/logs/stats", time.Millisecond)
-	stats, err := log.GetDashStats(dashId)
-	if err != nil {
-		Logger.Error(err)
-	}
-	duration()
-	c.JSON(http.StatusOK, stats)
-}
-
 func (_ *LogsController) Find(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	userId := c.GetInt("userId")
@@ -71,10 +60,34 @@ func (_ *LogsController) Find(c *gin.Context) {
 	duration := Logger.Time("response:/logs", time.Millisecond)
 	logs, err := log.GetByFilter(filter)
 	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
+		Logger.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
 	Logger.Inc("count:/logs", 1)
 	c.JSON(http.StatusOK, logs)
+}
+
+func (_ *LogsController) Stats(c *gin.Context) {
+	dashId := c.GetInt("dashId")
+	duration := Logger.Time("response:/logs/stats", time.Millisecond)
+
+	stats, err := log.GetDashStatsCached(dashId)
+	if err != nil {
+		Logger.Error(err)
+	}
+	duration()
+	c.JSON(http.StatusOK, stats)
+}
+
+func (_ *LogsController) Lognames(c *gin.Context) {
+	dashId := c.GetInt("dashId")
+	duration := Logger.Time("response:/logs/lognames", time.Millisecond)
+	stats, err := log.GetDashLognamesCached(dashId)
+	if err != nil {
+		Logger.Error(err)
+	}
+	duration()
+	c.JSON(http.StatusOK, stats)
 }
