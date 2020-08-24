@@ -57,6 +57,7 @@ https://docs.github.com/en/developers/apps/creating-an-oauth-app/
 
 * Golang [github.com/504dev/logr-go-client](https://github.com/504dev/logr-go-client)
 * Node.js [github.com/504dev/logr-node-client](https://github.com/504dev/logr-node-client)
+* Python [github.com/504dev/logr-python-client](https://github.com/504dev/logr-python-client)
 
 ## Utils
 * Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
