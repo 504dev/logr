@@ -6,7 +6,7 @@ import (
 )
 
 func SeedUsers() {
-	sqltext := "INSERT INTO users (id, github_id, username, role) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE username=username, github_id=VALUES(github_id)"
+	sqltext := "INSERT INTO users (id, github_id, username, role) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE username=username"
 	stmt, err := db.Prepare(sqltext)
 	if err != nil {
 		panic(err)
