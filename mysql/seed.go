@@ -13,7 +13,7 @@ func SeedUsers() {
 	}
 	defer stmt.Close()
 	users := [][]interface{}{
-		{1, nil, "admin", types.RoleAdmin},
+		{1, 0, "admin", types.RoleAdmin},
 		{2, 55717547, "kidlog", types.RoleViewer},
 	}
 	for _, v := range users {
