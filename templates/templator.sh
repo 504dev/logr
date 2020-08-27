@@ -10,7 +10,7 @@ if [ ! -f ".env" ]; then
 fi
 
 if ! sha256sum --version &> /dev/null; then
-    function sha256sum() { shasum -a 256 "$@" ; } && export -f sha256sum                                                                                                        
+    function sha256sum() { shasum -a 256 "$@" ; } && export -f sha256sum
 fi
 
 source .env
