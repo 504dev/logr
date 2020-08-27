@@ -1,9 +1,9 @@
 <yandex>
   <users>
-    <CLICKHOUSE_USER>
+    <${CLICKHOUSE_USER}>
       <profile>default</profile>
       <quota>default</quota>
-      <password_sha256_hex>CLICKHOUSE_PASSWORD_HASH</password_sha256_hex>
-    </CLICKHOUSE_USER>
+      <password_sha256_hex>${CLICKHOUSE_PASSWORD_HASH}</password_sha256_hex>
+    </${CLICKHOUSE_USER}>
   </users>
 </yandex>
