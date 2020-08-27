@@ -9,6 +9,8 @@ if [ ! -f ".env" ]; then
     exit 1
 fi
 
+function sha256sum() { shasum -a 256 "$@" ; } && export -f sha256sum
+
 source .env
 
 ## Create clickhouse user from template
