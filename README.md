@@ -21,7 +21,7 @@ Get to know your application better.
 * ClickHouse `v20`
 * Mysql `v5.7`
 
-## Build service
+## Build & Run service
 1. Clone repository: \
     `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
 2. Init config file:
@@ -39,9 +39,9 @@ bind:
   udp: ":7776"
 oauth:
   github:
-    client_id: "client_id"
-    client_secret: "client_secret"
-    org: ""
+    client_id: "9bd30997b0ee30997b0ee3"
+    client_secret: "1f241d37d910b11f241d37d910b11f241d37d910b1"
+    org: "504dev"
   jwt_secret: "jwt-secret"
 clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
 mysql: "logr:logr@/logr"
@@ -51,6 +51,14 @@ mysql: "logr:logr@/logr"
 https://docs.github.com/en/developers/apps/creating-an-oauth-app/
 * `org` is organization restriction (if set, only members can authorize)
 * `jwt_secret` is random string (using to sign temporary authorization tokens)
+
+## Run in Docker
+1. Clone repository: \
+    `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
+2. Create **.env** file:
+    `make env`
+3. Fill **.env** file
+4. Run: ` docker-compose up -d`
 
 
 ## Client libraries
