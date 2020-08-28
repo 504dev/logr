@@ -22,17 +22,27 @@ Get to know your application better.
 * Mysql `v5.7`
 
 ## Build & Run service
+### Manual
 1. Clone repository: \
     `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
 2. Init config file:
     `make config`
-3. Fill config, see **Config**
+3. Fill **config.yml**, see [Config](#config)
 4. Build frontend:
     `make front`
 5. Run:
     `make run`
 
+### Docker-compose
+1. Clone repository: \
+    `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
+2. Create **.env** file:
+    `make env`
+3. Set env variables in **.env** file
+4. Run: ` docker-compose up -d`
+
 ## Config
+
 ```yaml
 bind:
   http: ":7778"
@@ -49,17 +59,8 @@ mysql: "logr:logr@/logr"
 
 * `client_id` and `client_secret`, need to create Github OAuth App \
 https://docs.github.com/en/developers/apps/creating-an-oauth-app/
-* `org` is organization restriction (if set, only members can authorize)
+* `org` is organization restriction (if set, only org members can authorize)
 * `jwt_secret` is random string (using to sign temporary authorization tokens)
-
-## Run in Docker
-1. Clone repository: \
-    `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
-2. Create **.env** file:
-    `make env`
-3. Fill **.env** file
-4. Run: ` docker-compose up -d`
-
 
 ## Client libraries
 

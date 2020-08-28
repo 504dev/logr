@@ -15,7 +15,7 @@ config: ## Creating the local config yml.
 
 env: ## Creating .env file.
 	echo "Creating .env file ..."
-	cp templates/.env-template .env
+	cp templates/.env.template .env
 
 build: ## Build the executable file of service.
 	echo "Building backend..."
