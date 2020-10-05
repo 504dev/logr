@@ -70,6 +70,7 @@ services:
     depends_on:
       frontend:
         condition: service_healthy
+    restart: always
     volumes:
       - ./:/opt/logr
     command: >
