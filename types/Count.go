@@ -3,10 +3,12 @@ package types
 import (
 	"fmt"
 	"github.com/504dev/logr/cipher"
+	"sync"
 	"time"
 )
 
 type Count struct {
+	sync.RWMutex
 	DashId    int    `db:"dash_id"   json:"dash_id,omitempty"`
 	Timestamp int64  `db:"timestamp" json:"timestamp"`
 	Hostname  string `db:"hostname"  json:"hostname,omitempty"`
@@ -49,14 +51,20 @@ func (m Metrics) ToMap() map[string]interface{} {
 }
 
 func (c *Count) Decrypt(cipherText string, priv string) error {
+	c.RLock()
+	defer c.RUnlock()
 	return cipher.DecodeAesJson(cipherText, priv, c)
 }
 
 func (c *Count) Encrypt(priv string) (string, error) {
+	c.RLock()
+	defer c.RUnlock()
 	return cipher.EncryptAesJson(c, priv)
 }
 
 func (c *Count) AsVector() []interface{} {
+	c.RLock()
+	defer c.RUnlock()
 	dt := time.Unix(c.Timestamp, 0).UTC()
 	day := dt.Format("2006-01-02")
 	values := []interface{}{day, dt, c.DashId, c.Hostname, c.Logname, c.Keyname, c.Version}
@@ -98,6 +106,8 @@ func (c *Count) now() {
 }
 
 func (c *Count) Inc(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
 	if c.Metrics.Inc == nil {
 		c.Metrics.Inc = &Inc{}
 	}
@@ -107,6 +117,8 @@ func (c *Count) Inc(num float64) *Count {
 }
 
 func (c *Count) Max(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
 	if c.Metrics.Max == nil {
 		c.Metrics.Max = &Max{Val: num}
 	} else if num > c.Metrics.Max.Val {
@@ -117,6 +129,8 @@ func (c *Count) Max(num float64) *Count {
 }
 
 func (c *Count) Min(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
 	if c.Metrics.Min == nil {
 		c.Metrics.Min = &Min{Val: num}
 	} else if num < c.Metrics.Min.Val {
@@ -127,6 +141,8 @@ func (c *Count) Min(num float64) *Count {
 }
 
 func (c *Count) Avg(num float64) *Count {
+	c.Lock()
+	defer c.Unlock()
 	if c.Metrics.Avg == nil {
 		c.Metrics.Avg = &Avg{}
 	}
@@ -137,6 +153,8 @@ func (c *Count) Avg(num float64) *Count {
 }
 
 func (c *Count) Per(taken float64, total float64) *Count {
+	c.Lock()
+	defer c.Unlock()
 	if c.Metrics.Per == nil {
 		c.Metrics.Per = &Per{}
 	}
@@ -147,6 +165,8 @@ func (c *Count) Per(taken float64, total float64) *Count {
 }
 
 func (c *Count) Time(duration time.Duration) func() time.Duration {
+	c.Lock()
+	defer c.Unlock()
 	if c.Metrics.Time == nil {
 		c.Metrics.Time = &Time{}
 	}
