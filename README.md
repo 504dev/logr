@@ -1,8 +1,8 @@
 # Logr
 
-*Logr* is an open source logger and metric service. \
+**Logr** is an open source logger and metric service. \
 Helps you debug and analyze performance of your features. \
-Get to know your application better with *Logr*.
+Get to know your application better with **Logr**.
 
 [Demo](http://212.224.113.196:7778/demo)
 
