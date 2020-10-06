@@ -1,7 +1,8 @@
 # Logr
 
-_Logr_ is an open source logger and metric service. \
-Get to know your application better.
+*Logr* is an open source logger and metric service. \
+Helps you debug and analyze performance of your features. \
+Get to know your application better with *Logr*.
 
 [Demo](http://212.224.113.196:7778/demo)
 
@@ -67,7 +68,7 @@ https://docs.github.com/en/developers/apps/creating-an-oauth-app/
 * Golang [github.com/504dev/logr-go-client](https://github.com/504dev/logr-go-client)
 * Node.js [github.com/504dev/logr-node-client](https://github.com/504dev/logr-node-client)
 * Python [github.com/504dev/logr-python-client](https://github.com/504dev/logr-python-client)
-* PHP [github.com/504dev/logr-php-client](https://github.com/504dev/logr-php-client) _logger only_
+* PHP [github.com/504dev/logr-php-client](https://github.com/504dev/logr-php-client) (logger only, metrics not supported)
 
 ## Utils
 * Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
