@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+shopt -s expand_aliases
+
 DIR="$(dirname "${BASH_SOURCE[0]}")"
 
 cd ${DIR} && cd ..
