@@ -27,8 +27,8 @@ func createConfig(dashId int) (*logr.Config, error) {
 func Init() {
 	conf, _ := createConfig(types.DashboardSystemId)
 	Logger, _ = conf.NewLogger("main.log")
-	system, _ := conf.NewLogger("system.log")
-	system.WatchSystem()
+	conf.DefaultSystemCounter()
+	conf.DefaultProcessCounter()
 	gin, _ := conf.NewLogger("gin.log")
 	GinWritter = gin.CustomWritter(func(log *logr.Log) {
 		codestr := log.Message[38:41]
