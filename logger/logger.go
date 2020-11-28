@@ -10,7 +10,8 @@ import (
 
 func createConfig(dashId int) (*logr.Config, error) {
 	conf := logr.Config{
-		Udp: config.Get().Bind.Udp,
+		Console: true,
+		Udp:     config.Get().Bind.Udp,
 	}
 	dk, err := dashkey.GetById(dashId)
 	if err != nil {
