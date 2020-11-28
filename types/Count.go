@@ -178,7 +178,7 @@ func (c *Count) Time(duration time.Duration) func() time.Duration {
 		if delta == nil {
 			tmp := time.Since(ts)
 			delta = &tmp
-			num := float64(time.Since(ts).Nanoseconds()) / float64(duration.Nanoseconds())
+			num := float64(tmp.Nanoseconds()) / float64(duration.Nanoseconds())
 			c.Avg(num).Min(num).Max(num)
 		}
 		return *delta
