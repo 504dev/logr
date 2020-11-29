@@ -17,9 +17,13 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	if limit == 0 {
 		limit = 100
 	}
-	if f.Pattern == "" && f.Offset == 0 {
-		today := time.Now().UTC().Format(time.RFC3339)[0:10]
-		w1 := fmt.Sprintf("%v AND day = '%v'", where, today)
+	if f.Pattern == "" {
+		now := time.Now()
+		if f.Offset != 0 {
+			now = time.Unix(0, f.Offset)
+		}
+		day := now.UTC().Format(time.RFC3339)[0:10]
+		w1 := fmt.Sprintf("%v AND day = '%v'", where, day)
 		logs, err := getByFilter(w1, values, limit)
 		if err != nil {
 			return nil, err
@@ -28,7 +32,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 		if rest == 0 {
 			return logs, nil
 		}
-		w2 := fmt.Sprintf("%v AND day < '%v'", where, today)
+		w2 := fmt.Sprintf("%v AND day < '%v'", where, day)
 		tmp, err := getByFilter(w2, values, rest)
 		if err != nil {
 			return nil, err
