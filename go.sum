@@ -41,6 +41,8 @@ github.com/504dev/logr-go-client v0.0.51 h1:up0N8BZH3bhGwQJRcxP8lnktKmcdY9ApaoTA
 github.com/504dev/logr-go-client v0.0.51/go.mod h1:mqijj5Gi6BJhiR2FSEe7MaccwPK0LI2/EPoOhSTCtn4=
 github.com/504dev/logr-go-client v0.0.54 h1:G4BDWAgZ5qYr3kM3SQ+wtS2RranQbAERvCCsq0ACYwg=
 github.com/504dev/logr-go-client v0.0.54/go.mod h1:mqijj5Gi6BJhiR2FSEe7MaccwPK0LI2/EPoOhSTCtn4=
+github.com/504dev/logr-go-client v0.0.60 h1:obmwu8TfSWykXf4MHiMZvMBEE8F1AZqbiAcEQGPEY1w=
+github.com/504dev/logr-go-client v0.0.60/go.mod h1:mqijj5Gi6BJhiR2FSEe7MaccwPK0LI2/EPoOhSTCtn4=
 github.com/ClickHouse/clickhouse-go v1.3.12 h1:HvD2NhKPLSeO3Ots6YV0ePgs4l3wO0bLqa9Uk1yeMOs=
 github.com/ClickHouse/clickhouse-go v1.3.12/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d h1:G0m3OIz70MZUWq3EgK3CesDbo8upS2Vm9/P3FtgI+Jk=

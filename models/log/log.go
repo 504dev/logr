@@ -44,6 +44,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 
 func getByFilter(where string, values []interface{}, limit int) (types.Logs, error) {
 	conn := clickhouse.Conn()
+	delta := Logger.Duration()
 	sql := `
       SELECT timestamp, dash_id, hostname, logname, level, message
       FROM logs ` + where + `
@@ -51,7 +52,7 @@ func getByFilter(where string, values []interface{}, limit int) (types.Logs, err
       LIMIT ` + fmt.Sprint(limit)
 	logs := types.Logs{}
 	err := conn.Select(&logs, sql, values...)
-	Logger.Debug("%v\n%v\n%v", sql, values, len(logs))
+	Logger.Debug("%v\n%v\ncount: %v, time: %v", sql, values, len(logs), delta())
 	return logs, err
 }
 
