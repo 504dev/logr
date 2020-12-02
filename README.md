@@ -58,8 +58,7 @@ clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
 mysql: "logr:logr@/logr"
 ```
 
-* `client_id` and `client_secret`, need to create Github OAuth App \
-https://docs.github.com/en/developers/apps/creating-an-oauth-app/
+* `client_id` and `client_secret` is Github App keys (optional. set empty, if not sure)
 * `org` is organization restriction (if set, only org members can authorize)
 * `jwt_secret` is random string (using to sign temporary authorization tokens)
 

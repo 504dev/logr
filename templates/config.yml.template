@@ -3,7 +3,7 @@ bind:
   udp: "${LOGR_UDP_BIND}"
 oauth:
   jwt_secret: "${OAUTH_JWT_SECRET}"
-  github: # create OAuth App https://docs.github.com/en/developers/apps/creating-an-oauth-app
+  github:
     client_id: "${OAUTH_GITHUB_CLIENT_ID}"
     client_secret: "${OAUTH_GITHUB_CLIENT_SECRET}"
     org: "${OAUTH_GITHUB_ORG}"
