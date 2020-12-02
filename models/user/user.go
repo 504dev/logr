@@ -54,11 +54,15 @@ func GetByGithubId(id int64) (*types.User, error) {
 	return findOneByField("github_id", id)
 }
 
-func Create(githubId int64, username string) (*types.User, error) {
+func Create(githubId int64, username string, role int) (*types.User, error) {
 	conn := mysql.Conn()
 
-	sql := "INSERT INTO users (github_id, username, role) VALUES (?, ?, ?)"
-	values := []interface{}{githubId, username, types.RoleUser}
+	sql := `
+		INSERT INTO users (github_id, username, role)
+		VALUES (?, ?, ?)
+		ON DUPLICATE KEY UPDATE role=VALUES(role)
+	`
+	values := []interface{}{githubId, username, role}
 
 	_, err := conn.Exec(sql, values...)
 	if err != nil {

@@ -23,9 +23,10 @@ func NewRouter() *gin.Engine {
 	}))
 
 	r.GET("/api/globals", func(c *gin.Context) {
-		res := map[string]string{
+		res := map[string]interface{}{
 			"version": Logger.GetVersion(),
 			"org":     config.Get().OAuth.Github.Org,
+			"setup":   config.Get().OAuth.Github.ClientId == "",
 		}
 		c.JSON(http.StatusOK, res)
 	})
@@ -66,7 +67,9 @@ func NewRouter() *gin.Engine {
 	auth.Init()
 	{
 		r.GET("/oauth/authorize", auth.Authorize)
-		r.GET("/oauth/callback", auth.Callback)
+		r.GET("/oauth/authorize/callback", auth.Callback)
+		r.POST("/oauth/setup", auth.Setup)
+		r.GET("/oauth/setup/callback", auth.SetupCallback)
 	}
 
 	// me

@@ -13,7 +13,7 @@ func SeedUsers() {
 	}
 	defer stmt.Close()
 	users := [][]interface{}{
-		{1, 0, "admin", types.RoleAdmin},
+		{1, 0, "logr", types.RoleAdmin},
 		{2, 55717547, "kidlog", types.RoleViewer},
 	}
 	for _, v := range users {
@@ -43,7 +43,11 @@ func SeedDashboards() {
 }
 
 func SeedKeys() {
-	sqltext := "INSERT INTO dashboard_keys (id, dash_id, name, public_key, private_key) VALUES (?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE name=name"
+	sqltext := `
+		INSERT INTO dashboard_keys (id, dash_id, name, public_key, private_key)
+		VALUES (?, ?, ?, ?, ?)
+		ON DUPLICATE KEY UPDATE name=name
+	`
 	stmt, err := db.Prepare(sqltext)
 	if err != nil {
 		panic(err)

@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
@@ -10,22 +11,19 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v29/github"
 	"golang.org/x/oauth2"
-	"math/rand"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 )
 
 type AuthController struct {
 	*oauth2.Config
-	sync.Mutex
-	states map[string]string
+	*types.States
 }
 
 func (a *AuthController) Init() {
 	conf := config.Get().OAuth.Github
-	scopes := []string{"user"}
+	scopes := []string{"read:user", "user:email"}
 	if conf.Org != "" {
 		scopes = append(scopes, "read:org")
 	}
@@ -38,34 +36,80 @@ func (a *AuthController) Init() {
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
 	}
-	a.states = make(map[string]string)
+	a.States = &types.States{Data: make(map[string]string)}
 }
 
 func (a *AuthController) Authorize(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
-	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
 	login := c.Query("login")
 	callback := c.Query("callback")
-	a.Lock()
-	a.states[state] = callback
-	a.Unlock()
+	state := a.States.Insert(callback)
 	authorizeUrl := a.Config.AuthCodeURL(state)
 	if login != "" {
 		authorizeUrl += "&login=" + login
 	}
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
-	c.Abort()
+}
+
+func (a *AuthController) Setup(c *gin.Context) {
+	c.Header("Cache-Control", "no-cache")
+	callback := c.Query("callback")
+	a.States.Set("setup", callback)
+	c.Redirect(http.StatusTemporaryRedirect, "https://github.com/settings/apps/new")
+}
+
+func (a *AuthController) SetupCallback(c *gin.Context) {
+	code := c.Query("code")
+	url := fmt.Sprintf("https://api.github.com/app-manifests/%v/conversions", code)
+	resp, err := http.Post(url, "application/json", nil)
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	defer resp.Body.Close()
+
+	var data struct {
+		Name         string `json:"name"`
+		ClientId     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+		Owner        struct {
+			ID    int64  `json:"id"`
+			Login string `json:"login"`
+		} `json:"owner"`
+	}
+	err = json.NewDecoder(resp.Body).Decode(&data)
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	_, err = user.Create(data.Owner.ID, data.Owner.Login, types.RoleAdmin)
+	if err != nil {
+		Logger.Error(err)
+	}
+	config.Set(func(conf *config.Config) {
+		conf.OAuth.Github.ClientId = data.ClientId
+		conf.OAuth.Github.ClientSecret = data.ClientSecret
+	})
+	err = config.Save()
+	if err != nil {
+		Logger.Error(err)
+	}
+	defer a.Init()
+	callback, ok := a.States.Get("setup")
+	if !ok {
+		c.JSON(http.StatusOK, data)
+	} else {
+		c.Redirect(http.StatusMovedPermanently, callback)
+	}
 }
 
 func (a *AuthController) Callback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
-	a.Lock()
-	callback, ok := a.states[state]
-	delete(a.states, state)
-	a.Unlock()
-
+	callback, ok := a.States.Get(state)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "incorrect state"})
 		return
@@ -120,7 +164,7 @@ func (a *AuthController) Callback(c *gin.Context) {
 	}
 	if userDb == nil {
 		Logger.Error(err)
-		userDb, err = user.Create(*userGithub.ID, *userGithub.Login)
+		userDb, err = user.Create(*userGithub.ID, *userGithub.Login, types.RoleUser)
 		if err != nil {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
@@ -156,7 +200,6 @@ func (a *AuthController) Callback(c *gin.Context) {
 	} else {
 		c.JSON(http.StatusOK, tokenString)
 	}
-	c.Abort()
 }
 
 func (_ *AuthController) EnsureJWT(c *gin.Context) {

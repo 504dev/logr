@@ -6,22 +6,24 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"sync"
 )
 
-type argsT struct {
+type Args struct {
 	Configpath string
 }
 
-type confT struct {
-	Bind struct {
+type Config struct {
+	sync.RWMutex `yaml:"-"`
+	Bind         struct {
 		Http string `yaml:"http"`
 		Udp  string `yaml:"udp"`
 	} `yaml:"bind"`
 	OAuth struct {
 		Github struct {
-			ClientId     string `yaml:"client_id"`
-			ClientSecret string `yaml:"client_secret"`
-			Org          string `yaml:"org"`
+			Org          string `yaml:"org"           json:"org"`
+			ClientId     string `yaml:"client_id"     json:"client_id"`
+			ClientSecret string `yaml:"client_secret" json:"-"`
 		} `yaml:"github"`
 		JwtSecret string `yaml:"jwt_secret"`
 	} `yaml:"oauth"`
@@ -29,19 +31,38 @@ type confT struct {
 	Mysql      string `yaml:"mysql"`
 }
 
-var args argsT
-var config confT
+var args Args
+var config Config
 
 func ParseArgs() {
 	flag.StringVar(&args.Configpath, "config", "./config.yml", "set service config file")
 	flag.Parse()
 }
 
-func Args() *argsT {
-	return &args
-}
-func Get() *confT {
+func Get() *Config {
+	config.RLock()
+	defer config.RUnlock()
 	return &config
+}
+
+func Set(set func(c *Config)) {
+	config.Lock()
+	clone := config
+	set(&clone)
+	config = clone
+	config.Unlock()
+}
+
+func Save() error {
+	d, err := yaml.Marshal(&config)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(args.Configpath, d, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func Init() {
