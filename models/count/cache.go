@@ -15,10 +15,10 @@ func GetDashLognamesCached(dashId int) ([]*types.DashStatRow, error) {
 	return res.([]*types.DashStatRow), err
 }
 
-func GetDashStatsCached(dashId int) ([]*types.DashStatRow, error) {
-	key := fmt.Sprintf("counts:stats:%v", dashId)
+func GetDashStatsCached(dashId int, logname string) ([]*types.DashStatRow, error) {
+	key := fmt.Sprintf("counts:stats:%v:%v", dashId, logname)
 	res, err := cachify.Cachify(key, func() (interface{}, error) {
-		return GetDashStats(dashId)
+		return GetDashStats(dashId, logname)
 	}, time.Minute)
 	return res.([]*types.DashStatRow), err
 }

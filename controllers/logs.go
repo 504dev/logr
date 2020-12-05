@@ -71,9 +71,10 @@ func (_ *LogsController) Find(c *gin.Context) {
 
 func (_ *LogsController) Stats(c *gin.Context) {
 	dashId := c.GetInt("dashId")
+	logname := c.Query("logname")
 	duration := Logger.Time("response:/logs/stats", time.Millisecond)
 
-	stats, err := log.GetDashStatsCached(dashId)
+	stats, err := log.GetDashStatsCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
 	}

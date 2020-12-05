@@ -14,11 +14,19 @@ func ListenHTTP() error {
 
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWritter)
 
+	// TODO react
 	r := NewRouter()
 	r.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
-	r.Use(func(c *gin.Context) {
-		c.File("./frontend/dist/index.html")
-	})
+	r.GET("/", frontend)
+	r.GET("/demo", frontend)
+	r.GET("/login", frontend)
+	r.GET("/jwt/:token", frontend)
+	r.GET("/dashboards", frontend)
+	r.GET("/dashboard/*rest", frontend)
 
 	return r.Run(config.Get().Bind.Http)
+}
+
+func frontend(c *gin.Context) {
+	c.File("./frontend/dist/index.html")
 }
