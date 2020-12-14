@@ -4,7 +4,7 @@
 Helps you debug and analyze performance of your features. \
 Get to know your application better with **_Logr_**.
 
-[Demo](http://212.224.113.196:7778/demo)
+[Demo](http://logr.info/demo)
 
 ![Logr](https://i.ibb.co/4dsbDdk/image.png)
 
@@ -21,6 +21,23 @@ Get to know your application better with **_Logr_**.
 * Golang `v1.13`
 * ClickHouse `v20`
 * Mysql `v5.7`
+
+
+## Usage
+Nodejs example:
+```javascript
+const { Logr } = require('logr-node-client');
+
+const conf = new Logr({
+    udp: ':7776',
+    publicKey: 'MCAwDQYJKoZIhvcNAQEBBQADDwAwDAIFAMg7IrMCAwEAAQ==',
+    privateKey: 'MC0CAQACBQDIOyKzAgMBAAECBQCHaZwRAgMA0nkCAwDziwIDAL+xAgJMKwICGq0=',
+});
+
+const logr = conf.newLogger('hello.log');
+
+logr.info('Hello, Logr!');
+```
 
 ## Build & Run service
 ### Manual

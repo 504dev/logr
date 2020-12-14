@@ -19,6 +19,7 @@ func ListenHTTP() error {
 	r.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
 	r.GET("/", frontend)
 	r.GET("/demo", frontend)
+	r.GET("/logos", frontend)
 	r.GET("/login", frontend)
 	r.GET("/jwt/:token", frontend)
 	r.GET("/dashboards", frontend)
