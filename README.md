@@ -4,9 +4,11 @@
 Helps you debug and analyze performance of your features. \
 Get to know your application better with **_Logr_**.
 
-[Demo](http://logr.info/demo)
+[Demo]
 
-![Logr](https://i.ibb.co/4dsbDdk/image.png)
+[![Logr](https://i.ibb.co/4dsbDdk/image.png)][Demo]
+
+[Demo]: http://logr.info/demo
 
 * logs looks like in your `Terminal`
 * storing data in `ClickHouse`
