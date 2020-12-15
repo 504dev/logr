@@ -17,16 +17,7 @@ Get to know your application better with **_Logr_**.
 * `Vue.js` frontend
 * Authorization by `GitHub`
 
-## Requirements
-* Node.js `v12`
-* Npm `v6`
-* Golang `v1.13`
-* ClickHouse `v20`
-* Mysql `v5.7`
-
-
 ## Usage
-Nodejs example:
 ```javascript
 const { Logr } = require('logr-node-client');
 
@@ -40,6 +31,14 @@ const logr = conf.newLogger('hello.log');
 
 logr.info('Hello, Logr!');
 ```
+
+## Requirements
+* Node.js `v12`
+* Npm `v6`
+* Golang `v1.13`
+* ClickHouse `v20`
+* Mysql `v5.7`
+
 
 ## Build & Run service
 ### Manual

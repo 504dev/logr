@@ -44,7 +44,7 @@ func NewRouter() *gin.Engine {
 				GihubId:  usr.GithubId,
 				Username: usr.Username,
 				StandardClaims: jwt.StandardClaims{
-					ExpiresAt: time.Now().Add(5 * time.Minute).Unix(),
+					ExpiresAt: time.Now().Add(15 * time.Minute).Unix(),
 				},
 			}
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
