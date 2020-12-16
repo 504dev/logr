@@ -6,7 +6,7 @@ Get to know your application better with **_Logr_**.
 
 [Demo]
 
-[![Logr](https://i.ibb.co/4dsbDdk/image.png)][Demo]
+[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.jpg)][Demo]
 
 [Demo]: http://logr.info/demo
 
