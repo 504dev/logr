@@ -79,12 +79,20 @@ func NewRouter() *gin.Engine {
 		r.GET("/api/me/dashboards", auth.EnsureJWT, me.Dashboards)
 		r.POST("/api/me/dashboard", auth.EnsureJWT, auth.EnsureUser, me.AddDashboard)
 		r.POST(
-			"/api/me/dashboard/share/:dash_id/to/:username",
+			"/api/me/dashboard/:dash_id/member",
 			auth.EnsureJWT,
 			auth.EnsureUser,
 			me.DashRequired("dash_id"),
 			me.MyDash,
 			me.ShareDashboard,
+		)
+		r.DELETE(
+			"/api/me/dashboard/:dash_id/member",
+			auth.EnsureJWT,
+			auth.EnsureUser,
+			me.DashRequired("dash_id"),
+			me.MyDash,
+			me.RemoveMember,
 		)
 		r.PUT(
 			"/api/me/dashboard/:dash_id",

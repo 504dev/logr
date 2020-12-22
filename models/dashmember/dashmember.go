@@ -64,3 +64,15 @@ func Create(m *types.DashMember) error {
 
 	return nil
 }
+
+func Remove(id int) error {
+	conn := mysql.Conn()
+
+	_, err := conn.Exec("DELETE FROM dashboard_members WHERE id = ?", id)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

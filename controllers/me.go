@@ -29,7 +29,7 @@ func (_ *MeController) ShareDashboard(c *gin.Context) {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
-	username := c.Param("username")
+	username := c.Query("username")
 	userTo, _ := user.GetByUsername(username)
 	if userTo == nil {
 		c.AbortWithStatus(http.StatusNotFound)
@@ -49,7 +49,30 @@ func (_ *MeController) ShareDashboard(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	membership.User = userTo
 	c.JSON(http.StatusOK, membership)
+}
+
+func (_ *MeController) RemoveMember(c *gin.Context) {
+	userId := c.GetInt("userId")
+	dashId := c.GetInt("dashId")
+	id, _ := strconv.Atoi(c.Query("id"))
+	if id <= 0 {
+		c.AbortWithStatus(http.StatusBadRequest)
+		return
+	}
+	dash, _ := dashboard.GetById(dashId)
+	if userId != dash.OwnerId {
+		c.AbortWithStatus(http.StatusForbidden)
+		return
+	}
+	err := dashmember.Remove(id)
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	c.JSON(http.StatusOK, id)
 }
 
 func (_ *MeController) DashboardsOwn(c *gin.Context) {
