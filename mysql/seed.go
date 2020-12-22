@@ -14,7 +14,7 @@ func SeedUsers() {
 	defer stmt.Close()
 	users := [][]interface{}{
 		{1, 0, "logr", types.RoleAdmin},
-		{2, 55717547, "kidlog", types.RoleViewer},
+		{2, 55717547, "kidlog", types.RoleDemo},
 	}
 	for _, v := range users {
 		_, err = stmt.Exec(v...)

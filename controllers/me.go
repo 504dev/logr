@@ -9,6 +9,7 @@ import (
 	"github.com/504dev/logr/models/user"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
+	"github.com/google/go-github/v29/github"
 	"net/http"
 	"sort"
 	"strconv"
@@ -21,29 +22,35 @@ func (_ *MeController) Me(c *gin.Context) {
 	usr, _ := user.GetById(id)
 	c.JSON(http.StatusOK, usr)
 }
-func (_ *MeController) ShareDashboard(c *gin.Context) {
-	ownerId := c.GetInt("userId")
-	dashId := c.GetInt("dashId")
-	dash, _ := dashboard.GetById(dashId)
-	if ownerId != dash.OwnerId {
-		c.AbortWithStatus(http.StatusForbidden)
-		return
-	}
+func (_ *MeController) AddMember(c *gin.Context) {
+	idash, _ := c.Get("dash")
+	dash := idash.(*types.Dashboard)
 	username := c.Query("username")
-	userTo, _ := user.GetByUsername(username)
-	if userTo == nil {
-		c.AbortWithStatus(http.StatusNotFound)
+	if username == c.GetString("username") {
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
-	if ownerId == userTo.Id {
-		c.AbortWithStatus(http.StatusBadRequest)
+	userTo, err := user.GetByUsername(username)
+	if userTo == nil && err == nil {
+		client := github.NewClient(nil)
+		userGithub, _, err := client.Users.Get(c, username)
+		if err != nil {
+			Logger.Error(err)
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		userTo, err = user.Create(*userGithub.ID, username, types.RoleUser)
+	}
+	if err != nil {
+		Logger.Error(err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 	membership := types.DashMember{
 		DashId: dash.Id,
 		UserId: userTo.Id,
 	}
-	err := dashmember.Create(&membership)
+	err = dashmember.Create(&membership)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -54,16 +61,9 @@ func (_ *MeController) ShareDashboard(c *gin.Context) {
 }
 
 func (_ *MeController) RemoveMember(c *gin.Context) {
-	userId := c.GetInt("userId")
-	dashId := c.GetInt("dashId")
 	id, _ := strconv.Atoi(c.Query("id"))
 	if id <= 0 {
 		c.AbortWithStatus(http.StatusBadRequest)
-		return
-	}
-	dash, _ := dashboard.GetById(dashId)
-	if userId != dash.OwnerId {
-		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
 	err := dashmember.Remove(id)
@@ -191,8 +191,8 @@ func (_ *MeController) DashRequired(name string) func(c *gin.Context) {
 }
 
 func (_ *MeController) MyDash(c *gin.Context) {
-	tmp, _ := c.Get("dash")
-	dash := tmp.(*types.Dashboard)
+	idash, _ := c.Get("dash")
+	dash := idash.(*types.Dashboard)
 	ownerId := c.GetInt("userId")
 	if dash.OwnerId != ownerId {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -201,8 +201,8 @@ func (_ *MeController) MyDash(c *gin.Context) {
 }
 
 func (_ *MeController) MyDashOrShared(c *gin.Context) {
-	tmp, _ := c.Get("dash")
-	dash := tmp.(*types.Dashboard)
+	idash, _ := c.Get("dash")
+	dash := idash.(*types.Dashboard)
 	userId := c.GetInt("userId")
 	role := c.GetInt("role")
 	if dash.OwnerId != userId {

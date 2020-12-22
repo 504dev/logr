@@ -84,7 +84,7 @@ func NewRouter() *gin.Engine {
 			auth.EnsureUser,
 			me.DashRequired("dash_id"),
 			me.MyDash,
-			me.ShareDashboard,
+			me.AddMember,
 		)
 		r.DELETE(
 			"/api/me/dashboard/:dash_id/member",

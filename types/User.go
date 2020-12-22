@@ -13,6 +13,7 @@ const (
 	RoleAdmin  = 1
 	RoleUser   = 2
 	RoleViewer = 3
+	RoleDemo   = 4
 )
 
 const (

@@ -237,6 +237,7 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 	c.Set("claims", claims)
 	c.Set("token", token)
 	c.Set("userId", claims.Id)
+	c.Set("username", claims.Username)
 	c.Set("role", claims.Role)
 
 	c.Next()
