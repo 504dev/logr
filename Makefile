@@ -23,7 +23,7 @@ build: ## Build the executable file of service.
 
 front: ## Run service.
 	echo "Building frontend..."
-	cd ./frontend && npm i && npm run build
+	cd ./frontend && npm i --only=production && npm run build
 
 run: build ## Run service.
 	echo "Running..."
