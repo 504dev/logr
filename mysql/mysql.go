@@ -14,7 +14,7 @@ func Conn() *sqlx.DB {
 
 func Init() {
 	var err error
-	db, err = sqlx.Open("mysql", config.Get().Mysql)
+	db, err = sqlx.Open("mysql", config.Get().Mysql + "?parseTime=true")
 	if err != nil {
 		panic(err)
 	}

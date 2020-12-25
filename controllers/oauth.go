@@ -171,6 +171,7 @@ func (a *AuthController) Callback(c *gin.Context) {
 		}
 	}
 	Logger.Debug(userDb)
+	user.LoginAt(userDb.Id)
 
 	claims := types.Claims{
 		Id:          userDb.Id,

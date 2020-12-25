@@ -9,7 +9,7 @@ import (
 func findAllByField(fieldname string, val interface{}, limit int) (types.Users, error) {
 	conn := mysql.Conn()
 	users := types.Users{}
-	sql := fmt.Sprintf("SELECT id, github_id, username, role FROM users WHERE %v = ?", fieldname)
+	sql := fmt.Sprintf("SELECT id, github_id, username, role, login_at, created_at FROM users WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sql = fmt.Sprintf("%v LIMIT %v", sql, limit)
 	}
@@ -34,7 +34,7 @@ func findOneByField(fieldname string, val interface{}) (*types.User, error) {
 func GetAll() (types.Users, error) {
 	conn := mysql.Conn()
 	users := types.Users{}
-	err := conn.Select(&users, "SELECT id, github_id, username, role FROM users")
+	err := conn.Select(&users, "SELECT id, github_id, username, role, login_at, created_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -72,4 +72,11 @@ func Create(githubId int64, username string, role int) (*types.User, error) {
 	user, err := GetByGithubId(githubId)
 
 	return user, err
+}
+
+func LoginAt(id int) error {
+	conn := mysql.Conn()
+	_, err := conn.Exec("UPDATE users SET login_at = NOW() WHERE id = ?", id)
+
+	return err
 }
