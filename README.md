@@ -2,11 +2,9 @@
   <a href="https://logr.info">
     <img width="128" height="128" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.png">
   </a>
+  <b><i>Logr</i></b> is an open source logger and metric service.
 </div>
 
-# Logr
-
-**_Logr_** is an open source logger and metric service. \
 Helps you debug and analyze performance of your features. \
 Get to know your application better with **_Logr_**.
 
