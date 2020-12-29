@@ -4,10 +4,11 @@
   </a>
   <br>
   <b><i>Logr</i></b> is an open source logger and metric service.
+  <br>
+  Helps you debug and analyze performance of your features.
+  <br>
+  Get to know your application better with <b><i>Logr</i></b>.
 </div>
-
-Helps you debug and analyze performance of your features. \
-Get to know your application better with **_Logr_**.
 
 [Demo]
 
