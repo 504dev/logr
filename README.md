@@ -1,5 +1,5 @@
 <div align="center">
-  <a href="https://logr.info">
+  <a href="https://logr.info/demo">
     <img width="128" height="128" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.png">
   </a>
   <p>
