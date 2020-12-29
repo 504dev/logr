@@ -1,6 +1,6 @@
 <div align="center">
   <a href="https://logr.info">
-    <img width="200" height="200" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.svg">
+    <img width="200" height="200" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.png">
   </a>
 </div>
 
