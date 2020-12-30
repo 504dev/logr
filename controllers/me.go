@@ -29,8 +29,12 @@ func (_ *MeController) AddMember(c *gin.Context) {
 	idash, _ := c.Get("dash")
 	dash := idash.(*types.Dashboard)
 	username := c.Query("username")
-	if username == c.GetString("username") {
+	if username == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "username required"})
+		return
+	}
+	if username == c.GetString("username") {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "share to owner denied"})
 		return
 	}
 	members, err := dashmember.GetAllByDashId(dash.Id)
@@ -53,6 +57,10 @@ func (_ *MeController) AddMember(c *gin.Context) {
 	}
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		return
+	}
+	if userTo == nil {
+		c.JSON(http.StatusNotFound, gin.H{"msg": "user not found"})
 		return
 	}
 	membership := types.DashMember{
