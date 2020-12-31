@@ -53,7 +53,7 @@ logr.info('Hello, Logr!');
     `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
 2. Init config file:
     `make config`
-3. Fill [config.yml](#config.yml)
+3. Fill **config.yml**, see [Config](#config)
 4. Build frontend:
     `make front`
 5. Run:
@@ -67,8 +67,7 @@ logr.info('Hello, Logr!');
 3. Set env variables in **.env** file
 4. Run: ` docker-compose up -d`
 
-## config.yml
-
+## Config
 ```yaml
 bind:
   http: ":7778"

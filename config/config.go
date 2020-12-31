@@ -27,8 +27,9 @@ type Config struct {
 		} `yaml:"github"`
 		JwtSecret string `yaml:"jwt_secret"`
 	} `yaml:"oauth"`
-	Clickhouse string `yaml:"clickhouse"`
-	Mysql      string `yaml:"mysql"`
+	Clickhouse    string `yaml:"clickhouse"`
+	Mysql         string `yaml:"mysql"`
+	AllowNoCipher bool   `yaml:"allow_no_cipher"`
 }
 
 var args Args

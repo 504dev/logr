@@ -9,4 +9,4 @@ oauth:
     org: "${OAUTH_GITHUB_ORG}"
 clickhouse: "tcp://${CLICKHOUSE_HOST}:${CLICKHOUSE_PORT}?database=${CLICKHOUSE_DATABASE}&username=${CLICKHOUSE_USER}&password=${CLICKHOUSE_PASSWORD}"
 mysql: "${MYSQL_USER}:${MYSQL_PASSWORD}@tcp(${MYSQL_HOST}:${MYSQL_PORT})/${MYSQL_DATABASE}"
-
+allow_no_cipher: false
