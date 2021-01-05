@@ -1,12 +1,12 @@
 package types
 
 type LogPackage struct {
-	DashId      int    `json:"dash_id"`
+	DashId      int    `json:"dash_id,omitempty"`
 	PublicKey   string `json:"public_key"`
-	CipherLog   string `json:"cipher_log"`
-	CipherCount string `json:"cipher_count"`
-	*Log
-	*Count
+	CipherLog   string `json:"cipher_log,omitempty"`
+	CipherCount string `json:"cipher_count,omitempty"`
+	*Log        `json:"log,omitempty"`
+	*Count      `json:"count,omitempty"`
 }
 
 func (lp *LogPackage) DecryptLog(priv string) error {
