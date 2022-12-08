@@ -61,11 +61,11 @@ logr.info('Hello, Logr!');
 
 ### Docker-compose
 1. Clone repository: \
-    `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
+    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
 2. Create **.env** file:
     `make env`
 3. Set env variables in **.env** file
-4. Run: ` docker-compose up -d`
+4. Run: `docker-compose up -d`
 
 ## Config
 ```yaml
