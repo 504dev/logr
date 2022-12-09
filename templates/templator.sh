@@ -38,8 +38,10 @@ if [ ! ${OAUTH_JWT_SECRET} ]; then
   OAUTH_JWT_SECRET=$(openssl rand -hex 12 | awk '{ print $1 }')
 fi
 
-sed -e "s/\${LOGR_HTTP_BIND\}/${LOGR_HTTP_BIND}/g" "${LOGR_CONFIG_FILE}"
-sed -e "s/\${LOGR_UDP_BIND\}/${LOGR_UDP_BIND}/g" "${LOGR_CONFIG_FILE}"
+sed -e "s/\${LOGR_HTTP_HOST\}/${LOGR_HTTP_HOST}/g" "${LOGR_CONFIG_FILE}"
+sed -e "s/\${LOGR_HTTP_PORT\}/${LOGR_HTTP_PORT}/g" "${LOGR_CONFIG_FILE}"
+sed -e "s/\${LOGR_UDP_HOST\}/${LOGR_UDP_HOST}/g" "${LOGR_CONFIG_FILE}"
+sed -e "s/\${LOGR_UDP_PORT\}/${LOGR_UDP_PORT}/g" "${LOGR_CONFIG_FILE}"
 
 sed -e "s/\${MYSQL_HOST\}/${MYSQL_HOST}/g" "${LOGR_CONFIG_FILE}"
 sed -e "s/\${MYSQL_PORT\}/${MYSQL_PORT}/g" "${LOGR_CONFIG_FILE}"

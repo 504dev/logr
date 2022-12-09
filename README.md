@@ -51,21 +51,25 @@ logr.info('Hello, Logr!');
 ### Manual
 1. Clone repository: \
     `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
-2. Init config file:
+2. Init **config.yml** file: \
     `make config`
-3. Fill **config.yml**, see [Config](#config)
-4. Build frontend:
+3. Fill **config.yml**, see [Config](#config) section
+4. Build frontend: \
     `make front`
-5. Run:
+5. Run: \
     `make run`
+6. Enjoy: \
+   http://localhost:7778/
 
 ### Docker-compose
 1. Clone repository: \
-    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
-2. Create **.env** file:
-    `make env`
-3. Set env variables in **.env** file
-4. Run: `docker-compose up -d`
+    `git clone --recurse-submodules https://github.com/504dev/logr.git`
+2. Generate **.env** file: \
+    `cd logr && make env`
+3. Run: \
+    `docker-compose up -d`
+4. Enjoy: \
+    http://localhost:7778/
 
 ## Config
 ```yaml

@@ -1,6 +1,6 @@
 bind:
-  http: "${LOGR_HTTP_BIND}"
-  udp: "${LOGR_UDP_BIND}"
+  http: "${LOGR_HTTP_HOST}:${LOGR_HTTP_PORT}"
+  udp: "${LOGR_UDP_HOST}:${LOGR_UDP_PORT}"
 oauth:
   jwt_secret: "${OAUTH_JWT_SECRET}"
   github:

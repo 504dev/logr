@@ -25,8 +25,6 @@ services:
     volumes:
       - clickhouse-volume:/var/lib/clickhouse
       - ./${CLICKHOUSE_USER}.xml:/etc/clickhouse-server/users.d/${CLICKHOUSE_USER}.xml
-    ports:
-      - "127.0.0.1:${CLICKHOUSE_PORT}:9000"
 
   clickhouse-client:
     image: yandex/clickhouse-server
@@ -39,8 +37,6 @@ services:
     image: mysql:5.7
     command: --default-authentication-plugin=mysql_native_password
     restart: always
-    ports:
-      - "127.0.0.1:${MYSQL_PORT}:3306"
     volumes:
       - mysql-volume:/var/lib/mysql
     environment:
@@ -56,13 +52,14 @@ services:
       test: ps -o comm | grep -q node && exit 1 || exit 0
       interval: 1s
       timeout: 2s
-      retries: 100
+      retries: 180
     volumes:
       - ./frontend:/frontend
     command: sh -c "yarn install && yarn build && sleep 5"
 
   logr-server:
-    network_mode: host
+    ports:
+      - "127.0.0.1:7778:7778"
     image: golang:1.13
     working_dir: /opt/logr
     depends_on:
