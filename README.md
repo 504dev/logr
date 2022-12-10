@@ -50,7 +50,7 @@ logr.info('Hello, Logr!');
 ## Build & Run service
 ### Manual
 1. Clone repository: \
-    `git clone --recurse-submodules git@github.com:504dev/logr.git && cd logr`
+    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
 2. Init **config.yml** file: \
     `make config`
 3. Fill **config.yml**, see [Config](#config) section

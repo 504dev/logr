@@ -11,85 +11,111 @@ import (
 	"time"
 )
 
+type BinancePrice struct {
+	Price  float64 `json:"lastPrice,string"`
+	Volume float64 `json:"quoteVolume,string"`
+}
+
+type HitbtcPrice struct {
+	Price  float64 `json:"last,string"`
+	Volume float64 `json:"volume_quote,string"`
+}
+
+type BitfinexPrice struct {
+	Price  float64
+	Volume float64
+}
+
+func (b *BitfinexPrice) UnmarshalJSON(buf []byte) error {
+	tmp := []interface{}{nil, nil, nil, nil, nil, nil, &b.Price, &b.Volume}
+	if err := json.Unmarshal(buf, &tmp); err != nil {
+		return err
+	}
+	b.Volume *= b.Price
+	return nil
+}
+
 func crypto(conf *logr.Config) {
 	l, _ := conf.NewLogger("crypto.log")
 	for {
 		time.Sleep(30 * time.Second)
-		delta := l.Time("pricer:/get-day-snapshot", time.Millisecond)
-		day := time.Now().Format("2006-01-02")
-		path := fmt.Sprintf("/get-day-snapshot?day=%v&uni=1&format=ohlcv&quote=USDT", day)
-		bytes, err := request(path)
-		if err != nil {
-			l.Error(err)
-			continue
-		}
-		prices := map[string]map[string]map[string]float64{}
-		if err = json.Unmarshal(bytes, &prices); err != nil {
-			l.Error(err)
-			continue
-		}
-		delta()
-
 		for _, base := range [3]string{"BTC", "ETH", "LTC"} {
 			sym := base + "_USDT"
-			hitp := prices["hitbtc"][sym]["c"]
-			binp := prices["binance"][sym]["c"]
-			bitp := prices["bitfinex"][sym]["c"]
+			bin, hit, bit := BinancePrice{}, HitbtcPrice{}, BitfinexPrice{}
+			var err error
+			err = request(&bin, fmt.Sprintf("https://data.binance.com/api/v3/ticker/24hr?symbol=%vUSDT", base))
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			err = request(&hit, fmt.Sprintf("https://api.hitbtc.com/api/3/public/ticker/%vUSDT", base))
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			err = request(&bit, fmt.Sprintf("https://api-pub.bitfinex.com/v2/ticker/t%vUSD", base))
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			binP, hitP, bitP := bin.Price, hit.Price, bit.Price
+			binV, hitV, bitV := bin.Volume, hit.Volume, bit.Volume
+
+			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitP).Avg(binP).Avg(bitP).Min(hitP).Min(binP).Min(bitP).Max(hitP).Max(binP).Max(bitP)
+			l.Avg(fmt.Sprintf("volume:%v", sym), hitV+binV+bitV)
+
 			l.Info(
 				"%v price: %v %v$, %v %v$, %v %v$",
 				color.New(color.Bold).SprintFunc()(base),
 				color.CyanString("HitBTC"),
-				humanize.Commaf(hitp),
+				humanize.Commaf(hitP),
 				color.YellowString("Binance"),
-				humanize.Commaf(binp),
+				humanize.Commaf(binP),
 				color.GreenString("Bitfinex"),
-				humanize.Commaf(bitp),
+				humanize.Commaf(bitP),
 			)
-			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitp).Avg(binp).Avg(bitp).Min(hitp).Min(binp).Min(bitp).Max(hitp).Max(binp).Max(bitp)
-			hitv := prices["hitbtc"][sym]["v"]
-			binv := prices["binance"][sym]["v"]
-			bitv := prices["bitfinex"][sym]["v"]
 			l.Info(
 				"%v volume: %v %v$, %v %v$, %v %v$",
 				color.New(color.Bold).SprintFunc()(base),
 				color.CyanString("HitBTC"),
-				humanize.Comma(int64(hitv)),
+				humanize.Comma(int64(hitV)),
 				color.YellowString("Binance"),
-				humanize.Comma(int64(binv)),
+				humanize.Comma(int64(binV)),
 				color.GreenString("Bitfinex"),
-				humanize.Comma(int64(bitv)),
+				humanize.Comma(int64(bitV)),
 			)
-			l.Avg(fmt.Sprintf("volume:%v", sym), hitp+binv+bitv)
 			l.Info(
 				"%v price widget %v",
 				color.New(color.Bold).SprintFunc()(base),
 				l.Widget("max", fmt.Sprintf("price:%v", sym), 30),
 			)
 			if sym == "BTC_USDT" {
-				v := hitv + bitv + binv
-				l.Per("volume:BTC_USDT:hitbtc", hitv, v)
-				l.Per("volume:BTC_USDT:bitfinex", bitv, v)
-				l.Per("volume:BTC_USDT:binance", binv, v)
+				totalV := hitV + bitV + binV
+				l.Per("volume:BTC_USDT:hitbtc", hitV, totalV)
+				l.Per("volume:BTC_USDT:bitfinex", bitV, totalV)
+				l.Per("volume:BTC_USDT:binance", binV, totalV)
 			}
 		}
 
-		l.Debug(string(bytes))
+		//l.Debug(string(bytes))
 	}
 }
 
-func request(path string) ([]byte, error) {
-	res := []byte{}
-	url := fmt.Sprintf("http://212.224.113.196:5554%v", path)
+func request(res interface{}, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
-		return res, err
+		return err
 	}
 	defer resp.Body.Close()
 
 	bodyBytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return res, err
+		return err
 	}
 
-	return bodyBytes, nil
+	if err = json.Unmarshal(bodyBytes, res); err != nil {
+		return err
+	}
+
+	return nil
 }
