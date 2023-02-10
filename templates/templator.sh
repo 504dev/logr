@@ -7,8 +7,7 @@ DIR="$(dirname "${BASH_SOURCE[0]}")"
 cd ${DIR} && cd ..
 
 if [ ! -f ".env" ]; then
-    echo "Error! You need to create .env file from .env.example first!"
-    exit 1
+    make env
 fi
 
 if [ $(uname) == "Darwin" ]; then
@@ -30,13 +29,9 @@ sed -e "s/\${CLICKHOUSE_USER\}/${CLICKHOUSE_USER}/g" "${CLICKHOUSE_USER_FILE}"
 sed -e "s/\${CLICKHOUSE_PASSWORD_HASH\}/${CLICKHOUSE_PASSWORD_HASH}/g" "${CLICKHOUSE_USER_FILE}"
 
 ## Create Logr config from template
-LOGR_CONFIG_FILE="config.yml"
+LOGR_CONFIG_FILE="config.docker.yml"
 
 cp templates/config.yml.template "${LOGR_CONFIG_FILE}"
-
-if [ ! ${OAUTH_JWT_SECRET} ]; then
-  OAUTH_JWT_SECRET=$(openssl rand -hex 12 | awk '{ print $1 }')
-fi
 
 sed -e "s/\${LOGR_HTTP_HOST\}/${LOGR_HTTP_HOST}/g" "${LOGR_CONFIG_FILE}"
 sed -e "s/\${LOGR_HTTP_PORT\}/${LOGR_HTTP_PORT}/g" "${LOGR_CONFIG_FILE}"

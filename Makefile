@@ -15,7 +15,7 @@ config: ## Creating the local config yml.
 
 env: ## Creating .env file.
 	echo "Creating .env file ..."
-	cp templates/.env.template .env
+	cat templates/.env.template | sed "s/OAUTH_JWT_SECRET=/OAUTH_JWT_SECRET=$$(openssl rand -hex 12 | awk '{ print $1 }')/" > .env
 
 build: ## Build the executable file of service.
 	echo "Building backend..."

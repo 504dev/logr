@@ -69,8 +69,4 @@ services:
     volumes:
       - ./:/opt/logr
     command: >
-      sh -c 'export PKG="github.com/504dev/logr"
-      &&     export PKG_LIST="$$(go list $${PKG}/... | grep -v /vendor/)"
-      &&     export SERVICE_SERVER="server"
-      &&     go build -o logr-server ./cmd/$${SERVICE_SERVER}/main.go
-      &&     ./logr-server'
+      sh -c 'go build -o logr-server ./cmd/server/main.go && ./logr-server --config="./config.docker.yml"'
