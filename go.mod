@@ -10,12 +10,12 @@ require (
 	github.com/fatih/color v1.9.0
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-contrib/static v0.0.0-20191128031702-f81c604d8ac2
-	github.com/gin-gonic/gin v1.5.0
+	github.com/gin-gonic/gin v1.7.7
 	github.com/go-sql-driver/mysql v1.4.0
 	github.com/google/go-github/v29 v29.0.2
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
-	gopkg.in/yaml.v2 v2.2.2
+	gopkg.in/yaml.v2 v2.2.8
 )
