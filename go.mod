@@ -15,7 +15,7 @@ require (
 	github.com/google/go-github/v29 v29.0.2
 	github.com/jmoiron/sqlx v1.2.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	golang.org/x/net v0.0.0-20190603091049-60506f45cf65
+	golang.org/x/net v0.7.0
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	gopkg.in/yaml.v2 v2.2.2
 )
