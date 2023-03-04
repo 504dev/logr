@@ -10,7 +10,7 @@ setup: ## Installing all service dependencies
 
 .PHONY: config
 config: ## Creating the local config yml.
-	@echo "Creating config.yml based in .env..."
+	@echo "Creating config.yml based on .env..."
 	@bash templates/templator.sh
 
 env: ## Creating .env file.
