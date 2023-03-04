@@ -45,28 +45,12 @@ services:
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
-  frontend:
-    image: node:12-alpine
-    working_dir: /frontend
-    healthcheck:
-      test: ps -o comm | grep -q node && exit 1 || exit 0
-      interval: 1s
-      timeout: 2s
-      retries: 180
-    volumes:
-      - ./frontend:/frontend
-    command: sh -c "yarn install && yarn build && sleep 5"
-
-  logr-server:
+  logr:
+    build: .
     ports:
       - "127.0.0.1:7778:7778"
-    image: golang:1.13
     working_dir: /opt/logr
-    depends_on:
-      frontend:
-        condition: service_healthy
     restart: always
     volumes:
       - ./:/opt/logr
-    command: >
-      sh -c 'go build -o logr-server ./cmd/server/main.go && ./logr-server --config="./config.docker.yml"'
+    command: --config="./config.docker.yml"
