@@ -23,10 +23,10 @@ source .env
 CLICKHOUSE_USER_FILE="./clickhouse/${CLICKHOUSE_USER}.xml"
 CLICKHOUSE_PASSWORD_HASH=$(echo -n "${CLICKHOUSE_PASSWORD}" | sha256sum | awk '{ print $1 }')
 
-cp templates/user.xml.template "${CLICKHOUSE_USER_FILE}"
+cp templates/user.xml.template                                              "${CLICKHOUSE_USER_FILE}"
 
-sed -e "s/\${CLICKHOUSE_USER\}/${CLICKHOUSE_USER}/g" "${CLICKHOUSE_USER_FILE}"
-sed -e "s/\${CLICKHOUSE_PASSWORD_HASH\}/${CLICKHOUSE_PASSWORD_HASH}/g" "${CLICKHOUSE_USER_FILE}"
+sed -e "s/\${CLICKHOUSE_USER\}/${CLICKHOUSE_USER}/g"                        "${CLICKHOUSE_USER_FILE}"
+sed -e "s/\${CLICKHOUSE_PASSWORD_HASH\}/${CLICKHOUSE_PASSWORD_HASH}/g"      "${CLICKHOUSE_USER_FILE}"
 
 ## Create Logr config from template
 LOGR_CONFIG_FILE="config.yml"
