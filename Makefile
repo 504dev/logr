@@ -10,12 +10,14 @@ setup: ## Installing all service dependencies
 
 .PHONY: config
 config: ## Creating the local config yml.
-	echo "Creating local config.yml ..."
-	cp templates/config.yml.template config.yml
+	@echo "Creating config.yml based in .env..."
+	@bash templates/templator.sh
 
 env: ## Creating .env file.
-	echo "Creating .env file ..."
-	cat templates/.env.template | sed "s/OAUTH_JWT_SECRET=/OAUTH_JWT_SECRET=$$(openssl rand -hex 12 | awk '{ print $1 }')/" > .env
+	@echo "Creating .env file..."
+	@[ -f ./.env ] && echo "Old .env file founded! Backuping to .env.backup" && cp .env .env.backup || true	
+	@cat templates/.env.template | sed "s/OAUTH_JWT_SECRET=/OAUTH_JWT_SECRET=$$(openssl rand -hex 12 | awk '{ print $1 }')/" > .env
+	@echo "Done" 
 
 build: ## Build the executable file of service.
 	echo "Building backend..."

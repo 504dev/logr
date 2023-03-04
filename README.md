@@ -66,9 +66,10 @@ logr.info('Hello, Logr!');
     `git clone --recurse-submodules https://github.com/504dev/logr.git`
 2. Generate **.env** file: \
     `cd logr && make env`
-3. Run: \
+3. Edit **.env** file with your favourite editor : \
+4. Run: \
     `docker-compose up -d`
-4. Enjoy: \
+5. Enjoy: \
     http://localhost:7778/
 
 ## Config
