@@ -87,7 +87,7 @@ func crypto(conf *logr.Config) {
 			l.Info(
 				"%v price widget %v",
 				color.New(color.Bold).SprintFunc()(base),
-				l.Widget("max", fmt.Sprintf("price:%v", sym), 30),
+				l.Snippet("max", fmt.Sprintf("price:%v", sym), 30),
 			)
 			if sym == "BTC_USDT" {
 				totalV := hitV + bitV + binV
