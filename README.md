@@ -63,9 +63,9 @@ logr.info('Hello, Logr!');
 
 ### Docker
 1. Clone repository: \
-    `git clone --recurse-submodules https://github.com/504dev/logr.git`
+    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
 2. Generate **.env** file: \
-    `cd logr && make env`
+    `make env`
 3. Edit **.env** file with your favourite editor
 4. Generate **.config** file: \
     `make config`
