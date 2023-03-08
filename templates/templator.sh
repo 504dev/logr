@@ -28,6 +28,13 @@ cp templates/user.xml.template                                              "${C
 sed -e "s/\${CLICKHOUSE_USER\}/${CLICKHOUSE_USER}/g"                        "${CLICKHOUSE_USER_FILE}"
 sed -e "s/\${CLICKHOUSE_PASSWORD_HASH\}/${CLICKHOUSE_PASSWORD_HASH}/g"      "${CLICKHOUSE_USER_FILE}"
 
+
+CLICKHOUSE_INITDB_FILE="./clickhouse/init-db.sh"
+
+cp templates/init-db.sh                                                     "${CLICKHOUSE_INITDB_FILE}"
+sed -e "s/\${CLICKHOUSE_DATABASE\}/${CLICKHOUSE_DATABASE}/g"                "${CLICKHOUSE_INITDB_FILE}"
+
+
 ## Create Logr config from template
 LOGR_CONFIG_FILE="config.yml"
 
