@@ -5,4 +5,5 @@ vendor/
 config.yml
 logr-server
 .env
+.env.backup
 *.xml
