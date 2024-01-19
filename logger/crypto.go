@@ -43,19 +43,19 @@ func crypto(conf *logr.Config) {
 			sym := base + "_USDT"
 			bin, hit, bit := BinancePrice{}, HitbtcPrice{}, BitfinexPrice{}
 			var err error
-			err = request(&bin, fmt.Sprintf("https://data.binance.com/api/v3/ticker/24hr?symbol=%vUSDT", base))
+			err = request(&bin, fmt.Sprintf("https://api.binance.com/api/v3/ticker/24hr?symbol=%vUSDT", base))
 			if err != nil {
-				fmt.Println(err)
+				Logger.Error("Demo crypto.log binance: %v", err)
 				continue
 			}
 			err = request(&hit, fmt.Sprintf("https://api.hitbtc.com/api/3/public/ticker/%vUSDT", base))
 			if err != nil {
-				fmt.Println(err)
+				Logger.Error("Demo crypto.log hitbtc: %v", err)
 				continue
 			}
 			err = request(&bit, fmt.Sprintf("https://api-pub.bitfinex.com/v2/ticker/t%vUSD", base))
 			if err != nil {
-				fmt.Println(err)
+				Logger.Error("Demo crypto.log bitfinex: %v", err)
 				continue
 			}
 			binP, hitP, bitP := bin.Price, hit.Price, bit.Price
