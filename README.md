@@ -54,11 +54,16 @@ logr.info('Hello, Logr!');
 2. Init **config.yml** file: \
     `make config`
 3. Fill **config.yml**, see [Config](#config) section
-4. Build frontend: \
+4. Create databases in Clickhouse and Mysql
+    ```
+    clickhouse-client --query "CREATE DATABASE IF NOT EXISTS logrdb"
+    mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS logrdb;"
+    ```
+5. Build frontend: \
     `make front`
-5. Run: \
+6. Run: \
     `make run`
-6. Enjoy: \
+7. Enjoy: \
    http://localhost:7778/
 
 ### Docker
@@ -86,7 +91,7 @@ oauth:
     org: "504dev"
   jwt_secret: "jwt-secret"
 clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
-mysql: "logr:logr@/logr"
+mysql: "logr:logr@tcp(localhost:3306)/logr"
 ```
 
 * `client_id` and `client_secret` is Github App keys (optional. set empty, if not sure)

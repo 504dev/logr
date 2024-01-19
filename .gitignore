@@ -3,6 +3,7 @@
 .DS_Store
 vendor/
 config.yml
+config.dev.yml
 logr-server
 .env
 .env.backup
