@@ -54,7 +54,7 @@ logr.info('Hello, Logr!');
 2. Init **config.yml** file: \
     `make config`
 3. Fill **config.yml**, see [Config](#config) section
-4. Create databases in Clickhouse and Mysql
+4. Creating databases in Clickhouse and Mysql
     ```
     clickhouse-client --query "CREATE DATABASE IF NOT EXISTS logrdb"
     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS logrdb;"
