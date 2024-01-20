@@ -22,8 +22,8 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 		if f.Offset != 0 {
 			now = time.Unix(0, f.Offset)
 		}
-		day := now.UTC().AddDate(0, 0, -1).Format(time.RFC3339)[0:10]
-		w1 := fmt.Sprintf("%v AND day >= '%v'", where, day)
+		day := now.UTC().Format(time.RFC3339)[0:10]
+		w1 := fmt.Sprintf("%v AND day = '%v'", where, day)
 		logs, err := getByFilter(w1, values, limit)
 		if err != nil {
 			return nil, err

@@ -117,6 +117,7 @@ func GetDashStats(dashId int, logname string) ([]*types.DashStatRow, error) {
       WHERE dash_id = ? AND logname = ? AND day > toDate(now() - interval 7 day)
       GROUP BY hostname, version
     `
+	Logger.Debug("%v %v", sql, []interface{}{dashId, logname})
 	stats := types.DashStatRows{}
 	err := clickhouse.Conn().Select(&stats, sql, dashId, logname)
 	if err != nil {
