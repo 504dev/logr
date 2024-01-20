@@ -2,13 +2,14 @@ package log
 
 import (
 	"fmt"
+	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/clickhouse"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"
 )
 
-func GetByFilter(f types.Filter) (types.Logs, error) {
+func GetByFilter(f types.Filter) (_types.Logs, error) {
 	where, values, err := f.ToSql()
 	if err != nil {
 		return nil, err
@@ -42,7 +43,7 @@ func GetByFilter(f types.Filter) (types.Logs, error) {
 	return getByFilter(where, values, limit)
 }
 
-func getByFilter(where string, values []interface{}, limit int) (types.Logs, error) {
+func getByFilter(where string, values []interface{}, limit int) (_types.Logs, error) {
 	conn := clickhouse.Conn()
 	delta := Logger.Duration()
 	sql := `
@@ -50,7 +51,7 @@ func getByFilter(where string, values []interface{}, limit int) (types.Logs, err
       FROM logs ` + where + `
       ORDER BY day DESC, timestamp DESC
       LIMIT ` + fmt.Sprint(limit)
-	logs := types.Logs{}
+	logs := _types.Logs{}
 	err := conn.Select(&logs, sql, values...)
 	Logger.Debug("%v\n%v\ncount: %v, time: %v", sql, values, len(logs), delta())
 	return logs, err

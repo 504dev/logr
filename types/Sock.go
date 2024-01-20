@@ -1,6 +1,7 @@
 package types
 
 import (
+	_types "github.com/504dev/logr-go-client/types"
 	"golang.org/x/net/websocket"
 	"sync"
 )
@@ -16,7 +17,7 @@ type Sock struct {
 	*websocket.Conn `json:"conn"`
 }
 
-func (s *Sock) SendLog(lg *Log) error {
+func (s *Sock) SendLog(lg *_types.Log) error {
 	m := SockMessage{
 		Path:    "/log",
 		Payload: lg,

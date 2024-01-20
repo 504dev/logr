@@ -1,6 +1,7 @@
 package count
 
 import (
+	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/clickhouse"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
@@ -14,7 +15,7 @@ const (
 	AggDay      = "d"
 )
 
-func Find(filter types.Filter, agg string) (types.Counts, error) {
+func Find(filter types.Filter, agg string) (_types.Counts, error) {
 	where := `dash_id = ? and logname = ?`
 	values := []interface{}{filter.DashId, filter.Logname}
 	if filter.Hostname != "" {
@@ -74,7 +75,7 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 		return nil, err
 	}
 
-	counts := types.Counts{}
+	counts := _types.Counts{}
 	for rows.Next() {
 		var timestamp time.Time
 		var hostname, keyname string
@@ -84,23 +85,23 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 		if err != nil {
 			return nil, err
 		}
-		metrics := types.Metrics{}
+		metrics := _types.Metrics{}
 		if inc != nil {
-			metrics.Inc = &types.Inc{Val: *inc}
+			metrics.Inc = &_types.Inc{Val: *inc}
 		}
 		if max != nil {
-			metrics.Max = &types.Max{Val: *max}
+			metrics.Max = &_types.Max{Val: *max}
 		}
 		if min != nil {
-			metrics.Min = &types.Min{Val: *min}
+			metrics.Min = &_types.Min{Val: *min}
 		}
 		if avgNum != nil && avgSum != nil {
-			metrics.Avg = &types.Avg{Sum: *avgSum, Num: *avgNum}
+			metrics.Avg = &_types.Avg{Sum: *avgSum, Num: *avgNum}
 		}
 		if perTaken != nil && perTotal != nil {
-			metrics.Per = &types.Per{Total: *perTotal, Taken: *perTaken}
+			metrics.Per = &_types.Per{Total: *perTotal, Taken: *perTaken}
 		}
-		counts = append(counts, &types.Count{
+		counts = append(counts, &_types.Count{
 			Timestamp: timestamp.Unix(),
 			Hostname:  hostname,
 			Keyname:   keyname,

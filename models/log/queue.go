@@ -1,9 +1,9 @@
 package log
 
 import (
+	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/clickhouse"
 	"github.com/504dev/logr/clickhouse/queue"
-	"github.com/504dev/logr/types"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func StopQueue() error {
 	return Queue.Stop()
 }
 
-func PushToQueue(log *types.Log) error {
+func PushToQueue(log *_types.Log) error {
 	day := time.Unix(0, log.Timestamp).UTC().Format("2006-01-02")
 	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message, log.Pid, log.Version}
 	Queue.Push(values)

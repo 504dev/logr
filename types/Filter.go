@@ -1,6 +1,7 @@
 package types
 
 import (
+	_types "github.com/504dev/logr-go-client/types"
 	"regexp"
 	"strings"
 	"time"
@@ -21,7 +22,7 @@ type Filter struct {
 	Keyname   string   `json:"keyname"`
 }
 
-func (f *Filter) Match(log *Log) bool {
+func (f *Filter) Match(log *_types.Log) bool {
 	if f.DashId != 0 && f.DashId != log.DashId {
 		return false
 	}

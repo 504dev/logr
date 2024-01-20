@@ -2,6 +2,7 @@ package types
 
 import (
 	"encoding/json"
+	_types "github.com/504dev/logr-go-client/types"
 	"sync"
 	"time"
 )
@@ -11,7 +12,7 @@ type SockMap struct {
 	data map[int]map[string]*Sock
 }
 
-func (sm *SockMap) PushLog(lg *Log) int {
+func (sm *SockMap) PushLog(lg *_types.Log) int {
 	cnt := 0
 	sm.Lock()
 	now := time.Now().Unix()

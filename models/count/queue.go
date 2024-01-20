@@ -1,9 +1,9 @@
 package count
 
 import (
+	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/clickhouse"
 	"github.com/504dev/logr/clickhouse/queue"
-	"github.com/504dev/logr/types"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func StopQueue() error {
 	return Queue.Stop()
 }
 
-func PushToQueue(c *types.Count) error {
+func PushToQueue(c *_types.Count) error {
 	Queue.Push(c.AsVector())
 	return nil
 }

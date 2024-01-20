@@ -2,13 +2,13 @@ package server
 
 import (
 	"encoding/json"
+	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
 	countModel "github.com/504dev/logr/models/count"
 	"github.com/504dev/logr/models/dashkey"
 	logModel "github.com/504dev/logr/models/log"
 	"github.com/504dev/logr/models/ws"
-	"github.com/504dev/logr/types"
 	"net"
 )
 
@@ -33,7 +33,7 @@ func ListenUDP() error {
 
 		Logger.Inc("udp", 1)
 
-		lp := types.LogPackage{}
+		lp := _types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
 
 		if err != nil {
