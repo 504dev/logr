@@ -9,6 +9,7 @@ import (
 	"github.com/504dev/logr/models/dashkey"
 	logModel "github.com/504dev/logr/models/log"
 	"github.com/504dev/logr/models/ws"
+	"github.com/504dev/logr/types"
 	"net"
 )
 
@@ -20,6 +21,10 @@ func ListenUDP() error {
 	pc, err := net.ListenUDP("udp", serverAddr)
 	if err != nil {
 		return err
+	}
+
+	var joiner = types.LogPackageJoiner{
+		Data: map[string]types.LogPackageRow{},
 	}
 
 	for {
@@ -55,36 +60,57 @@ func ListenUDP() error {
 			lp.Count = nil
 		}
 
-		if lp.CipherLog != "" {
+		// Handle logs
+		if lp.CipherLog != "" || lp.Log != nil {
 			Logger.Inc("udp:l", 1)
-			err = lp.DecryptLog(dk.PrivateKey)
-			if err != nil {
-				Logger.Error("UDP decrypt log error: %v", err)
-			}
-		}
-		if lp.Log != nil {
-			lp.Log.DashId = dk.DashId
-			ws.SockMap.PushLog(lp.Log)
-			err = logModel.PushToQueue(lp.Log)
-			if err != nil {
-				Logger.Error("UDP create log error: %v", err)
-			}
+			go func() {
+				if lp.CipherLog != "" {
+					if uid := lp.ChunkUid; uid != "" {
+						complete, joined := joiner.Add(&lp, 5)
+						if !complete {
+							return
+						}
+						joiner.Drop(uid)
+						lp = *joined
+					}
+					err = lp.DecryptLog(dk.PrivateKey)
+					if err != nil {
+						Logger.Error("UDP decrypt log error: %v", err)
+					}
+				}
+
+				if lp.Log != nil {
+					lp.Log.DashId = dk.DashId
+					ws.SockMap.PushLog(lp.Log)
+					err = logModel.PushToQueue(lp.Log)
+					if err != nil {
+						Logger.Error("UDP create log error: %v", err)
+					}
+				}
+			}()
+			continue
 		}
 
-		if lp.CipherCount != "" {
+		// Handle counts
+		if lp.CipherCount != "" || lp.Count != nil {
 			Logger.Inc("udp:c", 1)
-			err = lp.DecryptCount(dk.PrivateKey)
-			if err != nil {
-				Logger.Error("UDP decrypt count error: %v", err)
-			}
-		}
-		if lp.Count != nil {
-			lp.Count.DashId = dk.DashId
-			//Logger.Debug("UDP %v", lp.Count)
-			err = countModel.PushToQueue(lp.Count)
-			if err != nil {
-				Logger.Error("UDP create count error: %v", err)
-			}
+			go func() {
+				if lp.CipherCount != "" {
+					err = lp.DecryptCount(dk.PrivateKey)
+					if err != nil {
+						Logger.Error("UDP decrypt count error: %v", err)
+					}
+				}
+
+				if lp.Count != nil {
+					lp.Count.DashId = dk.DashId
+					//Logger.Debug("UDP %v", lp.Count)
+					err = countModel.PushToQueue(lp.Count)
+					if err != nil {
+						Logger.Error("UDP create count error: %v", err)
+					}
+				}
+			}()
 		}
 	}
 }

@@ -1,9 +1,9 @@
 module github.com/504dev/logr
 
-go 1.12
+go 1.13
 
 require (
-	github.com/504dev/logr-go-client v1.0.4
+	github.com/504dev/logr-go-client v1.0.7
 	github.com/ClickHouse/clickhouse-go v1.3.12
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
