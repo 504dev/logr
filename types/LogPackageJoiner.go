@@ -54,7 +54,7 @@ func (m *LogPackageJoiner) hasSafe(uid string) bool {
 func (m *LogPackageJoiner) completeSafe(uid string) (complete bool, joined *_types.LogPackage) {
 	m.RLock()
 	defer m.RUnlock()
-	return m.Data[uid].Complete()
+	return m.Data[uid].Joined()
 
 }
 

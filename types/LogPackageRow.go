@@ -7,7 +7,7 @@ import (
 
 type LogPackageRow []*_types.LogPackage
 
-func (chunks LogPackageRow) Complete() (complete bool, joined *_types.LogPackage) {
+func (chunks LogPackageRow) Joined() (complete bool, joined *_types.LogPackage) {
 	complete = true
 	var buffer bytes.Buffer
 	for _, lp := range chunks {
