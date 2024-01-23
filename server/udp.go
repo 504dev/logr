@@ -57,14 +57,15 @@ func ListenUDP() error {
 
 		if !config.Get().AllowNoCipher {
 			lp.Log = nil
+			lp.PlainLog = ""
 			lp.Count = nil
 		}
 
 		// Handle logs
-		if lp.CipherLog != "" || lp.Log != nil {
+		if lp.CipherLog != "" || lp.PlainLog != "" || lp.Log != nil {
 			Logger.Inc("udp:l", 1)
 			go func() {
-				if lp.CipherLog != "" {
+				if lp.CipherLog != "" || lp.PlainLog != "" {
 					if uid := lp.ChunkUid; uid != "" {
 						complete, joined := joiner.Add(&lp, 5)
 						if !complete {
@@ -73,9 +74,16 @@ func ListenUDP() error {
 						joiner.Drop(uid)
 						lp = *joined
 					}
-					err = lp.DecryptLog(dk.PrivateKey)
-					if err != nil {
-						Logger.Error("UDP decrypt log error: %v", err)
+					if lp.CipherLog != "" {
+						err = lp.DecryptLog(dk.PrivateKey)
+						if err != nil {
+							Logger.Error("UDP decrypt log error: %v", err)
+						}
+					} else {
+						err = lp.DeserializeLog()
+						if err != nil {
+							Logger.Error("UDP deserialize log error: %v", err)
+						}
 					}
 				}
 

@@ -9,13 +9,18 @@ type LogPackageRow []*_types.LogPackage
 
 func (chunks LogPackageRow) Joined() (complete bool, joined *_types.LogPackage) {
 	complete = true
+	ciphered := chunks[0].CipherLog != ""
 	var buffer bytes.Buffer
 	for _, lp := range chunks {
 		if lp == nil {
 			complete = false
 			break
 		}
-		buffer.WriteString(lp.CipherLog)
+		if ciphered {
+			buffer.WriteString(lp.CipherLog)
+		} else {
+			buffer.WriteString(lp.PlainLog)
+		}
 	}
 
 	if !complete {
@@ -23,7 +28,11 @@ func (chunks LogPackageRow) Joined() (complete bool, joined *_types.LogPackage) 
 	}
 
 	clone := *chunks[0]
-	clone.CipherLog = buffer.String()
+	if ciphered {
+		clone.CipherLog = buffer.String()
+	} else {
+		clone.PlainLog = buffer.String()
+	}
 
 	return true, &clone
 }
