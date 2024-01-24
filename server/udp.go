@@ -36,6 +36,8 @@ func ListenUDP() error {
 			continue
 		}
 
+		//fmt.Println("DEBUG buf:", string(buf))
+
 		Logger.Inc("udp", 1)
 
 		lp := _types.LogPackage{}
@@ -45,6 +47,7 @@ func ListenUDP() error {
 			Logger.Error("UDP parse json error: %v\n%v", err, string(buf[0:n]))
 			continue
 		}
+
 		dk, err := dashkey.GetByPubCached(lp.PublicKey)
 		if err != nil {
 			Logger.Error("UDP dash error: %v", err)
@@ -66,23 +69,35 @@ func ListenUDP() error {
 			Logger.Inc("udp:l", 1)
 			go func() {
 				if lp.CipherLog != "" || lp.PlainLog != "" {
-					if uid := lp.ChunkUid; uid != "" {
-						complete, joined := joiner.Add(&lp, 5)
-						if !complete {
+
+					if lp.Chunk != nil {
+						sig, err := lp.Chunk.CalcSig(dk.PrivateKey)
+						if err != nil || lp.Sig != sig {
+							Logger.Error("UDP signature error: %v, %v", err, lp.Sig != sig)
 							return
 						}
-						joiner.Drop(uid)
-						lp = *joined
+
+						if lp.Chunk.N > 1 {
+							complete, joined := joiner.Add(&lp, 5)
+							if !complete {
+								return
+							}
+							joiner.Drop(lp.Chunk.Uid)
+							lp = *joined
+						}
 					}
+
 					if lp.CipherLog != "" {
 						err = lp.DecryptLog(dk.PrivateKey)
 						if err != nil {
 							Logger.Error("UDP decrypt log error: %v", err)
+							return
 						}
 					} else {
 						err = lp.DeserializeLog()
 						if err != nil {
 							Logger.Error("UDP deserialize log error: %v", err)
+							return
 						}
 					}
 				}
@@ -93,6 +108,7 @@ func ListenUDP() error {
 					err = logModel.PushToQueue(lp.Log)
 					if err != nil {
 						Logger.Error("UDP create log error: %v", err)
+						return
 					}
 				}
 			}()
@@ -107,6 +123,7 @@ func ListenUDP() error {
 					err = lp.DecryptCount(dk.PrivateKey)
 					if err != nil {
 						Logger.Error("UDP decrypt count error: %v", err)
+						return
 					}
 				}
 
@@ -116,6 +133,7 @@ func ListenUDP() error {
 					err = countModel.PushToQueue(lp.Count)
 					if err != nil {
 						Logger.Error("UDP create count error: %v", err)
+						return
 					}
 				}
 			}()

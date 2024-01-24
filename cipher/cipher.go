@@ -13,35 +13,19 @@ import (
 	"io"
 )
 
-func GenerateKeyPair(bits int) (*rsa.PrivateKey, *rsa.PublicKey, error) {
-	privkey, err := rsa.GenerateKey(rand.Reader, bits)
-	if err != nil {
-		return nil, nil, err
-	}
-	return privkey, &privkey.PublicKey, nil
-}
-
-func GenerateKeyPairBase64(bits int) (string, string, error) {
-	priv, pub, err := GenerateKeyPair(bits)
+func GenerateKeyPairBase64(bits int) (pubBase64 string, privBase64 string, err error) {
+	priv, err := rsa.GenerateKey(rand.Reader, bits)
 	if err != nil {
 		return "", "", err
 	}
-	pubBytes, err := PublicKeyToBytes(pub)
+	pubBytes := x509.MarshalPKCS1PublicKey(&priv.PublicKey)
 	if err != nil {
 		return "", "", err
 	}
-	privBytes := PrivateKeyToBytes(priv)
-	pubString := base64.StdEncoding.EncodeToString(pubBytes)
-	privString := base64.StdEncoding.EncodeToString(privBytes)
-	return pubString, privString, nil
-}
-
-func PrivateKeyToBytes(priv *rsa.PrivateKey) []byte {
-	return x509.MarshalPKCS1PrivateKey(priv)
-}
-
-func PublicKeyToBytes(pub *rsa.PublicKey) ([]byte, error) {
-	return x509.MarshalPKIXPublicKey(pub)
+	privBytes := x509.MarshalPKCS1PrivateKey(priv)
+	pubBase64 = base64.StdEncoding.EncodeToString(pubBytes)
+	privBase64 = base64.StdEncoding.EncodeToString(privBytes)
+	return pubBase64, privBase64, nil
 }
 
 func EncryptAesJson(data interface{}, priv string) (string, error) {
