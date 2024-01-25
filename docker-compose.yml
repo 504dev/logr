@@ -29,7 +29,6 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
   server:
-    hostname: logr
     build: .
     ports:
       - "7778:7778"
