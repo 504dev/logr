@@ -32,6 +32,7 @@ services:
     build: .
     ports:
       - "7778:7778"
+      - "7776:7776"
     working_dir: /opt/logr
     restart: always
     links:
