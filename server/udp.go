@@ -54,7 +54,7 @@ func ListenUDP() error {
 			continue
 		}
 		if dk == nil {
-			Logger.Error("UDP unknown dash pub=%v", lp.PublicKey)
+			Logger.Warn("UDP unknown dash pub=%v", lp.PublicKey)
 			continue
 		}
 
