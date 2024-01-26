@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/504dev/logr-go-client/utils"
 	"github.com/504dev/logr/cachify"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/controllers"
@@ -11,6 +12,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -23,12 +25,24 @@ func NewRouter() *gin.Engine {
 	}))
 
 	r.GET("/api/globals", func(c *gin.Context) {
-		res := map[string]interface{}{
+
+		globals := map[string]interface{}{
 			"version": Logger.GetVersion(),
 			"org":     config.Get().OAuth.Github.Org,
 			"setup":   config.Get().OAuth.Github.ClientId == "",
 		}
-		c.JSON(http.StatusOK, res)
+		if wd, err := os.Getwd(); err == nil {
+			wd = wd + "/frontend"
+			version := utils.ReadGitTagDir(wd)
+			if version == "" {
+				version = utils.ReadGitCommitDir(wd)
+				if len(version) >= 6 {
+					version = version[0:6]
+				}
+			}
+			globals["frontend"] = version
+		}
+		c.JSON(http.StatusOK, globals)
 	})
 
 	r.GET("/api/free-token", func(c *gin.Context) {
