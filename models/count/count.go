@@ -15,7 +15,7 @@ const (
 	AggDay      = "d"
 )
 
-func Find(filter types.Filter, agg string) (_types.Counts, error) {
+func Find(filter types.Filter, agg string) (types.Counts, error) {
 	where := `dash_id = ? and logname = ?`
 	values := []interface{}{filter.DashId, filter.Logname}
 	if filter.Hostname != "" {
@@ -75,7 +75,7 @@ func Find(filter types.Filter, agg string) (_types.Counts, error) {
 		return nil, err
 	}
 
-	counts := _types.Counts{}
+	counts := types.Counts{}
 	for rows.Next() {
 		var timestamp time.Time
 		var hostname, keyname string
