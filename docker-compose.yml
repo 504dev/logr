@@ -6,7 +6,7 @@ volumes:
 
 services:
   clickhouse:
-    image: yandex/clickhouse-server
+    image: clickhouse/clickhouse-server:22.1.4-alpine
     ulimits:
       nofile:
         soft: 262144
