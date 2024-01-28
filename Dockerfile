@@ -1,4 +1,4 @@
-FROM node:12-alpine AS frontend
+FROM node:20.11-alpine AS frontend
 
 COPY ./ /opt/logr
 WORKDIR /opt/logr/frontend
