@@ -37,6 +37,8 @@ const conf = new Logr({
 const logr = conf.newLogger('hello.log');
 
 logr.info('Hello, Logr!');
+
+// OUT: 2024-01-30T22:50:04+03:00 info [v1.0.41, pid=60512, cmd/hello.go:41] Hello, Logr!
 ```
 
 ## Requirements
