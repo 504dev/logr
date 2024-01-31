@@ -38,8 +38,6 @@ func ListenUDP() error {
 
 		//fmt.Println("DEBUG buf:", string(buf))
 
-		Logger.Inc("udp", 1)
-
 		lp := _types.LogPackage{}
 		err = json.Unmarshal(buf[0:n], &lp)
 
@@ -54,7 +52,8 @@ func ListenUDP() error {
 			continue
 		}
 		if dk == nil {
-			Logger.Warn("UDP unknown dash pub=%v", lp.PublicKey)
+			Logger.Inc("udp:unknown", 1)
+			Logger.Warn("UDP unknown dash pub=%v, log=%v", lp.PublicKey, lp.Log)
 			continue
 		}
 
@@ -66,7 +65,8 @@ func ListenUDP() error {
 
 		// Handle logs
 		if lp.CipherLog != "" || lp.PlainLog != "" || lp.Log != nil {
-			Logger.Inc("udp:l", 1)
+			Logger.Inc("udp:logs", 1)
+			Logger.Inc("udp:logs:bytes", float64(n))
 			go func() {
 				if lp.CipherLog != "" || lp.PlainLog != "" {
 
@@ -117,7 +117,8 @@ func ListenUDP() error {
 
 		// Handle counts
 		if lp.CipherCount != "" || lp.Count != nil {
-			Logger.Inc("udp:c", 1)
+			Logger.Inc("udp:counts", 1)
+			Logger.Inc("udp:counts:bytes", float64(n))
 			go func() {
 				if lp.CipherCount != "" {
 					err = lp.DecryptCount(dk.PrivateKey)
