@@ -91,11 +91,11 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 	c.JSON(http.StatusOK, nil)
 }
 
-func (_ *CountsController) Stats(c *gin.Context) {
+func (_ *CountsController) StatsByLogname(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	logname := c.Query("logname")
 	duration := Logger.Time("response:/counts/stats", time.Millisecond)
-	stats, err := count.GetDashStatsCached(dashId, logname)
+	stats, err := count.GetStatsLognameCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
 	}
@@ -103,10 +103,10 @@ func (_ *CountsController) Stats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-func (_ *CountsController) Lognames(c *gin.Context) {
+func (_ *CountsController) StatsByDashboard(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	duration := Logger.Time("response:/counts/lognames", time.Millisecond)
-	stats, err := count.GetDashLognamesCached(dashId)
+	stats, err := count.GetStatsDashboardCached(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}

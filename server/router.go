@@ -137,8 +137,8 @@ func NewRouter() *gin.Engine {
 	{
 		r.GET("/api/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
 		r.GET("/api/counts/:dash_id/snippet", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.FindSnippet)
-		r.GET("/api/counts/:dash_id/lognames", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Lognames)
-		r.GET("/api/counts/:dash_id/stats", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Stats)
+		r.GET("/api/counts/:dash_id/lognames", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.StatsByDashboard)
+		r.GET("/api/counts/:dash_id/stats", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.StatsByLogname)
 
 	}
 
