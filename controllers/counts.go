@@ -95,7 +95,7 @@ func (_ *CountsController) StatsByLogname(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	logname := c.Query("logname")
 	duration := Logger.Time("response:/counts/stats", time.Millisecond)
-	stats, err := count.GetStatsLognameCached(dashId, logname)
+	stats, err := count.StatsByLognameCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
 	}
@@ -106,7 +106,7 @@ func (_ *CountsController) StatsByLogname(c *gin.Context) {
 func (_ *CountsController) StatsByDashboard(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	duration := Logger.Time("response:/counts/lognames", time.Millisecond)
-	stats, err := count.GetStatsDashboardCached(dashId)
+	stats, err := count.StatsByDashboardCached(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}

@@ -7,18 +7,18 @@ import (
 	"time"
 )
 
-func GetStatsDashboardCached(dashId int) ([]*types.DashStatRow, error) {
+func StatsByDashboardCached(dashId int) ([]*types.DashStatRow, error) {
 	key := fmt.Sprintf("logs:lognames:%v", dashId)
 	res, err := cachify.Cachify(key, func() (interface{}, error) {
-		return GetStatsDashboard(dashId)
+		return StatsByDashboard(dashId)
 	}, time.Minute)
 	return res.([]*types.DashStatRow), err
 }
 
-func GetStatsLognameCached(dashId int, logname string) ([]*types.DashStatRow, error) {
+func StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, error) {
 	key := fmt.Sprintf("logs:stats:%v:%v", dashId, logname)
 	res, err := cachify.Cachify(key, func() (interface{}, error) {
-		return GetStatsLogname(dashId, logname)
+		return StatsByLogname(dashId, logname)
 	}, time.Minute)
 	return res.([]*types.DashStatRow), err
 }

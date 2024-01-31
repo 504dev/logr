@@ -57,7 +57,7 @@ func getByFilter(where string, values []interface{}, limit int) (_types.Logs, er
 	return logs, err
 }
 
-func GetStatsLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
+func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT hostname, level, version, count(*) AS cnt, max(timestamp) AS updated
       FROM logs
@@ -72,7 +72,7 @@ func GetStatsLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func GetStatsDashboard(dashId int) ([]*types.DashStatRow, error) {
+func StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT logname, level, count(*) AS cnt, max(timestamp) AS updated
       FROM logs

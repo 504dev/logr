@@ -111,7 +111,7 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 	return counts, nil
 }
 
-func GetStatsLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
+func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT hostname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
       FROM counts
@@ -127,7 +127,7 @@ func GetStatsLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func GetStatsDashboard(dashId int) ([]*types.DashStatRow, error) {
+func StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT logname, count(*) AS cnt
       FROM counts
