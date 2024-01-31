@@ -16,6 +16,8 @@ import (
 	"time"
 )
 
+const EXPIRE_TIME = 4 * time.Hour
+
 type AuthController struct {
 	*oauth2.Config
 	*types.States
@@ -180,7 +182,7 @@ func (a *AuthController) Callback(c *gin.Context) {
 		Username:    *userGithub.Login,
 		AccessToken: tok.AccessToken,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Hour).Unix(),
+			ExpiresAt: time.Now().Add(EXPIRE_TIME).Unix(),
 		},
 	}
 	err = claims.EncryptAccessToken()
