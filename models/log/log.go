@@ -57,7 +57,7 @@ func getByFilter(where string, values []interface{}, limit int) (_types.Logs, er
 	return logs, err
 }
 
-func GetDashStats(dashId int, logname string) ([]*types.DashStatRow, error) {
+func GetStatsLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT hostname, level, version, count(*) AS cnt, max(timestamp) AS updated
       FROM logs
@@ -72,15 +72,15 @@ func GetDashStats(dashId int, logname string) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func GetDashLognames(dashId int) ([]*types.DashStatRow, error) {
+func GetStatsDashboard(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
-      SELECT logname, count(*) AS cnt
+      SELECT logname, level, count(*) AS cnt, max(timestamp) AS updated
       FROM logs
       WHERE
         dash_id = ?
         AND day >= toDate(now() - interval 1 day)
         AND timestamp > toUnixTimestamp(now() - interval 1 hour) * 1e9
-      GROUP BY logname
+      GROUP BY logname, level
     `
 	stats := types.DashStatRows{}
 	err := clickhouse.Conn().Select(&stats, sql, dashId)

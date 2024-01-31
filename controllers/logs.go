@@ -69,12 +69,12 @@ func (_ *LogsController) Find(c *gin.Context) {
 	c.JSON(http.StatusOK, logs)
 }
 
-func (_ *LogsController) Stats(c *gin.Context) {
+func (_ *LogsController) StatsByLogname(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	logname := c.Query("logname")
 	duration := Logger.Time("response:/logs/stats", time.Millisecond)
 
-	stats, err := log.GetDashStatsCached(dashId, logname)
+	stats, err := log.GetStatsLognameCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
 	}
@@ -82,10 +82,10 @@ func (_ *LogsController) Stats(c *gin.Context) {
 	c.JSON(http.StatusOK, stats)
 }
 
-func (_ *LogsController) Lognames(c *gin.Context) {
+func (_ *LogsController) StatsByDashboard(c *gin.Context) {
 	dashId := c.GetInt("dashId")
 	duration := Logger.Time("response:/logs/lognames", time.Millisecond)
-	stats, err := log.GetDashLognamesCached(dashId)
+	stats, err := log.GetStatsDashboardCached(dashId)
 	if err != nil {
 		Logger.Error(err)
 	}

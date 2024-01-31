@@ -42,10 +42,10 @@ logr.info('Hello, Logr!');
 ```
 
 ## Requirements
-* Node.js `v12`
-* Npm `v6`
+* Node.js `v20`
+* Npm `v10`
 * Golang `v1.13`
-* ClickHouse `v20`
+* ClickHouse `v23`
 * Mysql `v5.7`
 
 
