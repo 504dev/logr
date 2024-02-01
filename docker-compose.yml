@@ -37,7 +37,7 @@ services:
     build: .
     ports:
       - "7778:7778"
-      - "7776:7776"
+      - "7776:7776/udp"
     working_dir: /opt/logr
     command: --config="./config.yml"
     restart: always
