@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const EXPIRE_TIME = 4 * time.Hour
+const EXPIRE_TIME = 8 * time.Hour
 
 type AuthController struct {
 	*oauth2.Config
