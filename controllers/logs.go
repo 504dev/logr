@@ -77,6 +77,8 @@ func (_ *LogsController) StatsByLogname(c *gin.Context) {
 	stats, err := log.StatsByLognameCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		return
 	}
 	duration()
 	c.JSON(http.StatusOK, stats)
@@ -88,6 +90,8 @@ func (_ *LogsController) StatsByDashboard(c *gin.Context) {
 	stats, err := log.StatsByDashboardCached(dashId)
 	if err != nil {
 		Logger.Error(err)
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		return
 	}
 	duration()
 	c.JSON(http.StatusOK, stats)

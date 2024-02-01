@@ -12,7 +12,10 @@ func StatsByDashboardCached(dashId int) ([]*types.DashStatRow, error) {
 	res, err := cachify.Cachify(key, func() (interface{}, error) {
 		return StatsByDashboard(dashId)
 	}, time.Minute)
-	return res.([]*types.DashStatRow), err
+	if err != nil {
+		return nil, err
+	}
+	return res.([]*types.DashStatRow), nil
 }
 
 func StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, error) {
@@ -20,5 +23,9 @@ func StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, err
 	res, err := cachify.Cachify(key, func() (interface{}, error) {
 		return StatsByLogname(dashId, logname)
 	}, time.Minute)
-	return res.([]*types.DashStatRow), err
+	if err != nil {
+		return nil, err
+	}
+
+	return res.([]*types.DashStatRow), nil
 }

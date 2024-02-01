@@ -74,7 +74,7 @@ func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 
 func StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
-      SELECT logname, level, count(*) AS cnt, max(timestamp) AS updated
+      SELECT logname, level, count(*) AS cnt, max(timestamp) AS updated, substring(anyLast(message), 1, 50) as message
       FROM logs
       WHERE
         dash_id = ?

@@ -12,7 +12,7 @@ import (
 func ListenHTTP() error {
 	gin.ForceConsoleColor()
 
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWritter)
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter)
 
 	// TODO react
 	r := NewRouter()

@@ -38,6 +38,7 @@ type DashStatRow struct {
 	Version  string `db:"version"  json:"version,omitempty"`
 	Cnt      int    `db:"cnt"      json:"cnt"`
 	Updated  int64  `db:"updated"  json:"updated,omitempty"`
+	Message  string `db:"message"  json:"message,omitempty"`
 }
 
 type DashStatRows []*DashStatRow

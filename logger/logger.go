@@ -31,7 +31,7 @@ func Init() {
 	conf.DefaultSystemCounter()
 	conf.DefaultProcessCounter()
 	gin, _ := conf.NewLogger("gin.log")
-	GinWritter = gin.CustomWritter(func(log *logr.Log) {
+	GinWriter = gin.CustomWriter(func(log *logr.Log) {
 		codestr := log.Message[38:41]
 		code, _ := strconv.Atoi(codestr)
 		if code >= 400 && code <= 499 {
@@ -39,9 +39,12 @@ func Init() {
 		} else if code >= 500 && code <= 599 {
 			log.Level = logr.LevelError
 		}
+		if code > 0 {
+			log.Message = log.Message[28:]
+		}
 	})
 	go Demo()
 }
 
 var Logger *logr.Logger
-var GinWritter *logr.Writter
+var GinWriter *logr.Writer
