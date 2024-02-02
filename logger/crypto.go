@@ -85,7 +85,7 @@ func crypto(conf *logr.Config) {
 				humanize.Comma(int64(bitV)),
 			)
 			l.Info(
-				"%v price widget %v",
+				"%v price widget %v!",
 				color.New(color.Bold).SprintFunc()(base),
 				l.Snippet("max", fmt.Sprintf("price:%v", sym), 30),
 			)
