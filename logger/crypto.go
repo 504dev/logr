@@ -38,8 +38,11 @@ func (b *BitfinexPrice) UnmarshalJSON(buf []byte) error {
 func crypto(conf *logr.Config) {
 	l, _ := conf.NewLogger("crypto.log")
 	for {
+		l.Info("")
 		time.Sleep(30 * time.Second)
+		l.Info("**************************************************")
 		for _, base := range [3]string{"BTC", "ETH", "LTC"} {
+			l.Info("")
 			sym := base + "_USDT"
 			bin, hit, bit := BinancePrice{}, HitbtcPrice{}, BitfinexPrice{}
 			var err error
@@ -64,31 +67,38 @@ func crypto(conf *logr.Config) {
 			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitP).Avg(binP).Avg(bitP).Min(hitP).Min(binP).Min(bitP).Max(hitP).Max(binP).Max(bitP)
 			l.Avg(fmt.Sprintf("volume:%v", sym), hitV+binV+bitV)
 
+			bold := color.New(color.Bold).SprintFunc()
+
 			l.Info(
-				"%v price: %v %v$, %v %v$, %v %v$",
-				color.New(color.Bold).SprintFunc()(base),
+				"%v %v %v$ (%v$)",
 				color.CyanString("HitBTC"),
-				humanize.Commaf(hitP),
-				color.HiYellowString("Binance"),
-				humanize.Commaf(binP),
-				color.GreenString("Bitfinex"),
-				humanize.Commaf(bitP),
-			)
-			l.Info(
-				"%v volume: %v %v$, %v %v$, %v %v$",
-				color.New(color.Bold).SprintFunc()(base),
-				color.CyanString("HitBTC"),
+				bold(base),
+				bold(humanize.Commaf(hitP)),
 				humanize.Comma(int64(hitV)),
-				color.HiYellowString("Binance"),
-				humanize.Comma(int64(binV)),
+			)
+
+			l.Info(
+				"%v %v %v$ (%v$)",
 				color.GreenString("Bitfinex"),
+				bold(base),
+				bold(humanize.Commaf(bitP)),
 				humanize.Comma(int64(bitV)),
 			)
+
 			l.Info(
-				"%v price widget %v!",
+				"%v %v %v$ (%v$)",
+				color.HiYellowString("Binance"),
+				bold(base),
+				bold(humanize.Commaf(binP)),
+				humanize.Comma(int64(binV)),
+			)
+
+			l.Info(
+				"%v price %v widget!",
 				color.New(color.Bold).SprintFunc()(base),
 				l.Snippet("max", fmt.Sprintf("price:%v", sym), 30),
 			)
+
 			if sym == "BTC_USDT" {
 				totalV := hitV + bitV + binV
 				l.Per("volume:BTC_USDT:hitbtc", hitV, totalV)
@@ -96,8 +106,6 @@ func crypto(conf *logr.Config) {
 				l.Per("volume:BTC_USDT:binance", binV, totalV)
 			}
 		}
-
-		//l.Debug(string(bytes))
 	}
 }
 
