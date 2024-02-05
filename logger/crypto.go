@@ -37,6 +37,7 @@ func (b *BitfinexPrice) UnmarshalJSON(buf []byte) error {
 
 func crypto(conf *logr.Config) {
 	l, _ := conf.NewLogger("crypto.log")
+	l.Body = "[{version}, pid={pid}] {message}"
 	for {
 		l.Info("")
 		time.Sleep(30 * time.Second)
@@ -93,7 +94,7 @@ func crypto(conf *logr.Config) {
 				humanize.Comma(int64(binV)),
 			)
 
-			l.Info(
+			l.Notice(
 				"%v price %v widget!",
 				color.New(color.Bold).SprintFunc()(base),
 				l.Snippet("max", fmt.Sprintf("price:%v", sym), 30),
