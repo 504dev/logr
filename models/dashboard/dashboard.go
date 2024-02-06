@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"fmt"
+	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/models/dashkey"
 	"github.com/504dev/logr/models/dashmember"
 	"github.com/504dev/logr/mysql"
@@ -57,7 +58,9 @@ func GetSystemIds(role int) []int {
 	if role == types.RoleAdmin {
 		ids = append(ids, types.DashboardSystemId)
 	}
-	ids = append(ids, types.DashboardDemoId)
+	if !config.Get().NoDemo {
+		ids = append(ids, types.DashboardDemoId)
+	}
 	return ids
 }
 func GetShared(userId int, role int) (types.Dashboards, error) {
