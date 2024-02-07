@@ -43,7 +43,9 @@ func Init() {
 			log.Message = log.Message[28:]
 		}
 	})
-	go Demo()
+	if config.Get().DemoDash {
+		go Demo()
+	}
 }
 
 var Logger *logr.Logger

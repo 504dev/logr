@@ -30,7 +30,7 @@ type Config struct {
 	Clickhouse    string `yaml:"clickhouse"`
 	Mysql         string `yaml:"mysql"`
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
-	NoDemo        bool   `yaml:"no_demo"`
+	DemoDash      bool   `yaml:"demo_dash"`
 }
 
 var args Args
