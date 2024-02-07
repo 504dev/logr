@@ -9,17 +9,17 @@ import (
 
 type States struct {
 	Data map[string]string
-	sync.Mutex
+	sync.RWMutex
 }
 
-func (s States) Get(state string) (string, bool) {
-	s.Lock()
+func (s *States) Get(state string) (string, bool) {
+	s.RLock()
 	v, ok := s.Data[state]
 	delete(s.Data, state)
-	s.Unlock()
+	s.RUnlock()
 	return v, ok
 }
-func (s States) Insert(v string) string {
+func (s *States) Insert(v string) string {
 	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
 	s.Lock()
 	s.Data[state] = v
@@ -27,7 +27,7 @@ func (s States) Insert(v string) string {
 	return state
 }
 
-func (s States) Set(k string, v string) {
+func (s *States) Set(k string, v string) {
 	s.Lock()
 	s.Data[k] = v
 	s.Unlock()

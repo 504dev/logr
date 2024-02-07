@@ -18,7 +18,7 @@ type Claims struct {
 }
 
 func (p *Claims) EncryptAccessToken() error {
-	cipherAccessToken, err := cipher.EncryptAes([]byte(p.AccessToken), []byte(config.Get().OAuth.JwtSecret))
+	cipherAccessToken, err := cipher.EncryptAes([]byte(p.AccessToken), []byte(config.Get().GetJwtSecret()))
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (p *Claims) EncryptAccessToken() error {
 
 func (p *Claims) DecryptAccessToken() error {
 	cipherBytes, _ := base64.StdEncoding.DecodeString(p.AccessTokenCipher)
-	accessToken, err := cipher.DecryptAes(cipherBytes, []byte(config.Get().OAuth.JwtSecret))
+	accessToken, err := cipher.DecryptAes(cipherBytes, []byte(config.Get().GetJwtSecret()))
 	if err != nil {
 		return err
 	}

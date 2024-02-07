@@ -53,6 +53,11 @@ func (a *AuthController) Authorize(c *gin.Context) {
 	c.Redirect(http.StatusMovedPermanently, authorizeUrl)
 }
 
+func (a *AuthController) NeedSetup(c *gin.Context) {
+	if config.Get().NeedSetup() == false {
+		c.AbortWithStatus(http.StatusForbidden)
+	}
+}
 func (a *AuthController) Setup(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	callback := c.Query("callback")
@@ -70,6 +75,11 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 		return
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusCreated {
+		c.AbortWithStatus(resp.StatusCode)
+		return
+	}
 
 	var data struct {
 		Name         string `json:"name"`
@@ -90,9 +100,10 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 	if err != nil {
 		Logger.Error(err)
 	}
-	config.Set(func(conf *config.Config) {
+	config.Set(func(conf *config.ConfigData) {
 		conf.OAuth.Github.ClientId = data.ClientId
 		conf.OAuth.Github.ClientSecret = data.ClientSecret
+		conf.OAuth.JwtSecret = conf.GetJwtSecret()
 	})
 	err = config.Save()
 	if err != nil {
@@ -107,7 +118,7 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 	}
 }
 
-func (a *AuthController) Callback(c *gin.Context) {
+func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
@@ -192,7 +203,7 @@ func (a *AuthController) Callback(c *gin.Context) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(config.Get().OAuth.JwtSecret))
+	tokenString, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -221,7 +232,7 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 
 	claims := &types.Claims{}
 	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Get().OAuth.JwtSecret), nil
+		return []byte(config.Get().GetJwtSecret()), nil
 	})
 
 	if err != nil || !tkn.Valid {

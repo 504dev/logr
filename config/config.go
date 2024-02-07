@@ -1,6 +1,8 @@
 package config
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
 	"flag"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
@@ -12,10 +14,8 @@ import (
 type Args struct {
 	Configpath string
 }
-
-type Config struct {
-	sync.RWMutex `yaml:"-"`
-	Bind         struct {
+type ConfigData struct {
+	Bind struct {
 		Http string `yaml:"http"`
 		Udp  string `yaml:"udp"`
 	} `yaml:"bind"`
@@ -33,38 +33,28 @@ type Config struct {
 	DemoDash      bool   `yaml:"demo_dash"`
 }
 
+func (c *ConfigData) GetJwtSecret() string {
+	if c.OAuth.JwtSecret != "" {
+		return c.OAuth.JwtSecret
+	}
+	hash := sha256.Sum256([]byte(c.OAuth.Github.ClientSecret))
+	return base64.StdEncoding.EncodeToString(hash[:])
+}
+func (c *ConfigData) NeedSetup() bool {
+	return c.OAuth.Github.ClientId == "" || c.OAuth.Github.ClientSecret == ""
+}
+
+type Config struct {
+	sync.RWMutex
+	Data ConfigData
+}
+
 var args Args
 var config Config
 
 func ParseArgs() {
 	flag.StringVar(&args.Configpath, "config", "./config.yml", "set service config file")
 	flag.Parse()
-}
-
-func Get() *Config {
-	config.RLock()
-	defer config.RUnlock()
-	return &config
-}
-
-func Set(set func(c *Config)) {
-	config.Lock()
-	clone := config
-	set(&clone)
-	config = clone
-	config.Unlock()
-}
-
-func Save() error {
-	d, err := yaml.Marshal(&config)
-	if err != nil {
-		return err
-	}
-	err = ioutil.WriteFile(args.Configpath, d, 0644)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func Init() {
@@ -74,8 +64,34 @@ func Init() {
 		log.Fatalf("yamlFile.Get err   #%v ", err)
 	}
 	yamlFile = []byte(os.ExpandEnv(string(yamlFile)))
-	err = yaml.Unmarshal(yamlFile, &config)
+	err = yaml.Unmarshal(yamlFile, &config.Data)
 	if err != nil {
 		log.Fatalf("Unmarshal: %v", err)
 	}
+}
+
+func Get() *ConfigData {
+	config.RLock()
+	defer config.RUnlock()
+	return &config.Data
+}
+
+func Set(set func(c *ConfigData)) {
+	config.Lock()
+	clone := config.Data
+	set(&clone)
+	config.Data = clone
+	config.Unlock()
+}
+
+func Save() error {
+	d, err := yaml.Marshal(&config.Data)
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(args.Configpath, d, 0644)
+	if err != nil {
+		return err
+	}
+	return nil
 }

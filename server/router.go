@@ -29,7 +29,7 @@ func NewRouter() *gin.Engine {
 		globals := map[string]interface{}{
 			"version": Logger.GetVersion(),
 			"org":     config.Get().OAuth.Github.Org,
-			"setup":   config.Get().OAuth.Github.ClientId == "",
+			"setup":   config.Get().NeedSetup(),
 		}
 		if wd, err := os.Getwd(); err == nil {
 			wd = wd + "/frontend"
@@ -62,7 +62,7 @@ func NewRouter() *gin.Engine {
 				},
 			}
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-			tokenString, err := token.SignedString([]byte(config.Get().OAuth.JwtSecret))
+			tokenString, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
 			if err != nil {
 				return nil, err
 			}
@@ -81,9 +81,9 @@ func NewRouter() *gin.Engine {
 	auth.Init()
 	{
 		r.GET("/oauth/authorize", auth.Authorize)
-		r.GET("/oauth/authorize/callback", auth.Callback)
-		r.POST("/oauth/setup", auth.Setup)
-		r.GET("/oauth/setup/callback", auth.SetupCallback)
+		r.GET("/oauth/authorize/callback", auth.AuthorizeCallback)
+		r.POST("/oauth/setup", auth.NeedSetup, auth.Setup)
+		r.GET("/oauth/setup/callback", auth.NeedSetup, auth.SetupCallback)
 	}
 
 	// me

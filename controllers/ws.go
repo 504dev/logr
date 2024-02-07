@@ -34,7 +34,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 
 	claims := &types.Claims{}
 	tkn, err := jwt.ParseWithClaims(tokenstring, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Get().OAuth.JwtSecret), nil
+		return []byte(config.Get().GetJwtSecret()), nil
 	})
 
 	Logger.Debug(claims)

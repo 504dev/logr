@@ -76,10 +76,12 @@ logr.info('Hello, Logr!');
     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS logrdb;"
     ```
 5. Build frontend: \
-    `make front`
-6. Run: \
+   `make front`
+6. Build backend: \
+   `make build`
+7. Run: \
     `make run`
-7. Enjoy: \
+8. Enjoy: \
    http://localhost:7778/
 
 ## Config
