@@ -39,7 +39,6 @@ func (_ *CountsController) Find(c *gin.Context) {
 		return
 	}
 	duration()
-	Logger.Inc("count:/counts", 1)
 	c.JSON(http.StatusOK, counts.Format())
 }
 

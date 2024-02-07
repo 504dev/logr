@@ -5,7 +5,7 @@ WORKDIR /opt/logr/frontend
 RUN yarn install && yarn build && yarn cache clean
 
 
-FROM golang:1.13-alpine AS gobuild
+FROM golang:1.17-alpine AS gobuild
 
 COPY --from=frontend /opt/logr /opt/logr
 WORKDIR /opt/logr
@@ -13,7 +13,7 @@ RUN go build -o logr-server ./cmd/server/main.go
 
 
 # Start fresh from a smaller image
-FROM alpine:3.9
+FROM alpine:3.19
 
 RUN apk add --no-cache git
 COPY --from=gobuild /opt/logr /opt/logr

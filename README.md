@@ -44,7 +44,7 @@ logr.info('Hello, Logr!');
 ## Requirements
 * Node.js `v20`
 * Npm `v10`
-* Golang `v1.13`
+* Golang `v1.17`
 * ClickHouse `v23`
 * Mysql `v5.7`
 
