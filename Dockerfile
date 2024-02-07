@@ -15,6 +15,7 @@ RUN go build -o logr-server ./cmd/server/main.go
 # Start fresh from a smaller image
 FROM alpine:3.9
 
+RUN apk add --no-cache git
 COPY --from=gobuild /opt/logr /opt/logr
 WORKDIR /opt/logr
 ENTRYPOINT ./logr-server --config="./config.yml"

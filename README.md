@@ -17,7 +17,7 @@
 
 [Demo]: http://logr.info/demo
 
-* logs looks like in your `Terminal`
+* logs look like in your `Terminal`
 * storing data in `ClickHouse`
 * transport data by `WebSocket`
 * `Golang` backend
@@ -38,7 +38,7 @@ const logr = conf.newLogger('hello.log');
 
 logr.info('Hello, Logr!');
 
-// OUT: 2024-01-30T22:50:04+03:00 info [v1.0.41, pid=60512, cmd/hello.go:41] Hello, Logr!
+// 2024-01-30T22:50:04+03:00 info [v1.0.41, pid=60512, cmd/hello.go:41] Hello, Logr!
 ```
 
 ## Requirements
