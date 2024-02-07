@@ -4,12 +4,18 @@ COPY ./ /opt/logr
 WORKDIR /opt/logr/frontend
 RUN yarn install && yarn build && yarn cache clean
 
-###
 
-FROM golang:1.13
+FROM golang:1.13-alpine AS gobuild
+
 COPY --from=frontend /opt/logr /opt/logr
 WORKDIR /opt/logr
 RUN go build -o logr-server ./cmd/server/main.go
 
-ENTRYPOINT ["./logr-server"]
-CMD ["--config=","./config.yml"]
+
+# Start fresh from a smaller image
+FROM alpine:3.9
+
+COPY --from=gobuild /opt/logr /opt/logr
+WORKDIR /opt/logr
+ENTRYPOINT ./logr-server --config="./config.yml"
+EXPOSE 7776 7778
