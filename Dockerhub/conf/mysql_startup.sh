@@ -12,10 +12,10 @@ else
 
   mysql_install_db --user=root > /dev/null
 
-  MYSQL_DATABASE=${MYSQL_DATABASE:-"mysql_test"}
-  MYSQL_USER=${MYSQL_USER:-"mysql_test"}
-  MYSQL_PASSWORD=${MYSQL_PASSWORD:-"mysql_test"}
-  MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-"mysql_test"}
+  MYSQL_DATABASE=${MYSQL_DATABASE:-"logrdb"}
+  MYSQL_USER=${MYSQL_USER:-"logr"}
+  MYSQL_PASSWORD=${MYSQL_PASSWORD:-"12345678"}
+  MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-"12345678"}
 
   tfile=`mktemp`
   if [ ! -f "$tfile" ]; then
