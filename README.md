@@ -51,6 +51,13 @@ logr.info('Hello, Logr!');
 
 ## Build & Run service
 
+### Docker
+```
+docker run -d -p 7776:7776/udp -p 7778:7778 kozhurkin/logr
+```
+Enjoy: \
+   http://localhost:7778/
+
 ### Docker-compose
 1. Clone repository: \
    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
@@ -70,7 +77,7 @@ logr.info('Hello, Logr!');
 2. Init **config.yml** file: \
     `make config`
 3. Fill **config.yml**, see [Config](#config) section
-4. Creating databases in Clickhouse and Mysql
+4. Creating databases in Clickhouse and Mysql:
     ```
     clickhouse-client --query "CREATE DATABASE IF NOT EXISTS logrdb"
     mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS logrdb;"
@@ -90,18 +97,18 @@ bind:
   http: ":7778"
   udp: ":7776"
 oauth:
+  jwt_secret: "santaclausdoesntexist"
   github:
     client_id: "9bd30997b0ee30997b0ee3"
     client_secret: "1f241d37d910b11f241d37d910b11f241d37d910b1"
     org: "504dev"
-  jwt_secret: "jwt-secret"
 clickhouse: "tcp://localhost:9000?database=logr&username=logr&password=logr"
 mysql: "logr:logr@tcp(localhost:3306)/logr"
 ```
 
+* `jwt_secret` is random string (using to sign temporary authorization tokens)
 * `client_id` and `client_secret` is Github App keys (optional. set empty, if not sure)
 * `org` is organization restriction (if set, only org members can authorize)
-* `jwt_secret` is random string (using to sign temporary authorization tokens)
 
 ## Client libraries
 
