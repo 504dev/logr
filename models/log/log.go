@@ -79,7 +79,7 @@ func StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
       WHERE
         dash_id = ?
         AND day >= toDate(now() - interval 1 day)
-        AND timestamp > toUnixTimestamp(now() - interval 1 hour) * 1e9
+        AND timestamp > toUnixTimestamp(now() - interval 1 day) * 1e9
       GROUP BY logname, level
     `
 	stats := types.DashStatRows{}
