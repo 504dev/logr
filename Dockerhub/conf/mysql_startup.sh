@@ -4,7 +4,7 @@ if [ ! -d "/run/mysqld" ]; then
   mkdir -p /run/mysqld
 fi
 
-if [ -d /var/lib/mysql ]; then
+if [ ! -z "$(ls -A /var/lib/mysql)" ]; then
   echo "[i] MySQL directory already present, skipping creation"
   /usr/bin/mysqld &
 else
