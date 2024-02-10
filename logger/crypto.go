@@ -6,7 +6,7 @@ import (
 	logr "github.com/504dev/logr-go-client"
 	humanize "github.com/dustin/go-humanize"
 	"github.com/fatih/color"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 )
@@ -117,7 +117,7 @@ func request(res interface{}, url string) error {
 	}
 	defer resp.Body.Close()
 
-	bodyBytes, err := ioutil.ReadAll(resp.Body)
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,6 @@ import (
 	"encoding/base64"
 	"flag"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"os"
 	"sync"
@@ -59,7 +58,7 @@ func ParseArgs() {
 
 func Init() {
 	ParseArgs()
-	yamlFile, err := ioutil.ReadFile(args.Configpath)
+	yamlFile, err := os.ReadFile(args.Configpath)
 	if err != nil {
 		log.Fatalf("yamlFile.Get err   #%v ", err)
 	}
@@ -89,7 +88,7 @@ func Save() error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(args.Configpath, d, 0644)
+	err = os.WriteFile(args.Configpath, d, 0644)
 	if err != nil {
 		return err
 	}

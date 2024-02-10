@@ -2,7 +2,7 @@ package mysql
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 )
 
 func Schema() {
@@ -10,7 +10,7 @@ func Schema() {
 	tables := []string{"users", "dashboards", "dashboard_members", "dashboard_keys"}
 	for _, table := range tables {
 		path := fmt.Sprintf("./mysql/schema/%v.sql", table)
-		sql, _ := ioutil.ReadFile(path)
+		sql, _ := os.ReadFile(path)
 		_, err = db.Exec(string(sql))
 		if err != nil {
 			panic(err)

@@ -5,7 +5,7 @@ import (
 	"github.com/504dev/logr/config"
 	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/jmoiron/sqlx"
-	"io/ioutil"
+	"os"
 )
 
 var db *sqlx.DB
@@ -32,7 +32,7 @@ func Schema() {
 	tables := []string{"logs", "counts"}
 	for _, table := range tables {
 		path := fmt.Sprintf("./clickhouse/schema/%v.sql", table)
-		sql, _ := ioutil.ReadFile(path)
+		sql, _ := os.ReadFile(path)
 		_, err = db.Exec(string(sql))
 		if err != nil {
 			panic(err)
