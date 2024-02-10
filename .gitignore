@@ -2,6 +2,7 @@
 .vscode/
 .DS_Store
 vendor/
+tmp/
 config.yml
 config.dev.yml
 logr-server
