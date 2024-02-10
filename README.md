@@ -25,6 +25,9 @@
 * Authorization by `GitHub`
 
 ## Usage
+```bash
+docker run -d -p 7776:7776/udp -p 7778:7778 kozhurkin/logr
+```
 ```javascript
 const { Logr } = require('logr-node-client');
 
@@ -51,7 +54,7 @@ logr.info('Hello, Logr!');
 
 ## Build & Run service
 
-### Docker
+### Docker image
 ```
 docker run -d -p 7776:7776/udp -p 7778:7778 kozhurkin/logr
 ```
