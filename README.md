@@ -26,7 +26,7 @@
 
 ## Usage
 ```bash
-docker run -d -p 7776:7776/udp -p 7778:7778 kozhurkin/logr
+docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ```
 ```javascript
 const { Logr } = require('logr-node-client');
@@ -56,7 +56,7 @@ logr.info('Hello, Logr!');
 
 ### Docker image
 ```
-docker run -d -p 7776:7776/udp -p 7778:7778 kozhurkin/logr
+docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ```
 Enjoy: \
    http://localhost:7778/
