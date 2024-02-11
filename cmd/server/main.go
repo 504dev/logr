@@ -17,9 +17,9 @@ import (
 
 func main() {
 	color.NoColor = false
-	config.Init()
-	clickhouse.Init()
-	mysql.Init()
+	args := config.Init()
+	clickhouse.Init(args.Retries)
+	mysql.Init(args.Retries)
 	logger.Init()
 	log.RunQueue()
 	count.RunQueue()

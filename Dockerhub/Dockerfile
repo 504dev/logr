@@ -30,5 +30,5 @@ RUN apk add --no-cache git
 COPY --from=gobuild /opt/logr /opt/logr
 WORKDIR /opt/logr
 EXPOSE 7776 7778
-CMD sh /mysql_startup.sh && (/entrypoint.sh &) && sleep 5s && ./logr-server --config="./config.yml"
+CMD sh /mysql_startup.sh && (/entrypoint.sh &) && ./logr-server --config="./config.yml" --retries=60
 

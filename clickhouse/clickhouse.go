@@ -6,6 +6,7 @@ import (
 	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/jmoiron/sqlx"
 	"os"
+	"time"
 )
 
 var db *sqlx.DB
@@ -14,17 +15,23 @@ func Conn() *sqlx.DB {
 	return db
 }
 
-func Init() {
+func Init(retries int) {
 	var err error
 	db, err = sqlx.Open("clickhouse", config.Get().Clickhouse)
-	if err != nil {
-		panic(err)
+	if err == nil {
+		err = db.Ping()
+		if err == nil {
+			Schema()
+			return
+		}
 	}
-	err = db.Ping()
-	if err != nil {
-		panic(err)
+	if retries > 0 {
+		fmt.Fprintf(os.Stderr, "(%v) clickhouse connect retry: %s\n", retries, err)
+		<-time.After(time.Second)
+		Init(retries - 1)
+		return
 	}
-	Schema()
+	panic(err)
 }
 
 func Schema() {

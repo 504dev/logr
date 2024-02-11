@@ -3,7 +3,7 @@
     <img width="128" height="128" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.png">
   </a>
   <p>
-    <b>logr</b> is an open source logger and metric service.
+    <b>logr</b> is an open-source logger and metric service.
     <br>
     Helps you debug and analyze performance of your features.
     <br>
@@ -110,7 +110,7 @@ mysql: "logr:logr@tcp(localhost:3306)/logr"
 ```
 
 * `jwt_secret` is random string (using to sign temporary authorization tokens)
-* `client_id` and `client_secret` is Github App keys (optional. set empty, if not sure)
+* `client_id` and `client_secret` is GitHub App keys (optional. set empty, if not sure)
 * `org` is organization restriction (if set, only org members can authorize)
 
 ## Client libraries
