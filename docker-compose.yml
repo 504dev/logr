@@ -1,4 +1,4 @@
-version: '2.4'
+version: '3.0'
 
 volumes:
   clickhouse-volume:
@@ -33,6 +33,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
   server:
+    hostname: ${HOSTNAME:-}
     container_name: "logr"
     build: .
     ports:

@@ -24,14 +24,11 @@ type AuthController struct {
 }
 
 func (a *AuthController) Init() {
-	conf := config.Get().OAuth.Github
-	scopes := []string{"read:user", "user:email"}
-	if conf.Org != "" {
-		scopes = append(scopes, "read:org")
-	}
+	credentials := config.Get().OAuth.Github
+	scopes := []string{"read:user", "user:email", "read:org"}
 	a.Config = &oauth2.Config{
-		ClientID:     conf.ClientId,
-		ClientSecret: conf.ClientSecret,
+		ClientID:     credentials.ClientId,
+		ClientSecret: credentials.ClientSecret,
 		Scopes:       scopes,
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
