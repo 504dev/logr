@@ -155,10 +155,11 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		for _, v := range orgs {
 			if *v.Login == org {
 				access = true
+				break
 			}
 		}
 		if !access {
-			msg := "organization membership required."
+			msg := fmt.Sprintf("membership in the %s organization is required.", org)
 			if callback != "" {
 				url := fmt.Sprintf("%verror?msg=%v", callback, msg)
 				c.Redirect(http.StatusMovedPermanently, url)
