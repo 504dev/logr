@@ -106,6 +106,8 @@ func crypto(conf *logr.Config) {
 				l.Per("volume:BTC_USDT:bitfinex", bitV, totalV)
 				l.Per("volume:BTC_USDT:binance", binV, totalV)
 			}
+
+			time.Sleep(time.Second)
 		}
 	}
 }
