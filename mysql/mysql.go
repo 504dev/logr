@@ -5,6 +5,7 @@ import (
 	"github.com/504dev/logr/config"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jmoiron/sqlx"
+	"github.com/pressly/goose/v3"
 	"os"
 	"time"
 )
@@ -21,10 +22,7 @@ func Init(retries int) {
 	if err == nil {
 		err = db.Ping()
 		if err == nil {
-			Schema()
-			SeedUsers()
-			SeedDashboards()
-			SeedKeys()
+			Migrate()
 			return
 		}
 	}
@@ -35,4 +33,13 @@ func Init(retries int) {
 		return
 	}
 	panic(err)
+}
+
+func Migrate() {
+	db, _ := sqlx.Open("mysql", config.Get().Mysql+"?multiStatements=true")
+	goose.SetDialect("mysql")
+	err := goose.Up(db.DB, "./mysql/migrations")
+	if err != nil {
+		panic(err)
+	}
 }

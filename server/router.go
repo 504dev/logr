@@ -46,7 +46,7 @@ func NewRouter() *gin.Engine {
 	})
 
 	r.GET("/api/free-token", func(c *gin.Context) {
-		usr, err := user.GetById(2)
+		usr, err := user.GetById(types.UserDemoId)
 		if err != nil {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return

@@ -2,7 +2,7 @@ package types
 
 import (
 	"encoding/base64"
-	"github.com/504dev/logr/cipher"
+	"github.com/504dev/logr-go-client/cipher"
 	"github.com/504dev/logr/config"
 	"github.com/dgrijalva/jwt-go"
 )

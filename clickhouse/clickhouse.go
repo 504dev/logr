@@ -5,6 +5,7 @@ import (
 	"github.com/504dev/logr/config"
 	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/jmoiron/sqlx"
+	"github.com/pressly/goose/v3"
 	"os"
 	"time"
 )
@@ -21,7 +22,7 @@ func Init(retries int) {
 	if err == nil {
 		err = db.Ping()
 		if err == nil {
-			Schema()
+			Migrate()
 			return
 		}
 	}
@@ -34,15 +35,11 @@ func Init(retries int) {
 	panic(err)
 }
 
-func Schema() {
-	var err error
-	tables := []string{"logs", "counts"}
-	for _, table := range tables {
-		path := fmt.Sprintf("./clickhouse/schema/%v.sql", table)
-		sql, _ := os.ReadFile(path)
-		_, err = db.Exec(string(sql))
-		if err != nil {
-			panic(err)
-		}
+func Migrate() {
+	db, _ := sqlx.Open("clickhouse", config.Get().Clickhouse+"&x-multi-statement=true")
+	goose.SetDialect("clickhouse")
+	err := goose.Up(db.DB, "./clickhouse/migrations")
+	if err != nil {
+		panic(err)
 	}
 }

@@ -21,6 +21,6 @@ const (
 )
 
 const (
-	ProviderGithub = 1
-	ProviderGoogle = 2
+	UserLogrId = 1
+	UserDemoId = 2
 )

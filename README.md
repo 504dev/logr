@@ -25,16 +25,18 @@
 * Authorization by `GitHub`
 
 ## Usage
+
 ```bash
 docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ```
+
 ```javascript
 const { Logr } = require('logr-node-client');
 
 const conf = new Logr({
-    udp: ':7776',
-    publicKey: 'MCAwDQYJKoZIhvcNAQEBBQADDwAwDAIFAMg7IrMCAwEAAQ==',
-    privateKey: 'MC0CAQACBQDIOyKzAgMBAAECBQCHaZwRAgMA0nkCAwDziwIDAL+xAgJMKwICGq0=',
+  udp: ':7776',
+  publicKey: 'MCAwDQYJKoZIhvcNAQEBBQADDwAwDAIFAMg7IrMCAwEAAQ==',
+  privateKey: 'MC0CAQACBQDIOyKzAgMBAAECBQCHaZwRAgMA0nkCAwDziwIDAL+xAgJMKwICGq0=',
 });
 
 const logr = conf.newLogger('hello.log');
@@ -45,23 +47,26 @@ logr.info('Hello, Logr!');
 ```
 
 ## Requirements
+
 * Node.js `v20`
 * Npm `v10`
 * Golang `v1.17`
 * ClickHouse `v23`
 * Mysql `v5.7`
 
-
 ## Build & Run service
 
 ### Docker image
+
 ```
 docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ```
+
 Enjoy: \
-   http://localhost:7778/
+http://localhost:7778/
 
 ### Docker-compose
+
 1. Clone repository: \
    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
 2. Generate **.env** file: \
@@ -75,10 +80,11 @@ Enjoy: \
    http://localhost:7778/
 
 ### Manual
+
 1. Clone repository: \
-    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
+   `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
 2. Init **config.yml** file: \
-    `make config`
+   `make config`
 3. Fill **config.yml**, see [Config](#config) section
 4. Creating databases in Clickhouse and Mysql:
     ```
@@ -90,11 +96,12 @@ Enjoy: \
 6. Build backend: \
    `make build`
 7. Run: \
-    `make run`
+   `make run`
 8. Enjoy: \
    http://localhost:7778/
 
 ## Config
+
 ```yaml
 bind:
   http: ":7778"
@@ -118,8 +125,10 @@ mysql: "logr:logr@tcp(localhost:3306)/logr"
 * Golang [github.com/504dev/logr-go-client](https://github.com/504dev/logr-go-client)
 * Node.js [github.com/504dev/logr-node-client](https://github.com/504dev/logr-node-client)
 * Python [github.com/504dev/logr-python-client](https://github.com/504dev/logr-python-client)
-* PHP [github.com/504dev/logr-php-client](https://github.com/504dev/logr-php-client) (logger only, metrics not supported)
+* PHP [github.com/504dev/logr-php-client](https://github.com/504dev/logr-php-client) (logger only, metrics not
+  supported)
 
 ## Utils
+
 * Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
 

@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS counts
 (
     `day` Date,
@@ -19,4 +21,10 @@ CREATE TABLE IF NOT EXISTS counts
 ENGINE = MergeTree()
 PARTITION BY toYYYYMM(day)
 ORDER BY (dash_id, logname, day, timestamp)
-TTL day + INTERVAL 1 YEAR
+TTL day + INTERVAL 1 YEAR;
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE counts;
+-- +goose StatementEnd

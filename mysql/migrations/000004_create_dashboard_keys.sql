@@ -1,3 +1,5 @@
+-- +goose Up
+-- +goose StatementBegin
 CREATE TABLE IF NOT EXISTS dashboard_keys (
     id INT NOT NULL AUTO_INCREMENT,
     dash_id INT,
@@ -8,3 +10,9 @@ CREATE TABLE IF NOT EXISTS dashboard_keys (
     UNIQUE (public_key),
     FOREIGN KEY (dash_id) REFERENCES dashboards(id) ON DELETE CASCADE
 );
+-- +goose StatementEnd
+
+-- +goose Down
+-- +goose StatementBegin
+DROP TABLE dashboard_keys;
+-- +goose StatementEnd
