@@ -11,11 +11,10 @@
   </p>
 </div>
 
-[Demo]
+[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.jpg)](http://logr.info/demo)
 
-[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.jpg)][Demo]
+[Look at the demo page](http://logr.info/demo)
 
-[Demo]: http://logr.info/demo
 
 * logs look like in your `Terminal`
 * storing data in `ClickHouse`

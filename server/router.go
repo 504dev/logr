@@ -12,6 +12,7 @@ import (
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"net/http/httputil"
 	"os"
 	"time"
 )
@@ -152,6 +153,15 @@ func NewRouter() *gin.Engine {
 
 	wsController := controllers.WsController{}
 	r.GET("/ws", wsController.Index)
+
+	r.GET("/webhook", func(c *gin.Context) {
+		requestDump, err := httputil.DumpRequest(c.Request, true)
+		if err != nil {
+			Logger.Error(err)
+		}
+		Logger.Notice(string(requestDump))
+		c.AbortWithStatus(http.StatusOK)
+	})
 
 	return r
 }
