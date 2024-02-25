@@ -1,6 +1,9 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"github.com/504dev/logr-go-client/utils"
 	"github.com/504dev/logr/cachify"
 	"github.com/504dev/logr/config"
@@ -164,8 +167,37 @@ func NewRouter() *gin.Engine {
 	})
 
 	r.POST("/support", func(c *gin.Context) {
-		body, err := c.GetRawData()
-		Support.Info("%v %v", string(body), err)
+		var data struct {
+			Name    string `json:"name"`
+			Email   string `json:"email"`
+			Message string `json:"message"`
+			Token   string `json:"recaptchaToken"`
+		}
+		err := json.NewDecoder(c.Request.Body).Decode(&data)
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		posturl := "https://www.google.com/recaptcha/api/siteverify"
+		body := []byte(fmt.Sprintf(`{ "secret": "%s", "response": "%s" }`, config.Get().ReCaptcha, data.Token))
+
+		r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
+		if err != nil {
+			c.AbortWithStatus(http.StatusBadRequest)
+		}
+
+		var result struct {
+			Success bool `json:"success"`
+		}
+		err = json.NewDecoder(r.Body).Decode(&result)
+		if err != nil || result.Success == false {
+			c.AbortWithStatus(http.StatusBadRequest)
+			return
+		}
+
+		payload, _ := c.GetRawData()
+		Support.Info("%v %v", string(payload))
 		c.AbortWithStatus(http.StatusOK)
 	})
 
