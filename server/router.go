@@ -178,23 +178,34 @@ func NewRouter() *gin.Engine {
 			return
 		}
 
-		if err = CheckRecaptcha(config.Get().RecaptchaSecret, data.Token); err != nil {
+		verifyData, err := CheckRecaptcha(config.Get().RecaptchaSecret, data.Token)
+		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
+		data.Token = ""
 		payload, _ := json.Marshal(data)
-		Support.Notice("%v", string(payload))
+		Support.Notice("%v %v", string(payload), verifyData)
 		c.AbortWithStatus(http.StatusOK)
 	})
 
 	return r
 }
 
-func CheckRecaptcha(secret, response string) error {
+type SiteVerifyResponse struct {
+	Success     bool      `json:"success"`
+	Score       float64   `json:"score"`
+	Action      string    `json:"action"`
+	ChallengeTS time.Time `json:"challenge_ts"`
+	Hostname    string    `json:"hostname"`
+	ErrorCodes  []string  `json:"error-codes"`
+}
+
+func CheckRecaptcha(secret, response string) (*SiteVerifyResponse, error) {
 	req, err := http.NewRequest(http.MethodPost, "https://www.google.com/recaptcha/api/siteverify", nil)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Add necessary request parameters.
@@ -206,29 +217,20 @@ func CheckRecaptcha(secret, response string) error {
 	// Make request
 	resp, err := http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	// Decode response.
-	var body struct {
-		Success     bool      `json:"success"`
-		Score       float64   `json:"score"`
-		Action      string    `json:"action"`
-		ChallengeTS time.Time `json:"challenge_ts"`
-		Hostname    string    `json:"hostname"`
-		ErrorCodes  []string  `json:"error-codes"`
-	}
+	var body SiteVerifyResponse
 	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
-		return err
+		return nil, err
 	}
-
-	Support.Info("%v %v", response, body)
 
 	// Check recaptcha verification success.
 	if !body.Success {
-		return errors.New("unsuccessful recaptcha verify request")
+		return &body, errors.New("unsuccessful recaptcha verify request")
 	}
 
-	return nil
+	return &body, nil
 }
