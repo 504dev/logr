@@ -193,7 +193,7 @@ func NewRouter() *gin.Engine {
 			ErrorCodes []string `json:"error-codes"`
 		}
 		err = json.NewDecoder(r.Body).Decode(&result)
-		Support.Info("%v %v", r.Body, result)
+		Support.Info("%v %v %v %v", data, string(body), r.Body, result)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 			return
