@@ -30,7 +30,7 @@ type ConfigData struct {
 	Mysql         string `yaml:"mysql"`
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
 	DemoDash      bool   `yaml:"demo_dash"`
-	ReCaptcha     bool   `yaml:"recaptcha"`
+	ReCaptcha     string `yaml:"recaptcha"`
 }
 
 func (c *ConfigData) GetJwtSecret() string {
