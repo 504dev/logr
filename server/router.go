@@ -165,7 +165,7 @@ func NewRouter() *gin.Engine {
 
 	r.POST("/support", func(c *gin.Context) {
 		body, err := c.GetRawData()
-		Support.Info("%v %v", body, err)
+		Support.Info("%v %v", string(body), err)
 		c.AbortWithStatus(http.StatusOK)
 	})
 
