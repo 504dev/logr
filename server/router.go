@@ -175,7 +175,7 @@ func NewRouter() *gin.Engine {
 		}
 		err := json.NewDecoder(c.Request.Body).Decode(&data)
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
@@ -184,7 +184,8 @@ func NewRouter() *gin.Engine {
 
 		r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
 		if err != nil {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			return
 		}
 
 		var result struct {
@@ -192,7 +193,7 @@ func NewRouter() *gin.Engine {
 		}
 		err = json.NewDecoder(r.Body).Decode(&result)
 		if err != nil || result.Success == false {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
