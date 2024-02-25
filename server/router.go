@@ -189,9 +189,11 @@ func NewRouter() *gin.Engine {
 		}
 
 		var result struct {
-			Success bool `json:"success"`
+			Success    bool     `json:"success"`
+			ErrorCodes []string `json:"error-codes"`
 		}
 		err = json.NewDecoder(r.Body).Decode(&result)
+		Support.Info("%v %v", r.Body, result)
 		if err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 			return
