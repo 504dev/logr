@@ -1,9 +1,8 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/504dev/logr-go-client/utils"
 	"github.com/504dev/logr/cachify"
 	"github.com/504dev/logr/config"
@@ -179,35 +178,57 @@ func NewRouter() *gin.Engine {
 			return
 		}
 
-		posturl := "https://www.google.com/recaptcha/api/siteverify"
-		body := []byte(fmt.Sprintf(`{ "secret": "%s", "response": "%s" }`, config.Get().ReCaptcha, data.Token))
-
-		r, err := http.Post(posturl, "application/json", bytes.NewBuffer(body))
-		if err != nil {
+		if err = CheckRecaptcha(config.Get().RecaptchaSecret, data.Token); err != nil {
 			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 			return
 		}
 
-		var result struct {
-			Success    bool     `json:"success"`
-			ErrorCodes []string `json:"error-codes"`
-		}
-		err = json.NewDecoder(r.Body).Decode(&result)
-		Support.Info("%v %v %v %v", data, string(body), r.Body, result)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if result.Success == false {
-			c.AbortWithStatus(http.StatusForbidden)
-			return
-		}
-
-		payload, _ := c.GetRawData()
-		Support.Info("%v %v", string(payload))
+		payload, _ := json.Marshal(data)
+		Support.Notice("%v", string(payload))
 		c.AbortWithStatus(http.StatusOK)
 	})
 
 	return r
+}
+
+func CheckRecaptcha(secret, response string) error {
+	req, err := http.NewRequest(http.MethodPost, "https://www.google.com/recaptcha/api/siteverify", nil)
+	if err != nil {
+		return err
+	}
+
+	// Add necessary request parameters.
+	q := req.URL.Query()
+	q.Add("secret", secret)
+	q.Add("response", response)
+	req.URL.RawQuery = q.Encode()
+
+	// Make request
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Decode response.
+	var body struct {
+		Success     bool      `json:"success"`
+		Score       float64   `json:"score"`
+		Action      string    `json:"action"`
+		ChallengeTS time.Time `json:"challenge_ts"`
+		Hostname    string    `json:"hostname"`
+		ErrorCodes  []string  `json:"error-codes"`
+	}
+	if err = json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return err
+	}
+
+	Support.Info("%v %v", response, body)
+
+	// Check recaptcha verification success.
+	if !body.Success {
+		return errors.New("unsuccessful recaptcha verify request")
+	}
+
+	return nil
 }
