@@ -175,16 +175,16 @@ func NewRouter() *gin.Engine {
 		}
 		err := json.NewDecoder(c.Request.Body).Decode(&data)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 
 		posturl := "https://www.google.com/recaptcha/api/siteverify"
 		body := []byte(fmt.Sprintf(`{ "secret": "%s", "response": "%s" }`, config.Get().ReCaptcha, data.Token))
 
-		r, err := http.NewRequest("POST", posturl, bytes.NewBuffer(body))
+		r, err := http.Post(posturl, "application/json", bytes.NewBuffer(body))
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 
@@ -193,7 +193,7 @@ func NewRouter() *gin.Engine {
 		}
 		err = json.NewDecoder(r.Body).Decode(&result)
 		if err != nil || result.Success == false {
-			c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+			c.AbortWithStatus(http.StatusBadRequest)
 			return
 		}
 
