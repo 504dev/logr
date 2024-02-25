@@ -23,6 +23,8 @@ func ListenHTTP() error {
 	r.GET("/jwt/:token", frontend)
 	r.GET("/dashboards", frontend)
 	r.GET("/dashboard/*rest", frontend)
+	r.GET("/policy", frontend)
+	r.GET("/support", frontend)
 
 	return r.Run(config.Get().Bind.Http)
 }

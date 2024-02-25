@@ -28,6 +28,7 @@ func createConfig(dashId int) (*logr.Config, error) {
 func Init() {
 	conf, _ := createConfig(types.DashboardSystemId)
 	Logger, _ = conf.NewLogger("main.log")
+	Support, _ = conf.NewLogger("support.log")
 	conf.DefaultSystemCounter()
 	conf.DefaultProcessCounter()
 	gin, _ := conf.NewLogger("gin.log")
@@ -48,5 +49,6 @@ func Init() {
 	}
 }
 
+var Support *logr.Logger
 var Logger *logr.Logger
 var GinWriter *logr.Writer
