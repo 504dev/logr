@@ -170,7 +170,7 @@ func NewRouter() *gin.Engine {
 			Name    string `json:"name"`
 			Email   string `json:"email"`
 			Message string `json:"message"`
-			Token   string `json:"recaptchaToken"`
+			Token   string `json:"recaptchaToken,omitempty"`
 		}
 		err := json.NewDecoder(c.Request.Body).Decode(&data)
 		if err != nil {
