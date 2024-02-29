@@ -597,8 +597,8 @@ cloud.google.com/go/workflows v1.10.0/go.mod h1:fZ8LmRmZQWacon9UCX1r/g/DfAXx5VcP
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
 gioui.org v0.0.0-20210308172011-57750fc8a0a6/go.mod h1:RSH6KIUZ0p2xy5zHDxgAM4zumjgTw83q2ge/PI+yyw8=
 git.sr.ht/~sbinet/gg v0.3.1/go.mod h1:KGYtlADtqsqANL9ueOFkWymvzUvLMQllU5Ixo+8v3pc=
-github.com/504dev/logr-go-client v1.50.0 h1:C6xZF/GhNnWp99FnECEzvUH70HfWQV8Uy9c0gwITCCY=
-github.com/504dev/logr-go-client v1.50.0/go.mod h1:GFqb7HF5H1n7wX9DmGwUlcdjUaSzT6/r78nwTzR1IuU=
+github.com/504dev/logr-go-client v1.50.3 h1:qgq0i412PL0SN1TXVD18HnsVnUCOVTJ/7M74zgnN2gU=
+github.com/504dev/logr-go-client v1.50.3/go.mod h1:GFqb7HF5H1n7wX9DmGwUlcdjUaSzT6/r78nwTzR1IuU=
 github.com/Azure/azure-sdk-for-go/sdk/azcore v0.19.0/go.mod h1:h6H6c8enJmmocHUbLiiGY6sx7f9i+X3m1CHdd5c6Rdw=
 github.com/Azure/azure-sdk-for-go/sdk/azidentity v0.11.0/go.mod h1:HcM1YX14R7CJcghJGOYCgdezslRSVzqwLf/q+4Y2r/0=
 github.com/Azure/azure-sdk-for-go/sdk/internal v0.7.0/go.mod h1:yqy467j36fJxcRV2TzfVZ1pCb5vxm4BtZPUdYWe/Xo8=
