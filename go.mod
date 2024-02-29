@@ -3,7 +3,7 @@ module github.com/504dev/logr
 go 1.17
 
 require (
-	github.com/504dev/logr-go-client v1.49.0
+	github.com/504dev/logr-go-client v1.50.0
 	github.com/ClickHouse/clickhouse-go v1.5.4
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.1
