@@ -20,22 +20,22 @@ func (row LogPackageRow) Joined() (complete bool, joined *_types.LogPackage) {
 		return false, nil
 	}
 
-	ciphered := row[0].CipherLog != ""
+	ciphered := row[0].CipherLog != nil
 	var buffer bytes.Buffer
 
 	for _, lp := range row {
 		if ciphered {
-			buffer.WriteString(lp.CipherLog)
+			buffer.Write(lp.CipherLog)
 		} else {
-			buffer.WriteString(lp.PlainLog)
+			buffer.Write(lp.PlainLog)
 		}
 	}
 
 	clone := *row[0]
 	if ciphered {
-		clone.CipherLog = buffer.String()
+		clone.CipherLog = buffer.Bytes()
 	} else {
-		clone.PlainLog = buffer.String()
+		clone.PlainLog = buffer.Bytes()
 	}
 
 	return true, &clone

@@ -59,17 +59,16 @@ func ListenUDP() error {
 
 		if !config.Get().AllowNoCipher {
 			lp.Log = nil
-			lp.PlainLog = ""
+			lp.PlainLog = nil
 			lp.Count = nil
 		}
 
 		// Handle logs
-		if lp.CipherLog != "" || lp.PlainLog != "" || lp.Log != nil {
+		if lp.CipherLog != nil || lp.PlainLog != nil || lp.Log != nil {
 			Logger.Inc("udp:logs", 1)
 			Logger.Inc("udp:logs:bytes", float64(n))
 			go func() {
-				if lp.CipherLog != "" || lp.PlainLog != "" {
-
+				if lp.CipherLog != nil || lp.PlainLog != nil {
 					if lp.Chunk != nil {
 						sig, err := lp.Chunk.CalcSig(dk.PrivateKey)
 						if err != nil || lp.Sig != sig {
@@ -87,7 +86,7 @@ func ListenUDP() error {
 						}
 					}
 
-					if lp.CipherLog != "" {
+					if lp.CipherLog != nil {
 						err = lp.DecryptLog(dk.PrivateKey)
 						if err != nil {
 							Logger.Error("UDP decrypt log error: %v", err)
@@ -116,11 +115,11 @@ func ListenUDP() error {
 		}
 
 		// Handle counts
-		if lp.CipherCount != "" || lp.Count != nil {
+		if lp.CipherCount != nil || lp.Count != nil {
 			Logger.Inc("udp:counts", 1)
 			Logger.Inc("udp:counts:bytes", float64(n))
 			go func() {
-				if lp.CipherCount != "" {
+				if lp.CipherCount != nil {
 					err = lp.DecryptCount(dk.PrivateKey)
 					if err != nil {
 						Logger.Error("UDP decrypt count error: %v", err)
