@@ -30,6 +30,12 @@ func main() {
 		}
 	})()
 	go (func() {
+		err := server.ListenGRPC()
+		if err != nil {
+			panic(err)
+		}
+	})()
+	go (func() {
 		err := server.ListenHTTP()
 		if err != nil {
 			panic(err)
