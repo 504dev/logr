@@ -6,14 +6,12 @@ tasks:
       - docker build ./ -t kozhurkin/logr-arm64:$VER -f ./Dockerhub/Dockerfile --platform linux/arm64
       - docker build ./ -t kozhurkin/logr-amd64:$VER -f ./Dockerhub/Dockerfile --platform linux/amd64
 
-  manifest:
-    cmds:
-      - docker manifest create kozhurkin/logr:$VER kozhurkin/logr-arm64:$VER kozhurkin/logr-amd64:$VER
-      - docker manifest create kozhurkin/logr:latest kozhurkin/logr-arm64:$VER kozhurkin/logr-amd64:$VER
-
   push:
     cmds:
       - docker push kozhurkin/logr-amd64:$VER
       - docker push kozhurkin/logr-arm64:$VER
+      - docker manifest rm kozhurkin/logr:latest
+      - docker manifest create kozhurkin/logr:$VER kozhurkin/logr-arm64:$VER kozhurkin/logr-amd64:$VER
+      - docker manifest create kozhurkin/logr:latest kozhurkin/logr-arm64:$VER kozhurkin/logr-amd64:$VER
       - docker manifest push kozhurkin/logr:$VER
       - docker manifest push kozhurkin/logr:latest
