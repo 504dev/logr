@@ -6,6 +6,7 @@ import (
 	"github.com/504dev/logr/config"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
+	"google.golang.org/protobuf/proto"
 	"net"
 )
 
@@ -16,7 +17,7 @@ type server struct {
 func (s *server) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
 	var lp types.LogPackage
 	lp.FromProto(lrp)
-	Handle(&lp, "grpc", 0)
+	Handle(&lp, "grpc", proto.Size(lrp))
 	return &pb.Response{}, nil
 }
 

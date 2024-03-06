@@ -11,6 +11,7 @@ import (
 func createConfig(dashId int) (*logr.Config, error) {
 	conf := logr.Config{
 		Udp:      config.Get().Bind.Udp,
+		Grpc:     config.Get().Bind.Grpc,
 		NoCipher: false,
 	}
 	dk, err := dashkey.GetById(dashId)
