@@ -2,9 +2,8 @@ name: "Deploy"
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Tag to deploy'
-        required: true
+      push:
+        branches: [ "master" ]
 jobs:
   deploy:
     runs-on: ubuntu-latest
