@@ -9,3 +9,4 @@ logr-server
 .env
 .env.backup
 *.xml
+prometheus.yml

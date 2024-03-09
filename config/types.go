@@ -18,6 +18,7 @@ type ConfigData struct {
 		Http string `yaml:"http"`
 		Udp  string `yaml:"udp"`
 		Grpc string `yaml:"grpc"`
+		Prom string `yaml:"prom"`
 	} `yaml:"bind"`
 	OAuth struct {
 		Github struct {

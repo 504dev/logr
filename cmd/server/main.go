@@ -24,20 +24,23 @@ func main() {
 	log.RunQueue()
 	count.RunQueue()
 	go (func() {
-		err := server.ListenUDP()
-		if err != nil {
+		if err := server.ListenUDP(); err != nil {
 			panic(err)
 		}
 	})()
 	go (func() {
-		err := server.ListenGRPC()
-		if err != nil {
+		if err := server.ListenGRPC(); err != nil {
 			panic(err)
 		}
 	})()
 	go (func() {
-		err := server.ListenHTTP()
-		if err != nil {
+		if err := server.ListenHTTP(); err != nil {
+			panic(err)
+		}
+	})()
+	go (func() {
+
+		if err := server.ListenPROM(); err != nil {
 			panic(err)
 		}
 	})()
