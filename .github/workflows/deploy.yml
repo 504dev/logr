@@ -25,6 +25,12 @@ jobs:
           go mod download
           go build -o test ./cmd/server
 
+      - name: List workspace contents
+        run: |
+          echo "Listing deployment folder contents:"
+          pwd
+          ls -la ${{ github.workspace }}
+
       - name: Deploy to VM
         run: |
           sudo apt-get install -y ssh rsync
@@ -32,14 +38,7 @@ jobs:
           chmod 600 deploy_key.pem
           
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
-          rsync -avz -e 'ssh -i deploy_key.pem -o StrictHostKeyChecking=no' ./test ${{ env.HOST }}:${{ env.DEPLOY_DIRECTORY }}/
+          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && git pull origin master --tags --recurse-submodules"
+          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && sudo bash deploy.sh"
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-
-      - name: List workspace contents
-        run: |
-          echo "Listing deployment folder contents:"
-          ls -la ${{ github.workspace }}
-      - name: Start application
-        run: |
-          cat deploy.sh
