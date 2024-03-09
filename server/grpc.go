@@ -21,6 +21,11 @@ func (s *server) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response,
 	return &pb.Response{}, nil
 }
 
+func MustListenGRPC() {
+	if err := ListenGRPC(); err != nil {
+		panic(err)
+	}
+}
 func ListenGRPC() error {
 	addr := config.Get().Bind.Grpc
 	if addr == "" {

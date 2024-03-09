@@ -21,29 +21,12 @@ func main() {
 	clickhouse.Init(args.Retries)
 	mysql.Init(args.Retries)
 	logger.Init()
-	log.RunQueue()
-	count.RunQueue()
-	go (func() {
-		if err := server.ListenUDP(); err != nil {
-			panic(err)
-		}
-	})()
-	go (func() {
-		if err := server.ListenGRPC(); err != nil {
-			panic(err)
-		}
-	})()
-	go (func() {
-		if err := server.ListenHTTP(); err != nil {
-			panic(err)
-		}
-	})()
-	go (func() {
-
-		if err := server.ListenPROM(); err != nil {
-			panic(err)
-		}
-	})()
+	log.RunQueue()   // TODO graceful shutdown
+	count.RunQueue() // TODO graceful shutdown
+	go server.MustListenUDP()
+	go server.MustListenGRPC()
+	go server.MustListenHTTP()
+	go server.MustListenPROM()
 	go (func() {
 		for {
 			time.Sleep(10 * time.Second)

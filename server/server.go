@@ -9,6 +9,11 @@ import (
 	"os"
 )
 
+func MustListenHTTP() {
+	if err := ListenHTTP(); err != nil {
+		panic(err)
+	}
+}
 func ListenHTTP() error {
 	gin.ForceConsoleColor()
 
