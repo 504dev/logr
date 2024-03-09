@@ -38,7 +38,7 @@ jobs:
           chmod 600 deploy_key.pem
           
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && git pull origin master --tags --recurse-submodules"
+          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && sudo git pull origin master --tags --recurse-submodules"
           ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && sudo bash deploy.sh"
         env:
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
