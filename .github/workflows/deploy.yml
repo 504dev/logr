@@ -39,7 +39,7 @@ jobs:
       - name: List workspace contents
         run: |
           echo "Listing deployment folder contents:"
-          ls -la ${{ github.workspace }}/deployment
+          ls -la ${{ github.workspace }}
       - name: Start application
         run: |
           cat deploy.sh
