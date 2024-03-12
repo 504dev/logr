@@ -1,5 +1,5 @@
-github.com/504dev/logr-go-client v1.60.2 h1:vGEH87E5hcxR3DrR5Gi1LfecxqwgRZmCYqlvV8bnzOs=
-github.com/504dev/logr-go-client v1.60.2/go.mod h1:9euPtC+2atMy2oDlFqvjvdunf4ARa6rhytKZ6Wgoo7I=
+github.com/504dev/logr-go-client v1.60.3 h1:2ayaS2iOAfNQT7+ltojfQOwic8w6Qe8atJ7Mpg0qnt4=
+github.com/504dev/logr-go-client v1.60.3/go.mod h1:9euPtC+2atMy2oDlFqvjvdunf4ARa6rhytKZ6Wgoo7I=
 github.com/ClickHouse/clickhouse-go v1.5.4 h1:cKjXeYLNWVJIx2J1K6H2CqyRmfwVJVY1OV1coaaFcI0=
 github.com/ClickHouse/clickhouse-go v1.5.4/go.mod h1:EaI/sW7Azgz9UATzd5ZdZHRUhHgv5+JMS9NSr2smCJI=
 github.com/bkaradzic/go-lz4 v1.0.0 h1:RXc4wYsyz985CkXXeX04y4VnZFGG8Rd43pRaHsOXAKk=
