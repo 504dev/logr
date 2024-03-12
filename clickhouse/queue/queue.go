@@ -7,34 +7,26 @@ import (
 	"time"
 )
 
-type Config struct {
+type QueueConfig struct {
 	*sqlx.DB
 	FlushInterval time.Duration
 	FlushCount    int
 	Sql           string
 }
 
-func DefaultConfig(db *sqlx.DB) *Config {
-	return &Config{
-		DB:            db,
-		FlushInterval: 5 * time.Second,
-		FlushCount:    1000,
-	}
-}
-
 type Queue struct {
 	sync.Mutex
-	*Config
+	*QueueConfig
 	*time.Ticker
 	list    [][]interface{}
 	flushed time.Time
 }
 
-func NewQueue(c *Config) *Queue {
+func NewQueue(c *QueueConfig) *Queue {
 	return &Queue{
-		Config:  c,
-		flushed: time.Now(),
-		list:    make([][]interface{}, 0, c.FlushCount),
+		QueueConfig: c,
+		flushed:     time.Now(),
+		list:        make([][]interface{}, 0, c.FlushCount),
 	}
 }
 

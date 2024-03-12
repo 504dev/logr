@@ -11,10 +11,9 @@ var Queue *queue.Queue
 
 func RunQueue() {
 	sql := `
-        INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `
-	Queue = queue.NewQueue(&queue.Config{
+		INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	Queue = queue.NewQueue(&queue.QueueConfig{
 		DB:            clickhouse.Conn(),
 		Sql:           sql,
 		FlushInterval: time.Second,
