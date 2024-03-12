@@ -17,7 +17,7 @@ COPY ./ /opt/logr
 WORKDIR /opt/logr/frontend
 RUN yarn install && yarn build && yarn cache clean
 
-FROM golang:1.17-alpine AS gobuild
+FROM golang:1.19-alpine AS gobuild
 
 COPY --from=frontend /opt/logr /opt/logr
 COPY ./Dockerhub/config.yml /opt/logr

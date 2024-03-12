@@ -49,7 +49,7 @@ logr.info('Hello, Logr!');
 
 * Node.js `v20`
 * Npm `v10`
-* Golang `v1.17`
+* Golang `v1.19`
 * ClickHouse `v23`
 * Mysql `v5.7`
 
