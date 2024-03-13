@@ -14,7 +14,7 @@ type Sock struct {
 	*User           `json:"user"`
 	*Filter         `json:"filter"`
 	*Claims         `json:"claims"`
-	*websocket.Conn `json:"conn"`
+	*websocket.Conn `json:"conn"` // TODO interface
 }
 
 func (s *Sock) SendLog(lg *_types.Log) error {

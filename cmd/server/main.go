@@ -30,7 +30,7 @@ func main() {
 	go (func() {
 		for {
 			time.Sleep(10 * time.Second)
-			logger.Logger.Info("ws.SockMap %v", ws.SockMap.Info())
+			logger.Logger.Info("ws.SockMap %v", ws.SockMap.String())
 		}
 	})()
 	HandleExit()

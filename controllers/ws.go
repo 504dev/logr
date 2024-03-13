@@ -56,7 +56,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 		Paused: paused,
 		Claims: claims,
 	}
-	ws.SockMap.Set(sock)
+	ws.SockMap.Add(sock)
 
 	for {
 		var m types.SockMessage

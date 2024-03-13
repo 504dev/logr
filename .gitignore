@@ -10,3 +10,4 @@ logr-server
 .env.backup
 *.xml
 prometheus.yml
+cmd/test/

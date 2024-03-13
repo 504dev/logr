@@ -15,6 +15,7 @@ require (
 	github.com/google/go-github/v29 v29.0.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/json-iterator/go v1.1.12
+	github.com/orcaman/concurrent-map/v2 v2.0.1
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pressly/goose/v3 v3.9.0
 	golang.org/x/net v0.22.0
