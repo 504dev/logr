@@ -45,14 +45,6 @@ logr.info('Hello, Logr!');
 // 2024-01-30T22:50:04+03:00 info [v1.0.41, pid=60512, cmd/hello.go:41] Hello, Logr!
 ```
 
-## Requirements
-
-* Node.js `v20`
-* Npm `v10`
-* Golang `v1.19`
-* ClickHouse `v23`
-* Mysql `v5.7`
-
 ## Build & Run service
 
 ### Docker image
@@ -79,6 +71,9 @@ http://localhost:7778/
    http://localhost:7778/
 
 ### Manual
+
+
+Requirements: `Node.js v20` `Npm v10` `Golang v1.19` `ClickHouse v23` `Mysql v5.7`
 
 1. Clone repository: \
    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
