@@ -42,6 +42,7 @@ func crypto(conf *logr.Config) {
 		l.Info("")
 		time.Sleep(30 * time.Second)
 		l.Info("**************************************************")
+		totals := make(map[string]float64)
 		for _, base := range [3]string{"BTC", "ETH", "LTC"} {
 			l.Info("")
 			sym := base + "_USDT"
@@ -65,7 +66,7 @@ func crypto(conf *logr.Config) {
 			binP, hitP, bitP := bin.Price, hit.Price, bit.Price
 			binV, hitV, bitV := bin.Volume, hit.Volume, bit.Volume
 
-			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitP).Avg(binP).Avg(bitP).Min(hitP).Min(binP).Min(bitP).Max(hitP).Max(binP).Max(bitP)
+			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitP).Avg(binP).Avg(bitP)
 			l.Avg(fmt.Sprintf("volume:%v", sym), hitV+binV+bitV)
 
 			bold := color.New(color.Bold).SprintFunc()
@@ -100,14 +101,21 @@ func crypto(conf *logr.Config) {
 				l.Snippet("max", fmt.Sprintf("price:%v", sym), 30),
 			)
 
-			if sym == "BTC_USDT" {
-				totalV := hitV + bitV + binV
-				l.Per("volume:BTC_USDT:hitbtc", hitV, totalV)
-				l.Per("volume:BTC_USDT:bitfinex", bitV, totalV)
-				l.Per("volume:BTC_USDT:binance", binV, totalV)
-			}
+			totalV := hitV + bitV + binV
+			l.Per("volume:hitbtc", hitV, totalV)
+			l.Per("volume:bitfinex", bitV, totalV)
+			l.Per("volume:binance", binV, totalV)
+
+			totals[sym] = totalV
+			totals[""] += totalV
 
 			time.Sleep(time.Second)
+		}
+
+		for sym, val := range totals {
+			if sym != "" {
+				l.Per(fmt.Sprintf("volume:%v", sym), val, totals[""])
+			}
 		}
 	}
 }

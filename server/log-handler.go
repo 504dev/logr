@@ -16,17 +16,17 @@ var joiner = types.LogPackageJoiner{
 	Data: map[string]types.LogPackageRow{},
 }
 
-func Handle(lp *_types.LogPackage, source string, size int) {
-	SOURCE := strings.ToUpper(source)
+func Handle(lp *_types.LogPackage, protocol string, size int) {
+	PROTOCOL := strings.ToUpper(protocol)
 
 	dk, err := dashkey.GetByPubCached(lp.PublicKey)
 	if err != nil {
-		Logger.Error(SOURCE+" dash error: %v", err)
+		Logger.Error(PROTOCOL+" dash error: %v", err)
 		return
 	}
 	if dk == nil {
-		Logger.Inc(source+":unknown", 1)
-		Logger.Warn(SOURCE+" unknown dash pub=%v, log=%v", lp.PublicKey, lp.Log)
+		Logger.Inc(protocol+":unknown", 1)
+		Logger.Warn(PROTOCOL+" unknown dash pub=%v, log=%v", lp.PublicKey, lp.Log)
 		return
 	}
 
@@ -38,14 +38,14 @@ func Handle(lp *_types.LogPackage, source string, size int) {
 
 	// Handle logs
 	if lp.CipherLog != nil || lp.PlainLog != nil || lp.Log != nil {
-		Logger.Inc(source+":logs", 1)
-		Logger.Inc(source+":logs:bytes", float64(size))
+		Logger.Inc(protocol+":logs", 1)
+		Logger.Inc(protocol+":logs:bytes", float64(size))
 		go func() {
 			if lp.CipherLog != nil || lp.PlainLog != nil {
 				if lp.Chunk != nil {
 					sig, err := lp.Chunk.CalcSig(dk.PrivateKey)
 					if err != nil || lp.Sig != sig {
-						Logger.Error(SOURCE+" signature error: %v, %v", err, lp.Sig != sig)
+						Logger.Error(PROTOCOL+" signature error: %v, %v", err, lp.Sig != sig)
 						return
 					}
 
@@ -62,13 +62,13 @@ func Handle(lp *_types.LogPackage, source string, size int) {
 				if lp.CipherLog != nil {
 					err = lp.DecryptLog(dk.PrivateKey)
 					if err != nil {
-						Logger.Error(SOURCE+" decrypt log error: %v", err)
+						Logger.Error(PROTOCOL+" decrypt log error: %v", err)
 						return
 					}
 				} else {
 					err = lp.DeserializeLog()
 					if err != nil {
-						Logger.Error(SOURCE+" deserialize log error: %v", err)
+						Logger.Error(PROTOCOL+" deserialize log error: %v", err)
 						return
 					}
 				}
@@ -79,7 +79,7 @@ func Handle(lp *_types.LogPackage, source string, size int) {
 				ws.SockMap.PushLog(lp.Log)
 				err = logModel.PushToQueue(lp.Log)
 				if err != nil {
-					Logger.Error(SOURCE+" create log error: %v", err)
+					Logger.Error(PROTOCOL+" create log error: %v", err)
 					return
 				}
 			}
@@ -89,23 +89,23 @@ func Handle(lp *_types.LogPackage, source string, size int) {
 
 	// Handle counts
 	if lp.CipherCount != nil || lp.Count != nil {
-		Logger.Inc(source+":counts", 1)
-		Logger.Inc(source+":counts:bytes", float64(size))
+		Logger.Inc(protocol+":counts", 1)
+		Logger.Inc(protocol+":counts:bytes", float64(size))
 		go func() {
 			if lp.CipherCount != nil {
 				err = lp.DecryptCount(dk.PrivateKey)
 				if err != nil {
-					Logger.Error(SOURCE+" decrypt count error: %v", err)
+					Logger.Error(PROTOCOL+" decrypt count error: %v", err)
 					return
 				}
 			}
 
 			if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
-				//Logger.Debug(SOURCE+" %v", lp.Count)
+				//Logger.Debug(PROTOCOL+" %v", lp.Count)
 				err = countModel.PushToQueue(lp.Count)
 				if err != nil {
-					Logger.Error(SOURCE+" create count error: %v", err)
+					Logger.Error(PROTOCOL+" create count error: %v", err)
 					return
 				}
 			}
