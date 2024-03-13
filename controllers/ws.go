@@ -6,7 +6,6 @@ import (
 	"github.com/504dev/logr/models/user"
 	"github.com/504dev/logr/models/ws"
 	"github.com/504dev/logr/types"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/websocket"
 )
@@ -33,12 +32,10 @@ func (wc WsController) Reader(w *websocket.Conn) {
 	}
 
 	claims := &types.Claims{}
-	tkn, err := jwt.ParseWithClaims(tokenstring, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Get().GetJwtSecret()), nil
-	})
+	tkn, err := claims.ParseWithClaims(tokenstring, config.Get().GetJwtSecret())
 
 	Logger.Debug(claims)
-	Logger.Debug(tkn, err)
+	Logger.Debug(err, tkn)
 
 	if err != nil || !tkn.Valid {
 		return

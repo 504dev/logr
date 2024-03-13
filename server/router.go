@@ -65,11 +65,11 @@ func NewRouter() *gin.Engine {
 				},
 			}
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-			tokenString, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
+			tokenSigned, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
 			if err != nil {
 				return nil, err
 			}
-			return tokenString, err
+			return tokenSigned, err
 		}, 4*time.Minute)
 
 		if err != nil {

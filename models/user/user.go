@@ -54,6 +54,20 @@ func GetByGithubId(id int64) (*types.User, error) {
 	return findOneByField("github_id", id)
 }
 
+func Upsert(githubId int64, username string, role int) (*types.User, error) {
+	user, err := GetByGithubId(githubId)
+	if err != nil {
+		return nil, err
+	}
+	if user == nil {
+		user, err = Create(githubId, username, role)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return user, nil
+}
+
 func Create(githubId int64, username string, role int) (*types.User, error) {
 	conn := mysql.Conn()
 

@@ -2,33 +2,35 @@ package types
 
 import (
 	"fmt"
+	cmap "github.com/orcaman/concurrent-map/v2"
 	"math/rand"
-	"sync"
 	"time"
 )
 
 type States struct {
-	Data map[string]string
-	sync.RWMutex
+	data cmap.ConcurrentMap[string, string]
 }
 
-func (s *States) Get(state string) (string, bool) {
-	s.RLock()
-	v, ok := s.Data[state]
-	delete(s.Data, state)
-	s.RUnlock()
+func (s States) Init() *States {
+	s.init()
+	return &s
+}
+
+func (s *States) init() {
+	s.data = cmap.New[string]()
+}
+
+func (s *States) Pop(state string) (string, bool) {
+	v, ok := s.data.Get(state)
+	s.data.Remove(state)
 	return v, ok
 }
-func (s *States) Insert(v string) string {
+func (s *States) Push(v string) string {
 	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
-	s.Lock()
-	s.Data[state] = v
-	s.Unlock()
+	s.data.Set(state, v)
 	return state
 }
 
 func (s *States) Set(k string, v string) {
-	s.Lock()
-	s.Data[k] = v
-	s.Unlock()
+	s.data.Set(k, v)
 }

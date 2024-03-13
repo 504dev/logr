@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const EXPIRE_TIME = 8 * time.Hour
+const DEFAULT_EXPIRE_TIME = 8 * time.Hour
 
 type AuthController struct {
 	*oauth2.Config
@@ -35,14 +35,14 @@ func (a *AuthController) Init() {
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
 	}
-	a.States = &types.States{Data: make(map[string]string)}
+	a.States = types.States{}.Init()
 }
 
 func (a *AuthController) Authorize(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	login := c.Query("login")
 	callback := c.Query("callback")
-	state := a.States.Insert(callback)
+	state := a.States.Push(callback)
 	authorizeUrl := a.Config.AuthCodeURL(state)
 	if login != "" {
 		authorizeUrl += "&login=" + login
@@ -107,7 +107,7 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 		Logger.Error(err)
 	}
 	defer a.Init()
-	callback, ok := a.States.Get("setup")
+	callback, ok := a.States.Pop("setup")
 	if !ok {
 		c.JSON(http.StatusOK, data)
 	} else {
@@ -119,20 +119,20 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
-	callback, ok := a.States.Get(state)
+	callback, ok := a.States.Pop(state)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "incorrect state"})
 		return
 	}
 
-	tok, err := a.Config.Exchange(c, code)
+	githubPermit, err := a.Config.Exchange(c, code)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	client := github.NewClient(a.Config.Client(c, tok))
+	client := github.NewClient(a.Config.Client(c, githubPermit))
 	userGithub, _, err := client.Users.Get(c, "")
 	if err != nil {
 		Logger.Error(err)
@@ -167,50 +167,51 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		}
 	}
 
-	userDb, err := user.GetByGithubId(*userGithub.ID)
+	userDb, err := user.Upsert(*userGithub.ID, *userGithub.Login, types.RoleUser)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	if userDb == nil {
-		Logger.Error(err)
-		userDb, err = user.Create(*userGithub.ID, *userGithub.Login, types.RoleUser)
-		if err != nil {
-			c.AbortWithStatus(http.StatusInternalServerError)
-			return
-		}
-	}
+
 	Logger.Debug(userDb)
 	user.LoginAt(userDb.Id)
+
+	var expiresAt time.Time
+	if githubPermit.Expiry.IsZero() {
+		expiresAt = time.Now().Add(DEFAULT_EXPIRE_TIME)
+	} else {
+		expiresAt = githubPermit.Expiry
+	}
 
 	claims := types.Claims{
 		Id:          userDb.Id,
 		Role:        userDb.Role,
 		GihubId:     *userGithub.ID,
 		Username:    *userGithub.Login,
-		AccessToken: tok.AccessToken,
+		AccessToken: githubPermit.AccessToken,
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(EXPIRE_TIME).Unix(),
+			ExpiresAt: expiresAt.Unix(),
 		},
 	}
-	err = claims.EncryptAccessToken()
+
+	err = claims.EncryptAccessToken(config.Get().GetJwtSecret())
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
+	tokenSigned, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if callback != "" {
-		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", callback, tokenString))
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", callback, tokenSigned))
 	} else {
-		c.JSON(http.StatusOK, tokenString)
+		c.JSON(http.StatusOK, tokenSigned)
 	}
 }
 
@@ -229,17 +230,16 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 	}
 
 	claims := &types.Claims{}
-	tkn, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.Get().GetJwtSecret()), nil
-	})
+	tkn, err := claims.ParseWithClaims(token, config.Get().GetJwtSecret())
 
 	if err != nil || !tkn.Valid {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 
+	//
 	if claims.AccessTokenCipher != "" {
-		err = claims.DecryptAccessToken()
+		err = claims.DecryptAccessToken(config.Get().GetJwtSecret())
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return

@@ -3,7 +3,6 @@ package types
 import (
 	"encoding/base64"
 	"github.com/504dev/logr-go-client/cipher"
-	"github.com/504dev/logr/config"
 	"github.com/dgrijalva/jwt-go"
 )
 
@@ -17,27 +16,33 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-func (p *Claims) EncryptAccessToken() error {
-	cipherAccessToken, err := cipher.EncryptAes([]byte(p.AccessToken), []byte(config.Get().GetJwtSecret()))
+func (claims *Claims) ParseWithClaims(token string, secret string) (*jwt.Token, error) {
+	return jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+}
+
+func (claims *Claims) EncryptAccessToken(secret string) error {
+	cipherAccessToken, err := cipher.EncryptAes([]byte(claims.AccessToken), []byte(secret))
 	if err != nil {
 		return err
 	}
-	p.AccessTokenCipher = base64.StdEncoding.EncodeToString(cipherAccessToken)
+	claims.AccessTokenCipher = base64.StdEncoding.EncodeToString(cipherAccessToken)
 	//fmt.Println("EncryptAccessToken", p.AccessToken, p.AccessTokenCipher)
-	p.AccessToken = ""
+	claims.AccessToken = ""
 
 	return nil
 }
 
-func (p *Claims) DecryptAccessToken() error {
-	cipherBytes, _ := base64.StdEncoding.DecodeString(p.AccessTokenCipher)
-	accessToken, err := cipher.DecryptAes(cipherBytes, []byte(config.Get().GetJwtSecret()))
+func (claims *Claims) DecryptAccessToken(secret string) error {
+	cipherBytes, _ := base64.StdEncoding.DecodeString(claims.AccessTokenCipher)
+	accessToken, err := cipher.DecryptAes(cipherBytes, []byte(secret))
 	if err != nil {
 		return err
 	}
-	p.AccessToken = string(accessToken)
+	claims.AccessToken = string(accessToken)
 	//fmt.Println("DecryptAccessToken", p.AccessTokenCipher, p.AccessToken)
-	p.AccessTokenCipher = ""
+	claims.AccessTokenCipher = ""
 
 	return nil
 }

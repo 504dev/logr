@@ -19,25 +19,31 @@ type SockCMap struct {
 }
 
 func (sm SockCMap) Init() *SockCMap {
+	sm.init()
+	return &sm
+}
+
+func (sm *SockCMap) init() {
 	data := cmap.NewStringer[UID, *cmap.ConcurrentMap[string, *Sock]]()
 	sm.data = &data
-	return &sm
 }
 
 func (sm *SockCMap) PushLog(lg *_types.Log) int {
 	cnt := 0
 	now := time.Now().Unix()
+	// TODO index socks by lg.DashId
 	for user := range sm.data.IterBuffered() {
 		for sock := range user.Val.IterBuffered() {
 			s := sock.Val
-			if s.Filter == nil || s.Paused || s.Listeners == nil || s.Listeners["/log"] == 0 {
+			sFilter := s.GetFilter()
+			if sFilter == nil || s.IsPaused() || !s.HasListener("/log") {
 				continue
 			}
-			if s.ExpiresAt < now {
+			if s.Claims.ExpiresAt < now {
 				sm.Delete(s.User.Id, s.SockId)
 				continue
 			}
-			if s.Filter.Match(lg) {
+			if sFilter.Match(lg) {
 				if err := s.SendLog(lg); err != nil {
 					sm.Delete(s.User.Id, s.SockId)
 				}
