@@ -7,8 +7,8 @@ import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/user"
 	"github.com/504dev/logr/types"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v29/github"
 	"golang.org/x/oauth2"
 	"net/http"
@@ -190,8 +190,8 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		GihubId:     *userGithub.ID,
 		Username:    *userGithub.Login,
 		AccessToken: githubPermit.AccessToken,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expiresAt.Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expiresAt),
 		},
 	}
 

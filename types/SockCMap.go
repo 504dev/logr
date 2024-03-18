@@ -30,7 +30,7 @@ func (sm *SockCMap) init() {
 
 func (sm *SockCMap) PushLog(lg *_types.Log) int {
 	cnt := 0
-	now := time.Now().Unix()
+	now := time.Now()
 	// TODO index socks by lg.DashId
 	for user := range sm.data.IterBuffered() {
 		for sock := range user.Val.IterBuffered() {
@@ -39,7 +39,7 @@ func (sm *SockCMap) PushLog(lg *_types.Log) int {
 			if sFilter == nil || s.IsPaused() || !s.HasListener("/log") {
 				continue
 			}
-			if s.Claims.ExpiresAt < now {
+			if s.Claims.ExpiresAt.Before(now) {
 				sm.Delete(s.User.Id, s.SockId)
 				continue
 			}

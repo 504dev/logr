@@ -3,7 +3,7 @@ package types
 import (
 	"encoding/base64"
 	"github.com/504dev/logr-go-client/cipher"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Claims struct {
@@ -13,7 +13,7 @@ type Claims struct {
 	Username          string `json:"username"`
 	AccessToken       string `json:"access_token,omitempty"`
 	AccessTokenCipher string `json:"access_token_cipher"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func (claims *Claims) ParseWithClaims(token string, secret string) (*jwt.Token, error) {

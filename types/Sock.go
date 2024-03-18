@@ -29,7 +29,7 @@ func (s *Sock) SendLog(lg *_types.Log) error {
 func (s *Sock) IsExpired() bool {
 	s.RLock()
 	defer s.RUnlock()
-	return s.Claims.ExpiresAt < time.Now().Unix()
+	return s.RegisteredClaims.ExpiresAt.Before(time.Now())
 }
 
 func (s *Sock) HasListener(path string) bool {

@@ -10,9 +10,9 @@ import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/user"
 	"github.com/504dev/logr/types"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt/v5"
 	"net/http"
 	"net/http/httputil"
 	"os"
@@ -60,8 +60,8 @@ func NewRouter() *gin.Engine {
 				Role:     usr.Role,
 				GihubId:  usr.GithubId,
 				Username: usr.Username,
-				StandardClaims: jwt.StandardClaims{
-					ExpiresAt: time.Now().Add(15 * time.Minute).Unix(),
+				RegisteredClaims: jwt.RegisteredClaims{
+					ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 				},
 			}
 			token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

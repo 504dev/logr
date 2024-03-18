@@ -3,15 +3,15 @@ module github.com/504dev/logr
 go 1.19
 
 require (
-	github.com/504dev/logr-go-client v1.60.3
+	github.com/504dev/logr-go-client v1.60.4
 	github.com/ClickHouse/clickhouse-go v1.5.4
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.1
 	github.com/fatih/color v1.16.0
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-sql-driver/mysql v1.7.1
+	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-github/v29 v29.0.2
 	github.com/jmoiron/sqlx v1.3.5
 	github.com/json-iterator/go v1.1.12
