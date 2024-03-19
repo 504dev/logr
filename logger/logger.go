@@ -37,9 +37,9 @@ func Init() {
 		codestr := log.Message[38:41]
 		code, _ := strconv.Atoi(codestr)
 		if code >= 400 && code <= 499 {
-			log.Level = logr.LevelWarn
+			log.Level = logr.Levels.Warn.String()
 		} else if code >= 500 && code <= 599 {
-			log.Level = logr.LevelError
+			log.Level = logr.Levels.Error.String()
 		}
 		if code > 0 {
 			log.Message = log.Message[28:]
