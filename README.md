@@ -45,15 +45,14 @@ logr.info('Hello, Logr!');
 // 2024-01-30T22:50:04+03:00 info [v1.0.41, pid=60512, cmd/hello.go:41] Hello, Logr!
 ```
 
-## Build & Run service
+## Build & Run
 
-### Docker image
+### Docker Hub Pull
 
 ```
 docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ```
-
-Enjoy: \
+✔ Enjoy: \
 http://localhost:7778/
 
 ### Docker-compose
@@ -67,7 +66,8 @@ http://localhost:7778/
    `make config`
 5. Run: \
    `docker-compose up -d`
-6. Enjoy: \
+
+✔ Enjoy: \
    http://localhost:7778/
 
 ### Manual
@@ -91,7 +91,8 @@ Requirements: `Node.js v20` `Npm v10` `Golang v1.19` `ClickHouse v23` `Mysql v5.
    `make build`
 7. Run: \
    `make run`
-8. Enjoy: \
+
+✔ Enjoy: \
    http://localhost:7778/
 
 ## Config
