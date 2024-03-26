@@ -11,7 +11,7 @@
   </p>
 </div>
 
-[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.jpg)](http://logr.info/demo)
+[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.png)](http://logr.info/demo)
 
 [Look at the demo page](http://logr.info/demo)
 
