@@ -98,7 +98,7 @@ func crypto(conf *logr.Config) {
 			l.Notice(
 				"%v price %v widget!",
 				color.New(color.Bold).SprintFunc()(base),
-				l.Snippet("max", fmt.Sprintf("price:%v", sym), 30),
+				l.Snippet("avg", fmt.Sprintf("price:%v", sym), 30),
 			)
 
 			totalV := hitV + bitV + binV
