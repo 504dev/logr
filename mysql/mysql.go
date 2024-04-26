@@ -18,13 +18,10 @@ func Conn() *sqlx.DB {
 
 func Init(retries int) {
 	var err error
-	db, err = sqlx.Open("mysql", config.Get().Mysql+"?parseTime=true")
+	db, err = sqlx.Connect("mysql", config.Get().Mysql+"?parseTime=true")
 	if err == nil {
-		err = db.Ping()
-		if err == nil {
-			Migrate()
-			return
-		}
+		Migrate()
+		return
 	}
 	if retries > 0 {
 		fmt.Fprintf(os.Stderr, "(%v) mysql connect retry: %s\n", retries, err)
@@ -36,7 +33,7 @@ func Init(retries int) {
 }
 
 func Migrate() {
-	db, _ := sqlx.Open("mysql", config.Get().Mysql+"?multiStatements=true")
+	db, _ := sqlx.Connect("mysql", config.Get().Mysql+"?multiStatements=true")
 	goose.SetDialect("mysql")
 	err := goose.Up(db.DB, "./mysql/migrations")
 	if err != nil {

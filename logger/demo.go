@@ -17,7 +17,7 @@ func Demo() {
 			logger.Warn(color.New(color.Bold).SprintFunc()(c.title))
 			time.Sleep(time.Second)
 			for _, t := range c.text {
-				time.Sleep(900 * time.Millisecond)
+				time.Sleep(500 * time.Millisecond)
 				logger.Info(t)
 				logger.Inc("count:letters", float64(len(t)))
 				logger.Inc("count:words", float64(len(strings.Fields(t))))
@@ -28,7 +28,7 @@ func Demo() {
 					logger.Inc("count:Leia", 1)
 				}
 			}
-			time.Sleep(3 * time.Second)
+			time.Sleep(2 * time.Second)
 		}
 	})()
 	go crypto(conf)

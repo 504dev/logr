@@ -18,13 +18,10 @@ func Conn() *sqlx.DB {
 
 func Init(retries int) {
 	var err error
-	db, err = sqlx.Open("clickhouse", config.Get().Clickhouse)
+	db, err = sqlx.Connect("clickhouse", config.Get().Clickhouse)
 	if err == nil {
-		err = db.Ping()
-		if err == nil {
-			Migrate()
-			return
-		}
+		Migrate()
+		return
 	}
 	if retries > 0 {
 		fmt.Fprintf(os.Stderr, "(%v) clickhouse connect retry: %s\n", retries, err)
@@ -36,7 +33,7 @@ func Init(retries int) {
 }
 
 func Migrate() {
-	db, _ := sqlx.Open("clickhouse", config.Get().Clickhouse+"&x-multi-statement=true")
+	db, _ := sqlx.Connect("clickhouse", config.Get().Clickhouse+"&x-multi-statement=true")
 	goose.SetDialect("clickhouse")
 	err := goose.Up(db.DB, "./clickhouse/migrations")
 	if err != nil {
