@@ -65,8 +65,7 @@ func author(conf *lgc.Config) {
 Придумай название книги про сервис мониторинга под названием logr, который разработал 30 летний разработчик из Санкт-Петербурга по имени Дима.
 Затем укажи жанр книги.
 Затем составь оглавление из %s коротких названий глав.
-Затем напиши краткое описание книги на 500 символов, c форматированием max line length = 70
-max line length = 50`, genres[rand.Intn(len(genres))], n)
+Затем напиши краткое описание книги на 500 символов, c форматированием max line length = 99`, genres[rand.Intn(len(genres))], n)
 
 	var body ResponseBody
 
@@ -96,10 +95,10 @@ max line length = 50`, genres[rand.Intn(len(genres))], n)
 	})
 	history = append(history, body.Answer())
 
-	log.Notice("\n%s", body.Answer())
+	log.Notice(body.Answer())
 
 	for i := 1; i <= n; i++ {
-		prompt := fmt.Sprintf("Напиши в одном сообщении Главу %v книги, c форматированием max line length = 70", i)
+		prompt := fmt.Sprintf("Напиши в одном сообщении Главу %v книги, c форматированием max line length = 99", i)
 		var body ResponseBody
 		_, err := client.R().
 			SetBody(RequestBody{
@@ -120,7 +119,7 @@ max line length = 50`, genres[rand.Intn(len(genres))], n)
 		history = append(history, body.Answer())
 		chunks := strings.Split(body.Answer().Content, "\n\n")
 		for _, chunk := range chunks {
-			log.Info("\n%s", chunk)
+			log.Info(chunk)
 		}
 	}
 }
