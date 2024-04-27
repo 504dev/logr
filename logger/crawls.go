@@ -32,7 +32,7 @@ var crowls = []crowlT{
 			"secretly dispatched two Jedi",
 			"Knights, the guardians of",
 			"peace and justice in the",
-			"galaxy, to settle the conflict...",
+			"galaxy, to settle the conflict....",
 		},
 	},
 	{
@@ -89,7 +89,7 @@ var crowls = []crowlT{
 			"capital with their valuable",
 			"hostage, two Jedi Knights lead a",
 			"desperate mission to rescue the",
-			"captive Chancellor...",
+			"captive Chancellor....",
 		},
 	},
 	{
@@ -119,7 +119,7 @@ var crowls = []crowlT{
 			"starship, custodian of the",
 			"stolen plans that can save",
 			"her people and restore",
-			"freedom to the galaxy...",
+			"freedom to the galaxy....",
 		},
 	},
 	{
@@ -148,7 +148,7 @@ var crowls = []crowlT{
 			"obsessed with finding young",
 			"Skywalker, has dispatched",
 			"thousands of remote probes into",
-			"the far reaches of space...",
+			"the far reaches of space....",
 		},
 	},
 	{
@@ -206,7 +206,7 @@ var crowls = []crowlT{
 			"pilot on a secret mission",
 			"to Jakku, where an old ally",
 			"has discovered a clue to",
-			"Luke’s whereabouts...",
+			"Luke’s whereabouts....",
 		},
 	},
 	{

@@ -58,7 +58,7 @@ func GetSystemIds(role int) []int {
 	if role == types.RoleAdmin {
 		ids = append(ids, types.DashboardSystemId)
 	}
-	if config.Get().DemoDash {
+	if config.Get().DemoDash != nil {
 		ids = append(ids, types.DashboardDemoId)
 	}
 	return ids

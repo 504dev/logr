@@ -45,7 +45,7 @@ func Init() {
 			log.Message = log.Message[28:]
 		}
 	})
-	if config.Get().DemoDash {
+	if config.Get().DemoDash != nil {
 		go Demo()
 	}
 }

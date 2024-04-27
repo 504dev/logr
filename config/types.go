@@ -28,10 +28,14 @@ type ConfigData struct {
 		} `yaml:"github"`
 		JwtSecret string `yaml:"jwt_secret"`
 	} `yaml:"oauth"`
-	Clickhouse      string `yaml:"clickhouse"`
-	Mysql           string `yaml:"mysql"`
-	AllowNoCipher   bool   `yaml:"allow_no_cipher"`
-	DemoDash        bool   `yaml:"demo_dash"`
+	Clickhouse    string `yaml:"clickhouse"`
+	Mysql         string `yaml:"mysql"`
+	AllowNoCipher bool   `yaml:"allow_no_cipher"`
+	DemoDash      *struct {
+		ApiKey string `yaml:"api_key"`
+		BotId  string `yaml:"bot_id"`
+		UserId string `yaml:"user_id"`
+	} `yaml:"demo_dash"`
 	RecaptchaSecret string `yaml:"recaptcha"`
 }
 

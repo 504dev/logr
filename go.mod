@@ -10,6 +10,7 @@ require (
 	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.0
+	github.com/go-resty/resty/v2 v2.12.0
 	github.com/go-sql-driver/mysql v1.7.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/go-github/v29 v29.0.2
