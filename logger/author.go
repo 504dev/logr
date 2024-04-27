@@ -99,7 +99,7 @@ func author(conf *lgc.Config) {
 
 	for i := 1; i <= n; i++ {
 		prompt := fmt.Sprintf(`max line length = 99
-Напиши в одном длинном сообщении Главу %v, каждое предложение начинай с новой строки`, i)
+Напиши в одном длинном сообщении Главу %v на 4000 символов, каждое предложение начинай с новой строки`, i)
 		var body ResponseBody
 		_, err := client.R().
 			SetBody(RequestBody{
