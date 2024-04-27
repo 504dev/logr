@@ -14,9 +14,7 @@ func Demo() {
 		logger, _ := conf.NewLogger("starwars.log")
 		for {
 			c := crowls[rand.Intn(len(crowls))]
-			logger.Warn("")
 			logger.Warn(color.New(color.Bold).SprintFunc()(c.title))
-			logger.Warn("")
 			for _, t := range append(c.text, "", "", "") {
 				time.Sleep(666 * time.Millisecond)
 				logger.Info(t)
