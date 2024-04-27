@@ -44,7 +44,7 @@ func (r *ResponseBody) Answer() *HistoryItem {
 
 func author(conf *lgc.Config) {
 	defer func() {
-		<-time.After(time.Second)
+		<-time.After(10 * time.Second)
 		author(conf)
 	}()
 	log, _ := conf.NewLogger("author.log")
@@ -84,8 +84,8 @@ max line length = 50`, genres[rand.Intn(len(genres))], n)
 		SetResult(&body).
 		Post(LLMAPIURL)
 
-	if err != nil {
-		log.Error(err)
+	if err != nil || body.Code != 0 {
+		log.Error(err, body.Msg)
 		return
 	}
 
@@ -113,14 +113,14 @@ max line length = 50`, genres[rand.Intn(len(genres))], n)
 			SetHeader("Accept", "application/json").
 			SetResult(&body).
 			Post(LLMAPIURL)
-		if err != nil {
-			log.Error(err)
+		if err != nil || body.Code != 0 {
+			log.Error(err, body.Msg)
 			return
 		}
 		history = append(history, body.Answer())
 		chunks := strings.Split(body.Answer().Content, "\n\n")
 		for _, chunk := range chunks {
-			log.Info(chunk)
+			log.Info("\n%s", chunk)
 		}
 	}
 }
