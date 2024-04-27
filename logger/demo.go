@@ -17,7 +17,7 @@ func Demo() {
 			logger.Warn("")
 			logger.Warn(color.New(color.Bold).SprintFunc()(c.title))
 			logger.Warn("")
-			for _, t := range c.text {
+			for _, t := range append(c.text, "", "", "") {
 				time.Sleep(666 * time.Millisecond)
 				logger.Info(t)
 				logger.Inc("count:letters", float64(len(t)))
