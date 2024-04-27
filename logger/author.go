@@ -117,9 +117,10 @@ func author(conf *lgc.Config) {
 			return
 		}
 		history = append(history, body.Answer())
-		chunks := strings.Split(body.Answer().Content, "\n\n")
+		chunks := strings.Split(body.Answer().Content, "\n")
 		for _, chunk := range chunks {
 			log.Info(chunk)
+			<-time.After(time.Second)
 		}
 	}
 }
