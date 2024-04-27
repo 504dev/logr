@@ -6,6 +6,7 @@ import (
 	"github.com/504dev/logr/config"
 	"github.com/go-resty/resty/v2"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -64,7 +65,8 @@ func author(conf *lgc.Config) {
 Придумай название книги про сервис мониторинга под названием logr, который разработал 30 летний разработчик из Санкт-Петербурга по имени Дима.
 Затем укажи жанр книги.
 Затем составь оглавление из %s коротких названий глав.
-Затем напиши краткое описание книги на 500 символов.`, genres[rand.Intn(len(genres))], n)
+Затем напиши краткое описание книги на 500 символов, c форматированием max line length = 70
+max line length = 50`, genres[rand.Intn(len(genres))], n)
 
 	var body ResponseBody
 
@@ -94,10 +96,10 @@ func author(conf *lgc.Config) {
 	})
 	history = append(history, body.Answer())
 
-	log.Notice(body.Answer())
+	log.Notice("\n%s", body.Answer())
 
 	for i := 1; i <= n; i++ {
-		prompt := fmt.Sprintf("Напиши в одном сообщении Главу %v книги", i)
+		prompt := fmt.Sprintf("Напиши в одном сообщении Главу %v книги, c форматированием max line length = 70", i)
 		var body ResponseBody
 		_, err := client.R().
 			SetBody(RequestBody{
@@ -116,6 +118,9 @@ func author(conf *lgc.Config) {
 			return
 		}
 		history = append(history, body.Answer())
-		log.Info(body.Answer())
+		chunks := strings.Split(body.Answer().Content, "\n\n")
+		for _, chunk := range chunks {
+			log.Info(chunk)
+		}
 	}
 }
