@@ -131,25 +131,33 @@ Then write a 100-word summary of the book.`, genre, n)
 func splitIntoSentences(text string) []string {
 	var sentences []string
 	var sentence strings.Builder
+	skip := false
 	for i, r := range text {
+		if skip {
+			skip = false
+			continue
+		}
+		var next byte
+		if i+1 < len(text) {
+			next = text[i+1]
+		}
 		switch r {
 		case '.', '?', '!':
 			sentence.WriteRune(r)
-			if i+1 < len(text) && text[i+1] == ' ' && sentence.Len() > 8 {
-				sentences = append(sentences, strings.Trim(sentence.String(), " "))
+			if (next == ' ' || next == '\n') && sentence.Len() > 32 {
+				sentences = append(sentences, sentence.String())
 				sentence.Reset()
+				skip = true
 			}
 		case '\n':
-			if sentence.Len() > 0 {
-				sentences = append(sentences, strings.Trim(sentence.String(), " "))
-				sentence.Reset()
-			}
+			sentences = append(sentences, sentence.String())
+			sentence.Reset()
 		default:
 			sentence.WriteRune(r)
 		}
 	}
 	if sentence.Len() > 0 {
-		sentences = append(sentences, strings.Trim(sentence.String(), " "))
+		sentences = append(sentences, sentence.String())
 	}
 	return sentences
 }
