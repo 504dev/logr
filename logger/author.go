@@ -76,7 +76,7 @@ func author(conf *lgc.Config) {
 	}()
 
 	log, _ := conf.NewLogger("author.log")
-	log.Body = "[{version}, pid={pid}] {message}"
+	log.Body = "[{version}] {message}"
 
 	n := 5
 	genres := []string{
