@@ -5,41 +5,27 @@ import (
 	lgc "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"github.com/go-resty/resty/v2"
-	"math/rand"
 	"strings"
 	"time"
 )
 
-const LLMAPIURL = "https://api.coze.com/open_api/v2/chat"
+const OLLAMA_CHAT_URL = "http://localhost:11434/api/chat"
 
-type HistoryItem struct {
+type ChatHistoryItem struct {
 	Role    string `json:"role"`
-	Type    string `json:"type"`
 	Content string `json:"content"`
 }
 
-func (hi *HistoryItem) String() string {
-	return hi.Content
-}
-
-type ChatHistory []*HistoryItem
+type ChatHistory []*ChatHistoryItem
 type RequestBody struct {
-	ConversationId string      `json:"conversation_id"`
-	BotId          string      `json:"bot_id"`
-	User           string      `json:"user"`
-	Query          string      `json:"query"`
-	Stream         bool        `json:"stream"`
-	ChatHistory    ChatHistory `json:"chat_history"`
+	Model    string      `json:"model"`
+	Messages ChatHistory `json:"messages"`
+	Stream   bool        `json:"stream"`
 }
 type ResponseBody struct {
-	Messages       ChatHistory `json:"messages"`
-	ConversationId string      `json:"conversation_id"`
-	Code           int         `json:"code"`
-	Msg            string      `json:"msg"`
-}
-
-func (r *ResponseBody) Answer() *HistoryItem {
-	return r.Messages[0]
+	Model   string          `json:"model"`
+	Message ChatHistoryItem `json:"message"`
+	Done    bool            `json:"done"`
 }
 
 func author(conf *lgc.Config) {
@@ -47,78 +33,72 @@ func author(conf *lgc.Config) {
 		<-time.After(10 * time.Second)
 		author(conf)
 	}()
+	model := config.Get().DemoDash.Model
 	log, _ := conf.NewLogger("author.log")
 	n := 5
 	genres := []string{
-		"фантастика",
-		"драма",
-		"ужасы",
-		"мистика",
-		"фантасмагория",
-		"детектив",
-		"роман",
-		"фэнтези",
-		"приключения",
+		"science fiction",
+		"drama",
+		"horror",
+		"mysticism",
+		"phantasmagoria",
+		"detective",
+		"novel",
+		"fantasy",
+		"adventure",
+		"comedy",
 	}
-	history := ChatHistory{}
-	prompt := fmt.Sprintf(`Представь что ты писатель в жанре %s. Пиши на русском.
-Придумай название книги про сервис мониторинга под названием logr, который разработал 30 летний разработчик из Санкт-Петербурга по имени Дима.
-Затем укажи жанр книги.
-Затем составь оглавление из %s коротких названий глав.
-Затем напиши краткое описание книги на 500 символов, max line length = 99`, genres[rand.Intn(len(genres))], n)
+	genre := genres[time.Now().Nanosecond()%len(genres)]
+	prompt := fmt.Sprintf(`Imagine that you are a writer in the %s genre.
+Think of the title of a book about a monitoring service called logr, which was developed by a 30-year-old developer from St. Petersburg named Dima.
+Then state the genre of the book.
+Then make a table of contents of %s short chapter titles.
+Then write a 100-word summary of the book.`, genre, n)
+	history := ChatHistory{
+		{Role: "user", Content: prompt},
+	}
 
 	var body ResponseBody
 
 	client := resty.New()
 	_, err := client.R().
 		SetBody(RequestBody{
-			BotId:       config.Get().DemoDash.BotId,
-			User:        config.Get().DemoDash.UserId,
-			Stream:      false,
-			Query:       prompt,
-			ChatHistory: history,
+			Model:    model,
+			Messages: history,
 		}).
-		SetAuthToken(config.Get().DemoDash.ApiKey).
 		SetHeader("Accept", "application/json").
 		SetResult(&body).
-		Post(LLMAPIURL)
+		Post(OLLAMA_CHAT_URL)
 
-	if err != nil || body.Code != 0 {
-		log.Error(err, body.Msg)
+	if err != nil {
+		log.Error(err)
 		return
 	}
 
-	history = append(history, &HistoryItem{
-		Role:    "user",
-		Type:    "text",
-		Content: prompt,
-	})
-	history = append(history, body.Answer())
+	history = append(history, &body.Message)
 
-	log.Notice(body.Answer())
+	log.Notice(body.Message.Content)
 
 	for i := 1; i <= n; i++ {
 		prompt := fmt.Sprintf(`max line length = 99
 Напиши в одном длинном сообщении Главу %v на 4000 символов, каждое предложение начинай с новой строки`, i)
+		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
+
 		var body ResponseBody
 		_, err := client.R().
 			SetBody(RequestBody{
-				BotId:       config.Get().DemoDash.BotId,
-				User:        config.Get().DemoDash.UserId,
-				Stream:      false,
-				Query:       prompt,
-				ChatHistory: history,
+				Model:    model,
+				Messages: history,
 			}).
-			SetAuthToken(config.Get().DemoDash.ApiKey).
 			SetHeader("Accept", "application/json").
 			SetResult(&body).
-			Post(LLMAPIURL)
-		if err != nil || body.Code != 0 {
-			log.Error(err, body.Msg)
+			Post(OLLAMA_CHAT_URL)
+		if err != nil {
+			log.Error(err)
 			return
 		}
-		history = append(history, body.Answer())
-		chunks := strings.Split(body.Answer().Content, "\n")
+		history = append(history, &body.Message)
+		chunks := strings.Split(body.Message.Content, "\n")
 		for _, chunk := range chunks {
 			log.Info(chunk)
 			<-time.After(time.Second * 3)

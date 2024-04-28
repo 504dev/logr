@@ -32,9 +32,7 @@ type ConfigData struct {
 	Mysql         string `yaml:"mysql"`
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
 	DemoDash      *struct {
-		ApiKey string `yaml:"api_key"`
-		BotId  string `yaml:"bot_id"`
-		UserId string `yaml:"user_id"`
+		Model string `yaml:"model"`
 	} `yaml:"demo_dash"`
 	RecaptchaSecret string `yaml:"recaptcha"`
 }
