@@ -6,7 +6,7 @@ import (
 
 func Demo() {
 	conf, _ := createConfig(types.DashboardDemoId)
-	go author(conf)
+	go ai(conf)
 	go starwars(conf)
 	go crypto(conf)
 }

@@ -29,7 +29,7 @@ type ResponseBody struct {
 	Done    bool            `json:"done"`
 }
 
-func Prompt(history ChatHistory, onSentence func(string)) (*ChatHistoryItem, error) {
+func Prompt(history ChatHistory, onSentence func(string), onToken func(string)) (*ChatHistoryItem, error) {
 	OLLAMA_MODEL := config.Get().DemoDash.Model
 	OLLAMA_CHAT_URL := config.Get().DemoDash.Url
 
@@ -56,10 +56,13 @@ func Prompt(history ChatHistory, onSentence func(string)) (*ChatHistoryItem, err
 		if err := json.Unmarshal(scanner.Bytes(), &item); err != nil {
 			panic(err)
 		}
+		if onToken != nil {
+			onToken(item.Message.Content)
+		}
 		answer.Content += item.Message.Content
 		tmp += item.Message.Content
-		splitted := splitIntoSentences(tmp)
-		if len(splitted) > 1 {
+
+		if splitted := splitIntoSentences(tmp); len(splitted) > 1 {
 			onSentence(splitted[0])
 			tmp = splitted[1]
 		}
@@ -69,13 +72,13 @@ func Prompt(history ChatHistory, onSentence func(string)) (*ChatHistoryItem, err
 	return &answer, nil
 }
 
-func author(conf *lgc.Config) {
+func ai(conf *lgc.Config) {
 	defer func() {
 		<-time.After(10 * time.Second)
-		author(conf)
+		ai(conf)
 	}()
 
-	log, _ := conf.NewLogger("author.log")
+	log, _ := conf.NewLogger("ai.log")
 	log.Body = "[{version}] {message}"
 
 	n := 5
@@ -101,9 +104,9 @@ Then write a 100-word summary of the book.`, genre, n)
 		{Role: "user", Content: prompt},
 	}
 
-	answer, err := Prompt(history, func(s string) {
-		log.Notice(s)
-	})
+	onToken := func(t string) { log.Inc("tokens", 1) }
+
+	answer, err := Prompt(history, func(s string) { log.Notice(s) }, onToken)
 	if err != nil {
 		log.Error(err)
 		return
@@ -111,13 +114,12 @@ Then write a 100-word summary of the book.`, genre, n)
 
 	history = append(history, answer)
 
+	log.Info("")
 	for i := 1; i <= n; i++ {
 		prompt := fmt.Sprintf(`Write chapter %v, as long as you can.`, i)
 		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
 
-		answer, err := Prompt(history, func(s string) {
-			log.Info(s)
-		})
+		answer, err := Prompt(history, func(s string) { log.Info(s) }, onToken)
 
 		if err != nil {
 			log.Error(err)
@@ -125,6 +127,7 @@ Then write a 100-word summary of the book.`, genre, n)
 		}
 
 		history = append(history, answer)
+		log.Info("")
 	}
 }
 
