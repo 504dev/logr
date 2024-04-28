@@ -58,10 +58,10 @@ func ai(conf *lgc.Config) {
 		"Self-Help",
 	}
 	genre := genres[time.Now().Nanosecond()%len(genres)]
-	prompt := fmt.Sprintf(`Imagine that you are a writer in the %s genre.
+	prompt := fmt.Sprintf(`Imagine that you are a writer in the %v genre.
 Think of the title of a book about a monitoring service called "Logr", which was developed by a 30-year-old developer from Saint-Petersburg named Dima.
 Then state the genre of the book.
-Then make a table of contents of 5 chapters.
+Then make a table of contents of %v chapters.
 Then write a 100-word summary of the book.`, genre, n)
 	history := ChatHistory{
 		{Role: "user", Content: prompt},
@@ -79,7 +79,7 @@ Then write a 100-word summary of the book.`, genre, n)
 
 	log.Info("")
 	for i := 1; i <= n; i++ {
-		prompt := fmt.Sprintf(`Write chapter %v, as long as you can.`, i)
+		prompt := fmt.Sprintf(`Write a chapter %v that is 500 words long.`, i)
 		if i == n {
 			prompt += "This is the last chapter, ending the book epically."
 		}
