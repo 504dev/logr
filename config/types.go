@@ -33,6 +33,7 @@ type ConfigData struct {
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
 	DemoDash      *struct {
 		Model string `yaml:"model"`
+		Url   string `yaml:"url"`
 	} `yaml:"demo_dash"`
 	RecaptchaSecret string `yaml:"recaptcha"`
 }

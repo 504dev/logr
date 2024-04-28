@@ -9,8 +9,6 @@ import (
 	"time"
 )
 
-const OLLAMA_CHAT_URL = "http://localhost:11434/api/chat"
-
 type ChatHistoryItem struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
@@ -33,7 +31,8 @@ func author(conf *lgc.Config) {
 		<-time.After(10 * time.Second)
 		author(conf)
 	}()
-	model := config.Get().DemoDash.Model
+	OLLAMA_MODEL := config.Get().DemoDash.Model
+	OLLAMA_CHAT_URL := config.Get().DemoDash.Url
 	log, _ := conf.NewLogger("author.log")
 	n := 5
 	genres := []string{
@@ -63,7 +62,7 @@ Then write a 100-word summary of the book.`, genre, n)
 	client := resty.New()
 	_, err := client.R().
 		SetBody(RequestBody{
-			Model:    model,
+			Model:    OLLAMA_MODEL,
 			Messages: history,
 		}).
 		SetHeader("Accept", "application/json").
@@ -80,14 +79,13 @@ Then write a 100-word summary of the book.`, genre, n)
 	log.Notice(body.Message.Content)
 
 	for i := 1; i <= n; i++ {
-		prompt := fmt.Sprintf(`max line length = 99
-Напиши в одном длинном сообщении Главу %v на 4000 символов, каждое предложение начинай с новой строки`, i)
+		prompt := fmt.Sprintf(`Write chapter %v, as long as you can.`, i)
 		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
 
 		var body ResponseBody
 		_, err := client.R().
 			SetBody(RequestBody{
-				Model:    model,
+				Model:    OLLAMA_MODEL,
 				Messages: history,
 			}).
 			SetHeader("Accept", "application/json").
@@ -98,10 +96,35 @@ Then write a 100-word summary of the book.`, genre, n)
 			return
 		}
 		history = append(history, &body.Message)
-		chunks := strings.Split(body.Message.Content, "\n")
-		for _, chunk := range chunks {
+
+		for _, chunk := range splitIntoSentences(body.Message.Content) {
 			log.Info(chunk)
 			<-time.After(time.Second * 3)
 		}
 	}
+}
+func splitIntoSentences(text string) []string {
+	var sentences []string
+	var sentence strings.Builder
+	for i, r := range text {
+		switch r {
+		case '.', '?', '!':
+			sentence.WriteRune(r)
+			if i+1 < len(text) && text[i+1] == ' ' {
+				sentences = append(sentences, strings.Trim(sentence.String(), " "))
+				sentence.Reset()
+			}
+		case '\n':
+			if sentence.Len() > 0 {
+				sentences = append(sentences, strings.Trim(sentence.String(), " "))
+				sentence.Reset()
+			}
+		default:
+			sentence.WriteRune(r)
+		}
+	}
+	if sentence.Len() > 0 {
+		sentences = append(sentences, strings.Trim(sentence.String(), " "))
+	}
+	return sentences
 }
