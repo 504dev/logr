@@ -1,10 +1,13 @@
 package logger
 
 import (
+	"bufio"
+	"bytes"
+	"encoding/json"
 	"fmt"
 	lgc "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
-	"github.com/go-resty/resty/v2"
+	"net/http"
 	"strings"
 	"time"
 )
@@ -26,14 +29,55 @@ type ResponseBody struct {
 	Done    bool            `json:"done"`
 }
 
+func Prompt(history ChatHistory, onSentence func(string)) (*ChatHistoryItem, error) {
+	OLLAMA_MODEL := config.Get().DemoDash.Model
+	OLLAMA_CHAT_URL := config.Get().DemoDash.Url
+
+	var buf bytes.Buffer
+	if err := json.NewEncoder(&buf).Encode(RequestBody{
+		Model:    OLLAMA_MODEL,
+		Messages: history,
+		Stream:   true,
+	}); err != nil {
+		return nil, err
+	}
+
+	resp, err := http.Post(OLLAMA_CHAT_URL, "application/json", &buf)
+	if err != nil {
+		return nil, err
+	}
+
+	answer := ChatHistoryItem{Role: "assistant"}
+	tmp := ""
+
+	scanner := bufio.NewScanner(resp.Body)
+	for scanner.Scan() {
+		var item ResponseBody
+		if err := json.Unmarshal(scanner.Bytes(), &item); err != nil {
+			panic(err)
+		}
+		answer.Content += item.Message.Content
+		tmp += item.Message.Content
+		splitted := splitIntoSentences(tmp)
+		if len(splitted) > 1 {
+			onSentence(splitted[0])
+			tmp = splitted[1]
+		}
+	}
+	onSentence(tmp)
+
+	return &answer, nil
+}
+
 func author(conf *lgc.Config) {
 	defer func() {
 		<-time.After(10 * time.Second)
 		author(conf)
 	}()
-	OLLAMA_MODEL := config.Get().DemoDash.Model
-	OLLAMA_CHAT_URL := config.Get().DemoDash.Url
+
 	log, _ := conf.NewLogger("author.log")
+	log.Body = "[{version}, pid={pid}] {message}"
+
 	n := 5
 	genres := []string{
 		"science fiction",
@@ -57,52 +101,33 @@ Then write a 100-word summary of the book.`, genre, n)
 		{Role: "user", Content: prompt},
 	}
 
-	var body ResponseBody
-
-	client := resty.New()
-	_, err := client.R().
-		SetBody(RequestBody{
-			Model:    OLLAMA_MODEL,
-			Messages: history,
-		}).
-		SetHeader("Accept", "application/json").
-		SetResult(&body).
-		Post(OLLAMA_CHAT_URL)
-
+	answer, err := Prompt(history, func(s string) {
+		log.Notice(s)
+	})
 	if err != nil {
 		log.Error(err)
 		return
 	}
 
-	history = append(history, &body.Message)
-
-	log.Notice(body.Message.Content)
+	history = append(history, answer)
 
 	for i := 1; i <= n; i++ {
 		prompt := fmt.Sprintf(`Write chapter %v, as long as you can.`, i)
 		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
 
-		var body ResponseBody
-		_, err := client.R().
-			SetBody(RequestBody{
-				Model:    OLLAMA_MODEL,
-				Messages: history,
-			}).
-			SetHeader("Accept", "application/json").
-			SetResult(&body).
-			Post(OLLAMA_CHAT_URL)
+		answer, err := Prompt(history, func(s string) {
+			log.Info(s)
+		})
+
 		if err != nil {
 			log.Error(err)
 			return
 		}
-		history = append(history, &body.Message)
 
-		for _, chunk := range splitIntoSentences(body.Message.Content) {
-			log.Info(chunk)
-			<-time.After(time.Second * 3)
-		}
+		history = append(history, answer)
 	}
 }
+
 func splitIntoSentences(text string) []string {
 	var sentences []string
 	var sentence strings.Builder
@@ -110,7 +135,7 @@ func splitIntoSentences(text string) []string {
 		switch r {
 		case '.', '?', '!':
 			sentence.WriteRune(r)
-			if i+1 < len(text) && text[i+1] == ' ' {
+			if i+1 < len(text) && text[i+1] == ' ' && sentence.Len() > 8 {
 				sentences = append(sentences, strings.Trim(sentence.String(), " "))
 				sentence.Reset()
 			}
