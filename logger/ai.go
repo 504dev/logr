@@ -99,7 +99,7 @@ Then write a 100-word summary of the book.`, genre, n)
 
 func Prompt(history ChatHistory, onSentence func(string), onToken func(string)) (*ChatHistoryItem, error) {
 	OLLAMA_MODEL := config.Get().DemoDash.Model
-	OLLAMA_CHAT_URL := config.Get().DemoDash.Url
+	OLLAMA_CHAT_URL := config.Get().DemoDash.Url + "/api/chat"
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(RequestBody{
