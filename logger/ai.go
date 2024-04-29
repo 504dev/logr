@@ -79,9 +79,9 @@ Then write a 100-word summary of the book.`, genre, n)
 
 	log.Info("")
 	for i := 1; i <= n; i++ {
-		prompt := fmt.Sprintf(`Write a chapter %v that is 500 words long.`, i)
+		prompt := fmt.Sprintf(`Give me a 300-word chapter %v. Start with the title of the chapter.`, i)
 		if i == n {
-			prompt += "This is the last chapter, ending the book epically."
+			prompt += " This is the last chapter, ending the book epically."
 		}
 		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
 
