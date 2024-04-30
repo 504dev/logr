@@ -67,7 +67,12 @@ Then write a 100-word summary of the book.`, genre, n)
 		{Role: "user", Content: prompt},
 	}
 
-	onToken := func(t string) { log.Inc("tokens", 1) }
+	onToken := func(t string) {
+		log.Inc("tokens", 1)
+		if t == "Dima" || t == "Logr" {
+			log.Inc(t, 1)
+		}
+	}
 
 	answer, err := Prompt(history, func(s string) { log.Notice(s) }, onToken)
 	if err != nil {

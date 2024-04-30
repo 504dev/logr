@@ -73,24 +73,24 @@ func crypto(conf *logr.Config) {
 
 			l.Info(
 				"%v %v %v$ (%v$)",
-				color.CyanString("HitBTC"),
 				bold(base),
+				color.CyanString("HitBTC"),
 				bold(humanize.Commaf(hitP)),
 				humanize.Comma(int64(hitV)),
 			)
 
 			l.Info(
 				"%v %v %v$ (%v$)",
-				color.GreenString("Bitfinex"),
 				bold(base),
+				color.GreenString("Bitfinex"),
 				bold(humanize.Commaf(bitP)),
 				humanize.Comma(int64(bitV)),
 			)
 
 			l.Info(
 				"%v %v %v$ (%v$)",
-				color.HiYellowString("Binance"),
 				bold(base),
+				color.HiYellowString("Binance"),
 				bold(humanize.Commaf(binP)),
 				humanize.Comma(int64(binV)),
 			)
