@@ -69,7 +69,7 @@ Then write a 100-word summary of the book.`, genre, n)
 
 	onToken := func(t string) {
 		log.Inc("tokens", 1)
-		if t == " Dima" || t == " Logr" {
+		if t := strings.TrimSpace(t); t == "Dima" || t == "Logr" {
 			log.Inc(t, 1)
 		}
 	}
