@@ -6,6 +6,10 @@ tasks:
       - docker build ./ -t kozhurkin/logr-arm64:$VER -f ./Dockerhub/Dockerfile --platform linux/arm64
       - docker build ./ -t kozhurkin/logr-amd64:$VER -f ./Dockerhub/Dockerfile --platform linux/amd64
 
+  buildx:
+    cmds:
+       - docker buildx build ./ --platform linux/arm64,linux/amd64 -t kozhurkin/logr:$VER -f ./Dockerhub/Dockerfile --push
+
   push:
     cmds:
       - docker push kozhurkin/logr-amd64:$VER
