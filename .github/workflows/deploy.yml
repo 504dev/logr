@@ -3,7 +3,7 @@ name: "Deploy"
 on:
   push:
     tags:
-      - master
+      - *
 
 env:
   REGISTRY: "docker.io"
