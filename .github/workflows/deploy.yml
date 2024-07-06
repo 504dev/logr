@@ -2,6 +2,8 @@ name: "Deploy"
 
 on:
   push:
+    branches:
+      - 'master'
     tags:
       - '*'
 
@@ -33,8 +35,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v4
+        run: |
         with:
-          context: ./Dockerhub/Dockerfile
-          push: true
-          tags: logr:${{ github.event.inputs.tag }}
+          docker buildx create --use
+          docker buildx build ./ --no-cache --push --platform linux/amd64,linux/arm64 -t $IMAGE_NAME:latest,$IMAGE_NAME:${{ github.event.inputs.tag }} -f ./Dockerhub/Dockerfile
