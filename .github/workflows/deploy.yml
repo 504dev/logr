@@ -6,6 +6,7 @@ on:
       - '*'
 
 env:
+  IMAGE_NAME: "logr"
   CONTAINER_NAME: "logr-container"
 
 jobs:
