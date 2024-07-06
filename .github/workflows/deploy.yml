@@ -3,46 +3,40 @@ name: "Deploy"
 on:
   push:
     tags:
-      - '*'
+      - master
+
+env:
+  REGISTRY: "docker.io"
+  IMAGE_NAME: "logr"
+  CONTAINER_NAME: "logr-container"
 
 jobs:
-  deploy:
+  image-build-and-push:
     runs-on: ubuntu-latest
-    env:
-      HOST: logr@79.132.138.186
-      DEPLOY_DIRECTORY: /home/logr/logr
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+      - name: Checkout tag with submodules
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.tag }}
+          submodules: recursive
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
+      - name: Show commit information
+        run: |
+          echo "Main repo commit: $(git rev-parse HEAD)"
+          git submodule foreach 'echo "Submodule $name commit: $(git rev-parse HEAD)"'
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to Docker registry
+        uses: docker/login-action@v2
         with:
-          go-version: 1.19
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build app
-        run: |
-          go mod download
-          go build -o test ./cmd/server
-
-      - name: List workspace contents
-        run: |
-          echo "Listing deployment folder contents:"
-          pwd
-          git log | head -n 20
-          ls -la ${{ github.workspace }}
-
-      - name: Deploy to VM
-        run: |
-          sudo apt-get install -y ssh rsync
-          echo "$DEPLOY_SSH_KEY" > deploy_key.pem
-          chmod 600 deploy_key.pem
-          
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "mkdir -p ${{ env.DEPLOY_DIRECTORY }}"
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && sudo git pull origin master --tags --recurse-submodules"
-          ssh -i deploy_key.pem -o StrictHostKeyChecking=no ${{ env.HOST }} "cd ${{ env.DEPLOY_DIRECTORY }} && sudo bash deploy.sh"
-        env:
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          context: ./Dockerhub/Dockerfile
+          push: true
+          tags: $IMAGE_NAME:${{ github.event.inputs.tag }}
