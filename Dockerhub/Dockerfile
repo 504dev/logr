@@ -15,7 +15,7 @@ FROM node:20.11-alpine AS frontend
 
 COPY ./ /opt/logr
 WORKDIR /opt/logr/frontend
-RUN yarn install && yarn build && yarn cache clean
+RUN yarn install && yarn build && yarn cache clean && rm -rf node_modules
 
 FROM golang:1.19-alpine AS gobuild
 
