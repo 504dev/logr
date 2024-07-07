@@ -63,6 +63,7 @@ jobs:
             sudo docker stop $CONTAINER_NAME || true
             sudo docker rm $CONTAINER_NAME || true
             sudo docker run -d \
+              -h $(hostname)
               -e OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }} \
               -e OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }} \
               -v "$(pwd)/clickhouse_data:/var/lib/clickhouse" \
