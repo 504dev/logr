@@ -55,4 +55,9 @@ jobs:
             sudo docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
             sudo docker stop $CONTAINER_NAME || true
             sudo docker rm $CONTAINER_NAME || true
-            sudo docker run -d -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME:${{ github.ref_name }}
+            sudo docker run -d \
+              -e OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }} \
+              -e OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }} \
+              -v "$(pwd)/clickhouse_data:/var/lib/clickhouse" \
+              -v "$(pwd)/mysql_data:/var/lib/mysql" \
+              -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME
