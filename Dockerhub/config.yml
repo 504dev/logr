@@ -10,4 +10,6 @@ oauth:
 clickhouse: "tcp://localhost:9000?database=logrdb&username=logr&password=12345678"
 mysql: "logr:12345678@tcp(localhost:3306)/logrdb"
 allow_no_cipher: false
-demo_dash: true
+demo_dash:
+  model: "gemma:2b"
+  url: "http://34.16.227.174:11434"
