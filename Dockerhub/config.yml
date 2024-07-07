@@ -1,0 +1,13 @@
+bind:
+  http: ":7778"
+  udp: ":7776"
+oauth:
+  jwt_secret: "$OAUTH_JWT_SECRET"
+  github:
+    org: "$OAUTH_GITHUB_ORG"
+    client_id: "$OAUTH_GITHUB_CLIENT_ID"
+    client_secret: "$OAUTH_GITHUB_CLIENT_SECRET"
+clickhouse: "tcp://localhost:9000?database=logrdb&username=logr&password=12345678"
+mysql: "logr:12345678@tcp(localhost:3306)/logrdb"
+allow_no_cipher: false
+demo_dash: true
