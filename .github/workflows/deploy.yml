@@ -50,8 +50,8 @@ jobs:
           host: ${{ secrets.DEPLOY_HOST }}
           username: ${{ secrets.DEPLOY_SSH_USERNAME }}
           key: ${{ secrets.DEPLOY_SSH_KEY }}
-        run: |
-          docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker stop $CONTAINER_NAME
-          docker rm $CONTAINER_NAME
-          docker run -d -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME:${{ github.ref_name }}
+          script: |
+            docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+            docker stop $CONTAINER_NAME
+            docker rm $CONTAINER_NAME
+            docker run -d -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME:${{ github.ref_name }}
