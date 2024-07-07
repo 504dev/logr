@@ -25,8 +25,9 @@ jobs:
         run: |
           echo "Main repo commit: $(git rev-parse HEAD)"
           git submodule foreach 'echo "Submodule $name commit: $(git rev-parse HEAD)"'
-          git log -3
+          git log
           du -sh ./*
+          du -sh ./frontend/*
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
