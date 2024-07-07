@@ -19,12 +19,14 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.tag }}
-          submodules: recursive
+          submodules: true
 
       - name: Show commit information
         run: |
           echo "Main repo commit: $(git rev-parse HEAD)"
           git submodule foreach 'echo "Submodule $name commit: $(git rev-parse HEAD)"'
+          git log -3
+          du -sh ./*
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -60,4 +62,4 @@ jobs:
               -e OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }} \
               -v "$(pwd)/clickhouse_data:/var/lib/clickhouse" \
               -v "$(pwd)/mysql_data:/var/lib/mysql" \
-              -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME
+              -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME:${{ github.ref_name }}
