@@ -31,9 +31,9 @@ type ConfigData struct {
 	Clickhouse    string `yaml:"clickhouse"`
 	Mysql         string `yaml:"mysql"`
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
-	DemoDash      *struct {
-		Model string `yaml:"model"`
-		Url   string `yaml:"url"`
+	DemoDash      struct {
+		Enabled bool   `yaml:"enabled"`
+		Llm     string `yaml:"llm"`
 	} `yaml:"demo_dash"`
 	RecaptchaSecret string `yaml:"recaptcha"`
 }

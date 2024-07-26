@@ -4,10 +4,12 @@ import (
 	"bufio"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	lgc "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -30,15 +32,23 @@ type ResponseBody struct {
 }
 
 func ai(conf *lgc.Config) {
+	log, _ := conf.NewLogger("ai.log")
+	log.Body = "[{version}] {message}"
+
+	matches := regexp.MustCompile(`^(https?://[^/]+)/(.*)$`).FindStringSubmatch(config.Get().DemoDash.Llm)
+	if len(matches) != 3 {
+		log.Error(errors.New("invalid llm url"))
+		return
+	}
+
+	ollamaUrl, ollamaModel := matches[1], matches[2]
+
 	defer func() {
 		<-time.After(10 * time.Second)
 		ai(conf)
 	}()
 
-	log, _ := conf.NewLogger("ai.log")
-	log.Body = "[{version}] {message}"
-
-	n := 5
+	chaptersN := 5
 	genres := []string{
 		"Romance",
 		"Biographies & Memoirs",
@@ -62,7 +72,7 @@ func ai(conf *lgc.Config) {
 Think of the title of a book about a monitoring service called "Logr", which was developed by a 30-year-old developer from Saint-Petersburg named Dima.
 Then state the genre of the book.
 Then make a table of contents of %v chapters.
-Then write a 100-word summary of the book.`, genre, n)
+Then write a 100-word summary of the book.`, genre, chaptersN)
 	history := ChatHistory{
 		{Role: "user", Content: prompt},
 	}
@@ -75,7 +85,7 @@ Then write a 100-word summary of the book.`, genre, n)
 		}
 	}
 
-	answer, err := Prompt(history, func(s string) { log.Notice(s) }, onToken)
+	answer, err := Prompt(ollamaUrl, ollamaModel, history, func(s string) { log.Notice(s) }, onToken)
 	if err != nil {
 		log.Error(err)
 		return
@@ -84,14 +94,14 @@ Then write a 100-word summary of the book.`, genre, n)
 	history = append(history, answer)
 
 	log.Info("")
-	for i := 1; i <= n; i++ {
+	for i := 1; i <= chaptersN; i++ {
 		prompt := fmt.Sprintf(`Give me a 300-word chapter %v. Start with the title of the chapter.`, i)
-		if i == n {
+		if i == chaptersN {
 			prompt += " This is the last chapter, ending the book epically."
 		}
 		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
 
-		answer, err := Prompt(history, func(s string) { log.Info(s) }, onToken)
+		answer, err := Prompt(ollamaUrl, ollamaModel, history, func(s string) { log.Info(s) }, onToken)
 
 		if err != nil {
 			log.Error(err)
@@ -103,20 +113,18 @@ Then write a 100-word summary of the book.`, genre, n)
 	}
 }
 
-func Prompt(history ChatHistory, onSentence func(string), onToken func(string)) (*ChatHistoryItem, error) {
-	OLLAMA_MODEL := config.Get().DemoDash.Model
-	OLLAMA_CHAT_URL := config.Get().DemoDash.Url + "/api/chat"
+func Prompt(ollamaUrl string, ollamaModel string, history ChatHistory, onSentence func(string), onToken func(string)) (*ChatHistoryItem, error) {
 
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(RequestBody{
-		Model:    OLLAMA_MODEL,
+		Model:    ollamaModel,
 		Messages: history,
 		Stream:   true,
 	}); err != nil {
 		return nil, err
 	}
 
-	resp, err := http.Post(OLLAMA_CHAT_URL, "application/json", &buf)
+	resp, err := http.Post(ollamaUrl+"/api/chat", "application/json", &buf)
 	if err != nil {
 		return nil, err
 	}

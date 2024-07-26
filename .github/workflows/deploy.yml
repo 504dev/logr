@@ -66,6 +66,9 @@ jobs:
               -h $(hostname) \
               -e OAUTH_GITHUB_CLIENT_ID=${{ secrets.OAUTH_GITHUB_CLIENT_ID }} \
               -e OAUTH_GITHUB_CLIENT_SECRET=${{ secrets.OAUTH_GITHUB_CLIENT_SECRET }} \
+              -e DEMO_DASH_ENABLED=true \
+              -e LLM_URL=${{ secrets.LLM_URL }} \
+              -e RECAPTCHA_SECRET=${{ secrets.RECAPTCHA_SECRET }} \
               -v "$(pwd)/clickhouse_data:/var/lib/clickhouse" \
               -v "$(pwd)/mysql_data:/var/lib/mysql" \
               -p 7776:7776/udp -p 7778:7778 --name $CONTAINER_NAME $IMAGE_NAME:${{ github.ref_name }}

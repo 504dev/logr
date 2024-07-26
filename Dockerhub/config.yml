@@ -11,5 +11,6 @@ clickhouse: "tcp://localhost:9000?database=logrdb&username=logr&password=1234567
 mysql: "logr:12345678@tcp(localhost:3306)/logrdb"
 allow_no_cipher: false
 demo_dash:
-  model: "gemma:2b"
-  url: "http://35.226.212.100:11434"
+  enabled: "$DEMO_DASH_ENABLED"
+  llm: "$LLM_URL"
+recaptcha: "$RECAPTCHA_SECRET"
