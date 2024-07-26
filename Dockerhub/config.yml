@@ -12,4 +12,4 @@ mysql: "logr:12345678@tcp(localhost:3306)/logrdb"
 allow_no_cipher: false
 demo_dash:
   model: "gemma:2b"
-  url: "http://34.16.227.174:11434"
+  url: "http://35.226.212.100:11434"

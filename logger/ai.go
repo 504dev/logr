@@ -120,6 +120,7 @@ func Prompt(history ChatHistory, onSentence func(string), onToken func(string)) 
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 
 	answer := ChatHistoryItem{Role: "assistant"}
 	tmp := ""
@@ -128,7 +129,7 @@ func Prompt(history ChatHistory, onSentence func(string), onToken func(string)) 
 	for scanner.Scan() {
 		var item ResponseBody
 		if err := json.Unmarshal(scanner.Bytes(), &item); err != nil {
-			panic(err)
+			return nil, err
 		}
 		if onToken != nil {
 			onToken(item.Message.Content)
