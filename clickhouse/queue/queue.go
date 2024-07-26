@@ -71,9 +71,12 @@ func (q *Queue) Flush() error {
 		return err
 	}
 
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
 	stmt, err := tx.Prepare(q.Sql)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 	defer stmt.Close()
@@ -81,7 +84,6 @@ func (q *Queue) Flush() error {
 	for _, v := range batch {
 		_, err = stmt.Exec(v...)
 		if err != nil {
-			tx.Rollback()
 			return err
 		}
 	}

@@ -34,7 +34,7 @@ func Init(retries int) {
 
 func Migrate() {
 	db, _ := sqlx.Connect("mysql", config.Get().Mysql+"?multiStatements=true")
-	goose.SetDialect("mysql")
+	_ = goose.SetDialect("mysql")
 	err := goose.Up(db.DB, "./mysql/migrations")
 	if err != nil {
 		panic(err)

@@ -100,39 +100,34 @@ func Create(dash *types.Dashboard) error {
 		return err
 	}
 
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
 	values = []interface{}{dash.OwnerId, dash.Name}
 	sqltext = "INSERT INTO dashboards (owner_id, name) VALUES (?, ?)"
 
 	res, err := tx.Exec(sqltext, values...)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	dashId := int(id)
-
 	dk := &types.DashKey{DashId: dashId, Name: "Default"}
 	err = dashkey.Create(dk, tx)
 	if err != nil {
-		tx.Rollback()
 		return err
 	}
 
 	dash.Id = dashId
 	dash.Keys = types.DashKeys{dk}
 
-	err = tx.Commit()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return tx.Commit()
 }
 
 func Update(dash *types.Dashboard) error {

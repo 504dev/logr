@@ -41,7 +41,7 @@ func HandleExit() {
 	signal.Notify(c, os.Interrupt)
 	sig := <-c
 	logger.Logger.Warn("Exit with code: %v", sig)
-	log.StopQueue()
-	count.StopQueue()
+	_ = log.StopQueue()
+	_ = count.StopQueue()
 	os.Exit(0)
 }

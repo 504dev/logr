@@ -51,7 +51,7 @@ func (a *AuthController) Authorize(c *gin.Context) {
 }
 
 func (a *AuthController) NeedSetup(c *gin.Context) {
-	if config.Get().NeedSetup() == false {
+	if !config.Get().NeedSetup() {
 		c.AbortWithStatus(http.StatusForbidden)
 	}
 }
@@ -175,7 +175,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 	}
 
 	Logger.Debug(userDb)
-	user.LoginAt(userDb.Id)
+	_ = user.LoginAt(userDb.Id)
 
 	var expiresAt time.Time
 	if githubPermit.Expiry.IsZero() {

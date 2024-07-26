@@ -30,8 +30,8 @@ func Init() {
 	conf, _ := createConfig(types.DashboardSystemId)
 	Logger, _ = conf.NewLogger("main.log")
 	Support, _ = conf.NewLogger("support.log")
-	conf.DefaultSystemCounter()
-	conf.DefaultProcessCounter()
+	_, _ = conf.DefaultSystemCounter()
+	_, _ = conf.DefaultProcessCounter()
 	gin, _ := conf.NewLogger("gin.log")
 	GinWriter = gin.CustomWriter(func(log *logr.Log) {
 		codestr := log.Message[38:41]

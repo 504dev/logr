@@ -1,0 +1,20 @@
+run:
+  timeout: 1m
+
+linters:
+  enable:
+    - errcheck
+    - govet
+    - staticcheck
+    - gofmt
+
+linters-settings:
+  govet:
+    disable:
+      - printf
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck

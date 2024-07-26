@@ -52,7 +52,10 @@ func (_ *MeController) AddMember(c *gin.Context) {
 		client := github.NewClient(nil)
 		userGithub, _, err := client.Users.Get(c, username)
 		if err == nil {
-			userTo, err = user.Create(*userGithub.ID, username, types.RoleUser)
+			created, err := user.Create(*userGithub.ID, username, types.RoleUser)
+			if err == nil {
+				userTo = created
+			}
 		}
 	}
 	if err != nil {

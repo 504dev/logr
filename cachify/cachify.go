@@ -12,7 +12,7 @@ const WARMING_TIME = 3 * time.Second
 const PREWARM_TIME = 3 * time.Second
 const PREWARM_ENABLED = true
 
-func Cachify(key string, f func() (interface{}, error), expired time.Duration) (interface{}, error) {
+func Cachify(key string, f func() (any, error), expired time.Duration) (any, error) {
 	warmingKey := getWarmingKey(key)
 
 	entry, exp, exist := store.GetWithExpiration(key)
@@ -20,7 +20,9 @@ func Cachify(key string, f func() (interface{}, error), expired time.Duration) (
 		if PREWARM_ENABLED {
 			if diff := -time.Since(exp); diff < PREWARM_TIME {
 				if _, exist := store.Get(warmingKey); !exist {
-					go fetchWithWarming(key, f, expired+diff) // PREWARM
+					go func() {
+						_, _ = fetchWithWarming(key, f, expired+diff) // PREWARM
+					}()
 				}
 			}
 		}
@@ -28,8 +30,8 @@ func Cachify(key string, f func() (interface{}, error), expired time.Duration) (
 		return entry, nil
 	}
 
-	entry, exist = store.Get(warmingKey)
-	if exist {
+	_, lock := store.Get(warmingKey)
+	if lock {
 		time.Sleep(time.Second)
 		return Cachify(key, f, expired)
 	}
@@ -37,7 +39,7 @@ func Cachify(key string, f func() (interface{}, error), expired time.Duration) (
 	return fetchWithWarming(key, f, expired)
 }
 
-func fetchWithWarming(key string, f func() (interface{}, error), expired time.Duration) (interface{}, error) {
+func fetchWithWarming(key string, f func() (any, error), expired time.Duration) (any, error) {
 	warmingKey := getWarmingKey(key)
 
 	store.Set(warmingKey, true, WARMING_TIME)
