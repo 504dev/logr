@@ -22,10 +22,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 	query := cfg.Location.Query()
 	tokenstring := query.Get("token")
 	sockId := query.Get("sock_id")
-	paused := false
-	if query.Get("paused") == "true" {
-		paused = true
-	}
+	paused := query.Get("paused") == "true"
 
 	if tokenstring == "" || sockId == "" {
 		return
@@ -63,6 +60,7 @@ func (wc WsController) Reader(w *websocket.Conn) {
 			ws.SockMap.Delete(usr.Id, sockId)
 			break
 		}
+
 		switch m.Action {
 		case "subscribe":
 			sock.AddListener(m.Path)
@@ -73,6 +71,6 @@ func (wc WsController) Reader(w *websocket.Conn) {
 			sock.SetPaused(paused)
 		}
 
-		Logger.Debug("Received: %v", m)
+		Logger.Debug("Received: %v %v", sockId, m)
 	}
 }

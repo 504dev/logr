@@ -18,6 +18,12 @@ type Sock struct {
 	*websocket.Conn `json:"conn"` // TODO interface
 }
 
+type SockMessage struct {
+	Action  string      `json:"action,omitempty"`
+	Path    string      `json:"path"`
+	Payload interface{} `json:"payload"`
+}
+
 func (s *Sock) SendLog(lg *_types.Log) error {
 	m := SockMessage{
 		Path:    "/log",
@@ -73,10 +79,4 @@ func (s *Sock) SetPaused(state bool) {
 	s.Lock()
 	s.Paused = state
 	s.Unlock()
-}
-
-type SockMessage struct {
-	Action  string      `json:"action,omitempty"`
-	Path    string      `json:"path"`
-	Payload interface{} `json:"payload"`
 }

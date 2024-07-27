@@ -2,30 +2,25 @@ package types
 
 import (
 	"encoding/json"
-	"fmt"
 	_types "github.com/504dev/logr-go-client/types"
 	cmap "github.com/orcaman/concurrent-map/v2"
+	"strconv"
 	"time"
 )
 
-type UID int
+type uid int
 
-func (id UID) String() string {
-	return fmt.Sprintf("%v", int(id))
+func (id uid) String() string {
+	return strconv.Itoa(int(id))
+}
+
+func NewSockCMap() *SockCMap {
+	data := cmap.NewStringer[uid, *cmap.ConcurrentMap[string, *Sock]]()
+	return &SockCMap{&data}
 }
 
 type SockCMap struct {
-	data *cmap.ConcurrentMap[UID, *cmap.ConcurrentMap[string, *Sock]]
-}
-
-func (sm SockCMap) Init() *SockCMap {
-	sm.init()
-	return &sm
-}
-
-func (sm *SockCMap) init() {
-	data := cmap.NewStringer[UID, *cmap.ConcurrentMap[string, *Sock]]()
-	sm.data = &data
+	data *cmap.ConcurrentMap[uid, *cmap.ConcurrentMap[string, *Sock]]
 }
 
 func (sm *SockCMap) PushLog(lg *_types.Log) int {
@@ -71,7 +66,7 @@ func (sm *SockCMap) SetPaused(userId int, sockId string, state bool) bool {
 }
 
 func (sm *SockCMap) GetSocks(userId int) *cmap.ConcurrentMap[string, *Sock] {
-	us, _ := sm.data.Get(UID(userId))
+	us, _ := sm.data.Get(uid(userId))
 	return us
 }
 
@@ -88,14 +83,14 @@ func (sm *SockCMap) Add(s *Sock) {
 	if us == nil {
 		tmp := cmap.New[*Sock]()
 		tmp.Set(s.SockId, s)
-		sm.data.Set(UID(s.User.Id), &tmp)
+		sm.data.Set(uid(s.User.Id), &tmp)
 		return
 	}
 	us.Set(s.SockId, s)
 }
 
 func (sm *SockCMap) Delete(userId int, sockId string) bool {
-	if us, ok := sm.data.Get(UID(userId)); ok {
+	if us, ok := sm.data.Get(uid(userId)); ok {
 		if s, ok := us.Get(sockId); ok {
 			s.Close()
 			us.Remove(sockId)
