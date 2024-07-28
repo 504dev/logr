@@ -52,7 +52,7 @@ func (_ *LogsController) Find(c *gin.Context) {
 	}
 	sockId := c.Query("sock_id")
 	if sockId != "" {
-		ws.SockMap.SetFilter(userId, sockId, &filter)
+		ws.GetSockMap().SetFilter(userId, sockId, &filter)
 	}
 	f, _ := json.Marshal(filter)
 	Logger.Info(string(f))

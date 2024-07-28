@@ -19,6 +19,10 @@ func ListenHTTP() error {
 
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter)
 
+	frontend := func(c *gin.Context) {
+		c.File("./frontend/dist/index.html")
+	}
+
 	// TODO react
 	r := NewRouter()
 	r.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
@@ -32,8 +36,4 @@ func ListenHTTP() error {
 	r.GET("/support", frontend)
 
 	return r.Run(config.Get().Bind.Http)
-}
-
-func frontend(c *gin.Context) {
-	c.File("./frontend/dist/index.html")
 }

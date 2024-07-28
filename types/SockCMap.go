@@ -14,20 +14,70 @@ func (id uid) String() string {
 	return strconv.Itoa(int(id))
 }
 
-func NewSockCMap() *SockCMap {
-	data := cmap.NewStringer[uid, *cmap.ConcurrentMap[string, *Sock]]()
-	return &SockCMap{&data}
-}
-
 type SockCMap struct {
-	data *cmap.ConcurrentMap[uid, *cmap.ConcurrentMap[string, *Sock]]
+	register   chan *Sock
+	unregister chan *Sock
+	push       chan *_types.Log
+	clients    *cmap.ConcurrentMap[uid, *cmap.ConcurrentMap[string, *Sock]]
+	SockSessionStore
 }
 
-func (sm *SockCMap) PushLog(lg *_types.Log) int {
+func NewSockCMap() *SockCMap {
+	clients := cmap.NewStringer[uid, *cmap.ConcurrentMap[string, *Sock]]()
+	sm := SockCMap{
+		register:         make(chan *Sock),
+		unregister:       make(chan *Sock),
+		push:             make(chan *_types.Log),
+		clients:          &clients,
+		SockSessionStore: MemorySessionStore{},
+	}
+	go sm.run()
+	return &sm
+}
+
+func (sm *SockCMap) SetSessionStore(sss SockSessionStore) {
+	sm.SockSessionStore = sss
+}
+
+func (sm *SockCMap) Push(log *_types.Log) {
+	sm.push <- log
+}
+
+func (sm *SockCMap) Register(s *Sock) {
+	s.SockSession = &SockSession{}
+	s.SockSessionStore = sm.SockSessionStore
+	// load session
+	session, err := sm.SockSessionStore.Get(s.SockId)
+	if err == nil && session != nil {
+		s.SockSession = session
+	}
+	go sm.SockSessionStore.Set(s.SockId, session)
+	sm.register <- s
+}
+
+func (sm *SockCMap) Unregister(s *Sock) {
+	go sm.SockSessionStore.Del(s.SockId)
+	sm.unregister <- s
+}
+
+func (sm *SockCMap) run() {
+	for {
+		select {
+		case client := <-sm.register:
+			sm.add(client)
+		case client := <-sm.unregister:
+			sm.delete(client)
+		case log := <-sm.push:
+			sm.pushLog(log)
+		}
+	}
+}
+
+func (sm *SockCMap) pushLog(lg *_types.Log) int {
 	cnt := 0
 	now := time.Now()
 	// TODO index socks by lg.DashId
-	for user := range sm.data.IterBuffered() {
+	for user := range sm.clients.IterBuffered() {
 		for sock := range user.Val.IterBuffered() {
 			s := sock.Val
 			sFilter := s.GetFilter()
@@ -35,12 +85,12 @@ func (sm *SockCMap) PushLog(lg *_types.Log) int {
 				continue
 			}
 			if s.Claims.ExpiresAt.Before(now) {
-				sm.Delete(s.User.Id, s.SockId)
+				sm.Unregister(s)
 				continue
 			}
 			if sFilter.Match(lg) {
 				if err := s.SendLog(lg); err != nil {
-					sm.Delete(s.User.Id, s.SockId)
+					sm.Unregister(s)
 				}
 				cnt += 1
 			}
@@ -57,16 +107,8 @@ func (sm *SockCMap) SetFilter(userId int, sockId string, filter *Filter) bool {
 	return false
 }
 
-func (sm *SockCMap) SetPaused(userId int, sockId string, state bool) bool {
-	if s := sm.GetSock(userId, sockId); s != nil {
-		s.SetPaused(state)
-		return true
-	}
-	return false
-}
-
 func (sm *SockCMap) GetSocks(userId int) *cmap.ConcurrentMap[string, *Sock] {
-	us, _ := sm.data.Get(uid(userId))
+	us, _ := sm.clients.Get(uid(userId))
 	return us
 }
 
@@ -78,22 +120,22 @@ func (sm *SockCMap) GetSock(userId int, sockId string) *Sock {
 	return nil
 }
 
-func (sm *SockCMap) Add(s *Sock) {
+func (sm *SockCMap) add(s *Sock) {
 	us := sm.GetSocks(s.User.Id)
-	if us == nil {
-		tmp := cmap.New[*Sock]()
-		tmp.Set(s.SockId, s)
-		sm.data.Set(uid(s.User.Id), &tmp)
+	if us != nil {
+		us.Set(s.SockId, s)
 		return
 	}
-	us.Set(s.SockId, s)
+	tmp := cmap.New[*Sock]()
+	tmp.Set(s.SockId, s)
+	sm.clients.Set(uid(s.User.Id), &tmp)
 }
 
-func (sm *SockCMap) Delete(userId int, sockId string) bool {
-	if us, ok := sm.data.Get(uid(userId)); ok {
-		if s, ok := us.Get(sockId); ok {
-			s.Close()
-			us.Remove(sockId)
+func (sm *SockCMap) delete(s *Sock) bool {
+	if us, ok := sm.clients.Get(uid(s.User.Id)); ok {
+		if s, ok := us.Get(s.SockId); ok {
+			_ = s.Close()
+			us.Remove(s.SockId)
 			return true
 		}
 	}
@@ -101,6 +143,6 @@ func (sm *SockCMap) Delete(userId int, sockId string) bool {
 }
 
 func (sm *SockCMap) String() string {
-	j, _ := json.Marshal(sm.data)
+	j, _ := json.Marshal(sm.clients)
 	return string(j)
 }
