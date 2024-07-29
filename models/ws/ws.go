@@ -15,12 +15,12 @@ func GetSockMap() *types.SockCMap {
 	once.Do(func() {
 		sockmap = types.NewSockCMap()
 		if connstring := config.Get().Redis; connstring != "" {
-			sss, err := types.NewRedisSessionStore(connstring, 0, time.Hour)
+			store, err := types.NewRedisSessionStore(connstring, 0, time.Hour)
 			if err != nil {
 				Logger.Error("cannot create redis session store: %v", err)
 				return
 			}
-			sockmap.SetSessionStore(sss)
+			sockmap.SetSessionStore(store)
 		}
 	})
 	return sockmap

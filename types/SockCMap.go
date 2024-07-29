@@ -29,14 +29,14 @@ func NewSockCMap() *SockCMap {
 		unregister:       make(chan *Sock),
 		push:             make(chan *_types.Log),
 		clients:          &clients,
-		SockSessionStore: MemorySessionStore{},
+		SockSessionStore: &MemorySessionStore{},
 	}
 	go sm.run()
 	return &sm
 }
 
-func (sm *SockCMap) SetSessionStore(sss SockSessionStore) {
-	sm.SockSessionStore = sss
+func (sm *SockCMap) SetSessionStore(store SockSessionStore) {
+	sm.SockSessionStore = store
 }
 
 func (sm *SockCMap) Push(log *_types.Log) {
