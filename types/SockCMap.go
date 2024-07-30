@@ -31,7 +31,6 @@ func NewSockCMap() *SockCMap {
 		clients:          &clients,
 		SockSessionStore: &MemorySessionStore{},
 	}
-	go sm.run()
 	return &sm
 }
 
@@ -40,7 +39,7 @@ func (sm *SockCMap) SetSessionStore(store SockSessionStore) {
 }
 
 func (sm *SockCMap) Push(log *_types.Log) {
-	sm.push <- log
+	sm.pushLog(log)
 }
 
 func (sm *SockCMap) Register(s *Sock) {
@@ -52,25 +51,12 @@ func (sm *SockCMap) Register(s *Sock) {
 		s.SockSession = session
 	}
 	go sm.SockSessionStore.Set(s.SockId, session)
-	sm.register <- s
+	sm.add(s)
 }
 
 func (sm *SockCMap) Unregister(s *Sock) {
 	go sm.SockSessionStore.Del(s.SockId)
-	sm.unregister <- s
-}
-
-func (sm *SockCMap) run() {
-	for {
-		select {
-		case client := <-sm.register:
-			sm.add(client)
-		case client := <-sm.unregister:
-			sm.delete(client)
-		case log := <-sm.push:
-			sm.pushLog(log)
-		}
-	}
+	sm.delete(s)
 }
 
 func (sm *SockCMap) pushLog(lg *_types.Log) int {
