@@ -7,15 +7,40 @@ import (
 	"time"
 )
 
+type SockSession struct {
+	Paused    bool           `json:"paused"`
+	Listeners map[string]int `json:"listeners"`
+	*Filter   `json:"filter"`
+}
+
 type Sock struct {
 	sync.RWMutex
-	SockId          string         `json:"sock_id"`
-	Listeners       map[string]int `json:"listeners"`
-	Paused          bool           `json:"paused"`
+	*SockSession
+	SockSessionStore
+	SockId          string `json:"sock_id"`
+	JwtToken        string `json:"jwt_token"`
 	*User           `json:"user"`
-	*Filter         `json:"filter"`
 	*Claims         `json:"claims"`
 	*websocket.Conn `json:"conn"` // TODO interface
+}
+
+type SockMessage struct {
+	Action  string      `json:"action,omitempty"`
+	Path    string      `json:"path"`
+	Payload interface{} `json:"payload"`
+}
+
+func (s *Sock) HandleMessage(msg *SockMessage) {
+	switch msg.Action {
+	case "subscribe":
+		s.AddListener(msg.Path)
+	case "unsubscribe":
+		s.RemoveListener(msg.Path)
+	case "pause":
+		paused := msg.Payload.(bool)
+		s.SetPaused(paused)
+	}
+	go s.SockSessionStore.Set(s.SockId, s.SockSession)
 }
 
 func (s *Sock) SendLog(lg *_types.Log) error {
@@ -62,6 +87,7 @@ func (s *Sock) SetFilter(f *Filter) {
 	s.Lock()
 	s.Filter = f
 	s.Unlock()
+	go s.SockSessionStore.Set(s.SockId, s.SockSession)
 }
 
 func (s *Sock) IsPaused() bool {
@@ -73,10 +99,4 @@ func (s *Sock) SetPaused(state bool) {
 	s.Lock()
 	s.Paused = state
 	s.Unlock()
-}
-
-type SockMessage struct {
-	Action  string      `json:"action,omitempty"`
-	Path    string      `json:"path"`
-	Payload interface{} `json:"payload"`
 }

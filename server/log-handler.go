@@ -76,7 +76,7 @@ func Handle(lp *_types.LogPackage, protocol string, size int) {
 
 			if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
-				ws.SockMap.PushLog(lp.Log)
+				ws.GetSockMap().Push(lp.Log)
 				err = logModel.PushToQueue(lp.Log)
 				if err != nil {
 					Logger.Error(PROTOCOL+" create log error: %v", err)

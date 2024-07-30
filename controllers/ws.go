@@ -22,10 +22,6 @@ func (wc WsController) Reader(w *websocket.Conn) {
 	query := cfg.Location.Query()
 	tokenstring := query.Get("token")
 	sockId := query.Get("sock_id")
-	paused := false
-	if query.Get("paused") == "true" {
-		paused = true
-	}
 
 	if tokenstring == "" || sockId == "" {
 		return
@@ -47,32 +43,25 @@ func (wc WsController) Reader(w *websocket.Conn) {
 	}
 
 	sock := &types.Sock{
-		SockId: sockId,
-		User:   usr,
-		Conn:   w,
-		Paused: paused,
-		Claims: claims,
+		SockId:   sockId,
+		User:     usr,
+		Conn:     w,
+		Claims:   claims,
+		JwtToken: tokenstring,
 	}
-	ws.SockMap.Add(sock)
+	ws.GetSockMap().Register(sock)
 
 	for {
-		var m types.SockMessage
+		var msg types.SockMessage
 
-		if err := websocket.JSON.Receive(w, &m); err != nil {
+		if err := websocket.JSON.Receive(w, &msg); err != nil {
 			Logger.Error("websocket.JSON.Receive: userId=%v, sockId=%v, err=%v", usr.Id, sockId, err)
-			ws.SockMap.Delete(usr.Id, sockId)
+			ws.GetSockMap().Unregister(sock)
 			break
 		}
-		switch m.Action {
-		case "subscribe":
-			sock.AddListener(m.Path)
-		case "unsubscribe":
-			sock.RemoveListener(m.Path)
-		case "pause":
-			paused := m.Payload.(bool)
-			sock.SetPaused(paused)
-		}
 
-		Logger.Debug("Received: %v", m)
+		sock.HandleMessage(&msg)
+
+		Logger.Debug("Received: %v %v", sockId, msg)
 	}
 }

@@ -30,6 +30,7 @@ type ConfigData struct {
 	} `yaml:"oauth"`
 	Clickhouse    string `yaml:"clickhouse"`
 	Mysql         string `yaml:"mysql"`
+	Redis         string `yaml:"redis"`
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
 	DemoDash      struct {
 		Enabled bool   `yaml:"enabled"`

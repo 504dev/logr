@@ -9,6 +9,7 @@ oauth:
     client_secret: "$OAUTH_GITHUB_CLIENT_SECRET"
 clickhouse: "tcp://localhost:9000?database=logrdb&username=logr&password=12345678"
 mysql: "logr:12345678@tcp(localhost:3306)/logrdb"
+redis: "$REDIS_URL"
 allow_no_cipher: false
 demo_dash:
   enabled: $DEMO_DASH_ENABLED
