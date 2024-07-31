@@ -24,25 +24,27 @@ func ListenUDP() error {
 	}
 	defer pc.Close()
 
-	for {
-		buf := make([]byte, 65536)
-		size, _, err := pc.ReadFromUDP(buf)
+	buf := make([]byte, 65536)
 
+	for {
+		size, _, err := pc.ReadFromUDP(buf)
 		if err != nil {
 			Logger.Error("UDP read error: %v", err)
 			continue
 		}
 
-		//fmt.Println("DEBUG buf:", string(buf))
+		data := make([]byte, size)
+		copy(data, buf[:size])
 
-		lp := _types.LogPackage{}
-		err = jsoniter.Unmarshal(buf[0:size], &lp)
+		go func() {
+			lp := _types.LogPackage{}
+			err = jsoniter.Unmarshal(data, &lp)
+			if err != nil {
+				Logger.Error("UDP parse json error: %v\n%v", err, string(data))
+				return
+			}
 
-		if err != nil {
-			Logger.Error("UDP parse json error: %v\n%v", err, string(buf[0:size]))
-			continue
-		}
-
-		Handle(&lp, "udp", size)
+			Handle(&lp, "udp", size)
+		}()
 	}
 }
