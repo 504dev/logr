@@ -22,6 +22,7 @@ func ListenUDP() error {
 	if err != nil {
 		return err
 	}
+	defer pc.Close()
 
 	for {
 		buf := make([]byte, 65536)
