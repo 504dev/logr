@@ -18,7 +18,6 @@ type ChatHistoryItem struct {
 	Role    string `json:"role"`
 	Content string `json:"content"`
 }
-
 type ChatHistory []*ChatHistoryItem
 type RequestBody struct {
 	Model    string      `json:"model"`
@@ -31,25 +30,9 @@ type ResponseBody struct {
 	Done    bool            `json:"done"`
 }
 
-func ai(conf *lgc.Config) {
-	log, _ := conf.NewLogger("ai.log")
-	log.Body = "[{version}] {message}"
-
-	matches := regexp.MustCompile(`^(https?://[^/]+)/(.*)$`).FindStringSubmatch(config.Get().DemoDash.Llm)
-	if len(matches) != 3 {
-		log.Error(errors.New("invalid llm url"))
-		return
-	}
-
-	ollamaUrl, ollamaModel := matches[1], matches[2]
-
-	defer func() {
-		<-time.After(10 * time.Second)
-		ai(conf)
-	}()
-
-	chaptersN := 5
-	genres := []string{
+var (
+	urlRegex = regexp.MustCompile(`^(https?://[^/]+)/(.*)$`)
+	genres   = []string{
 		"Romance",
 		"Biographies & Memoirs",
 		"Literary Fiction",
@@ -67,6 +50,38 @@ func ai(conf *lgc.Config) {
 		"Young Adult",
 		"Self-Help",
 	}
+	chaptersN        = 5
+	promptInterval   = 10 * time.Second
+	chapterWordCount = 300
+)
+
+func ai(conf *lgc.Config) {
+	log, _ := conf.NewLogger("ai.log")
+	log.Body = "[{version}] {message}"
+
+	ollamaUrl, ollamaModel, err := parseLLMURL(config.Get().DemoDash.Llm)
+	if err != nil {
+		log.Error(err)
+		return
+	}
+
+	for {
+		if err := generateBook(log, ollamaUrl, ollamaModel); err != nil {
+			log.Error(err)
+		}
+		time.Sleep(promptInterval)
+	}
+}
+
+func parseLLMURL(url string) (string, string, error) {
+	matches := urlRegex.FindStringSubmatch(url)
+	if len(matches) != 3 {
+		return "", "", errors.New("invalid llm url")
+	}
+	return matches[1], matches[2], nil
+}
+
+func generateBook(log *lgc.Logger, ollamaUrl, ollamaModel string) error {
 	genre := genres[time.Now().Nanosecond()%len(genres)]
 	prompt := fmt.Sprintf(`Imagine that you are a writer in the %v genre.
 Think of the title of a book about a monitoring service called "Logr", which was developed by a 30-year-old developer from Saint-Petersburg named Dima.
@@ -77,25 +92,24 @@ Then write a 100-word summary of the book.`, genre, chaptersN)
 		{Role: "user", Content: prompt},
 	}
 
-	onToken := func(t string) {
+	onToken := func(token string) {
 		log.Inc("tokens", 1)
-		t = strings.TrimSpace(t)
-		if t == "Dima" {
-			log.Inc(t, 1)
+		token = strings.TrimSpace(token)
+		if token == "Dima" {
+			log.Inc(token, 1)
 		}
 	}
 
 	answer, err := Prompt(ollamaUrl, ollamaModel, history, func(s string) { log.Notice(s) }, onToken)
 	if err != nil {
-		log.Error(err)
-		return
+		return err
 	}
 
 	history = append(history, answer)
 
 	log.Info("")
 	for i := 1; i <= chaptersN; i++ {
-		prompt := fmt.Sprintf(`Give me a 300-word chapter %v. Start with the title of the chapter.`, i)
+		prompt := fmt.Sprintf(`Give me a %v-word chapter %v. Start with the title of the chapter.`, chapterWordCount, i)
 		if i == chaptersN {
 			prompt += " This is the last chapter, ending the book epically."
 		}
@@ -104,13 +118,14 @@ Then write a 100-word summary of the book.`, genre, chaptersN)
 		answer, err := Prompt(ollamaUrl, ollamaModel, history, func(s string) { log.Info(s) }, onToken)
 
 		if err != nil {
-			log.Error(err)
-			return
+			return err
 		}
 
 		history = append(history, answer)
 		log.Info("")
 	}
+
+	return nil
 }
 
 func Prompt(ollamaUrl string, ollamaModel string, history ChatHistory, onSentence func(string), onToken func(string)) (*ChatHistoryItem, error) {

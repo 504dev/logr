@@ -1,10 +1,10 @@
 package server
 
 import (
+	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
-	jsoniter "github.com/json-iterator/go"
 	"net"
 )
 
@@ -38,8 +38,7 @@ func ListenUDP() error {
 
 		go func() {
 			lp := _types.LogPackage{}
-			err = jsoniter.Unmarshal(data, &lp)
-			if err != nil {
+			if err := json.Unmarshal(data, &lp); err != nil {
 				Logger.Error("UDP parse json error: %v\n%v", err, string(data))
 				return
 			}
