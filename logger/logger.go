@@ -3,6 +3,7 @@ package logger
 import (
 	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
+	"github.com/504dev/logr/logger/demo"
 	"github.com/504dev/logr/models/dashkey"
 	"github.com/504dev/logr/types"
 	"strconv"
@@ -46,7 +47,8 @@ func Init() {
 		}
 	})
 	if config.Get().DemoDash.Enabled {
-		go Demo()
+		conf, _ := createConfig(types.DashboardDemoId)
+		go demo.Run(conf, Logger)
 	}
 }
 

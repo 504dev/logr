@@ -1,4 +1,4 @@
-package logger
+package demo
 
 import (
 	lgc "github.com/504dev/logr-go-client"

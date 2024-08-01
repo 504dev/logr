@@ -1,4 +1,4 @@
-package logger
+package demo
 
 import (
 	"encoding/json"
@@ -35,43 +35,43 @@ func (b *BitfinexPrice) UnmarshalJSON(buf []byte) error {
 	return nil
 }
 
-func crypto(conf *logr.Config) {
-	l, _ := conf.NewLogger("crypto.log")
-	l.Body = "[{version}, pid={pid}] {message}"
+func crypto(conf *logr.Config, mainlog *logr.Logger) {
+	cryptolog, _ := conf.NewLogger("crypto.log")
+	cryptolog.Body = "[{version}, pid={pid}] {message}"
 	for {
-		l.Info("")
+		cryptolog.Info("")
 		time.Sleep(30 * time.Second)
-		l.Info("**************************************************")
+		cryptolog.Info("**************************************************")
 		totals := make(map[string]float64)
 		for _, base := range [3]string{"BTC", "ETH", "LTC"} {
-			l.Info("")
+			cryptolog.Info("")
 			sym := base + "_USDT"
 			bin, hit, bit := BinancePrice{}, HitbtcPrice{}, BitfinexPrice{}
 			var err error
 			err = request(&bin, fmt.Sprintf("https://api.binance.com/api/v3/ticker/24hr?symbol=%vUSDT", base))
 			if err != nil {
-				Logger.Error("Demo crypto.log binance: %v", err)
+				mainlog.Error("Demo crypto.log binance: %v", err)
 				continue
 			}
 			err = request(&hit, fmt.Sprintf("https://api.hitbtc.com/api/3/public/ticker/%vUSDT", base))
 			if err != nil {
-				Logger.Error("Demo crypto.log hitbtc: %v", err)
+				mainlog.Error("Demo crypto.log hitbtc: %v", err)
 				continue
 			}
 			err = request(&bit, fmt.Sprintf("https://api-pub.bitfinex.com/v2/ticker/t%vUSD", base))
 			if err != nil {
-				Logger.Error("Demo crypto.log bitfinex: %v", err)
+				mainlog.Error("Demo crypto.log bitfinex: %v", err)
 				continue
 			}
 			binP, hitP, bitP := bin.Price, hit.Price, bit.Price
 			binV, hitV, bitV := bin.Volume, hit.Volume, bit.Volume
 
-			l.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitP).Avg(binP).Avg(bitP)
-			l.Avg(fmt.Sprintf("volume:%v", sym), hitV+binV+bitV)
+			cryptolog.Touch(fmt.Sprintf("price:%v", sym)).Avg(hitP).Avg(binP).Avg(bitP)
+			cryptolog.Avg(fmt.Sprintf("volume:%v", sym), hitV+binV+bitV)
 
 			bold := color.New(color.Bold).SprintFunc()
 
-			l.Info(
+			cryptolog.Info(
 				"%v %v %v$ (%v$)",
 				bold(base),
 				color.CyanString("HitBTC"),
@@ -79,7 +79,7 @@ func crypto(conf *logr.Config) {
 				humanize.Comma(int64(hitV)),
 			)
 
-			l.Info(
+			cryptolog.Info(
 				"%v %v %v$ (%v$)",
 				bold(base),
 				color.GreenString("Bitfinex"),
@@ -87,7 +87,7 @@ func crypto(conf *logr.Config) {
 				humanize.Comma(int64(bitV)),
 			)
 
-			l.Info(
+			cryptolog.Info(
 				"%v %v %v$ (%v$)",
 				bold(base),
 				color.HiYellowString("Binance"),
@@ -95,16 +95,16 @@ func crypto(conf *logr.Config) {
 				humanize.Comma(int64(binV)),
 			)
 
-			l.Notice(
+			cryptolog.Notice(
 				"%v price %v widget!",
 				color.New(color.Bold).SprintFunc()(base),
-				l.Snippet("avg", fmt.Sprintf("price:%v", sym), 30),
+				cryptolog.Snippet("avg", fmt.Sprintf("price:%v", sym), 30),
 			)
 
 			totalV := hitV + bitV + binV
-			l.Per("volume:hitbtc", hitV, totalV)
-			l.Per("volume:bitfinex", bitV, totalV)
-			l.Per("volume:binance", binV, totalV)
+			cryptolog.Per("volume:hitbtc", hitV, totalV)
+			cryptolog.Per("volume:bitfinex", bitV, totalV)
+			cryptolog.Per("volume:binance", binV, totalV)
 
 			totals[sym] = totalV
 			totals[""] += totalV
@@ -114,7 +114,7 @@ func crypto(conf *logr.Config) {
 
 		for sym, val := range totals {
 			if sym != "" {
-				l.Per(fmt.Sprintf("volume:%v", sym), val, totals[""])
+				cryptolog.Per(fmt.Sprintf("volume:%v", sym), val, totals[""])
 			}
 		}
 	}
