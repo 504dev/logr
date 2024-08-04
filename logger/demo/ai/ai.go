@@ -35,18 +35,18 @@ var (
 )
 
 func Run(conf *lgc.Config) {
-	log, _ := conf.NewLogger("ai.log")
-	log.Body = "[{version}] {message}"
+	ailog, _ := conf.NewLogger("ai.log")
+	ailog.Body = "[{version}] {message}"
 
 	ollama, err := NewOllamaChat(config.Get().DemoDash.Llm)
 	if err != nil {
-		log.Error(err)
+		ailog.Error(err)
 		return
 	}
 
 	for {
-		if err := generateBook(log, ollama); err != nil {
-			log.Error(err)
+		if err := generateBook(ailog, ollama); err != nil {
+			ailog.Error(err)
 		}
 		time.Sleep(promptInterval)
 	}

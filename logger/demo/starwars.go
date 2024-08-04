@@ -9,20 +9,20 @@ import (
 )
 
 func starwars(conf *lgc.Config) {
-	logger, _ := conf.NewLogger("starwars.log")
+	starwarslog, _ := conf.NewLogger("starwars.log")
 	for {
 		c := crowls[rand.Intn(len(crowls))]
-		logger.Warn(color.New(color.Bold).SprintFunc()(c.title))
+		starwarslog.Warn(color.New(color.Bold).SprintFunc()(c.title))
 		for _, t := range append(c.text, "...", "..", ".", "") {
 			time.Sleep(666 * time.Millisecond)
-			logger.Info(t)
-			logger.Inc("count:letters", float64(len(t)))
-			logger.Inc("count:words", float64(len(strings.Fields(t))))
+			starwarslog.Info(t)
+			starwarslog.Inc("count:letters", float64(len(t)))
+			starwarslog.Inc("count:words", float64(len(strings.Fields(t))))
 			if strings.Contains(t, "Jedi") {
-				logger.Inc("count:Jedi", 1)
+				starwarslog.Inc("count:Jedi", 1)
 			}
 			if strings.Contains(t, "Leia") {
-				logger.Inc("count:Leia", 1)
+				starwarslog.Inc("count:Leia", 1)
 			}
 		}
 		time.Sleep(2 * time.Second)

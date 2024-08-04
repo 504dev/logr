@@ -17,7 +17,7 @@ func MustListenHTTP() {
 func ListenHTTP() error {
 	gin.ForceConsoleColor()
 
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter)
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
 
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")

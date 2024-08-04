@@ -26,12 +26,12 @@ func main() {
 	go server.MustListenUDP()
 	go server.MustListenGRPC()
 	go server.MustListenHTTP()
-	go (func() {
+	go func() {
 		for {
 			time.Sleep(10 * time.Second)
 			logger.Logger.Info("ws.GetSockMap() %v", ws.GetSockMap())
 		}
-	})()
+	}()
 	HandleExit()
 }
 

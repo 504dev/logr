@@ -30,11 +30,18 @@ func createConfig(dashId int) (*logr.Config, error) {
 func Init() {
 	conf, _ := createConfig(types.DashboardSystemId)
 	Logger, _ = conf.NewLogger("main.log")
-	Support, _ = conf.NewLogger("support.log")
 	_, _ = conf.DefaultSystemCounter()
 	_, _ = conf.DefaultProcessCounter()
-	gin, _ := conf.NewLogger("gin.log")
-	GinWriter = gin.CustomWriter(func(log *logr.Log) {
+
+	if config.Get().DemoDash.Enabled {
+		conf, _ := createConfig(types.DashboardDemoId)
+		go demo.Run(conf, Logger)
+	}
+}
+
+func GinWriter() *logr.Writer {
+	gin, _ := Logger.Config.NewLogger("gin.log")
+	return gin.CustomWriter(func(log *logr.Log) {
 		codestr := log.Message[38:41]
 		code, _ := strconv.Atoi(codestr)
 		if code >= 400 && code <= 499 {
@@ -46,12 +53,6 @@ func Init() {
 			log.Message = log.Message[28:]
 		}
 	})
-	if config.Get().DemoDash.Enabled {
-		conf, _ := createConfig(types.DashboardDemoId)
-		go demo.Run(conf, Logger)
-	}
 }
 
-var Support *logr.Logger
 var Logger *logr.Logger
-var GinWriter *logr.Writer

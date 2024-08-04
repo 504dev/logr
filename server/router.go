@@ -186,7 +186,7 @@ func NewRouter() *gin.Engine {
 
 		data.Token = ""
 		payload, _ := json.Marshal(data)
-		Support.Notice("%v %v", string(payload), verifyData)
+		Logger.Notice("%v %v", string(payload), verifyData)
 		c.AbortWithStatus(http.StatusOK)
 	})
 
