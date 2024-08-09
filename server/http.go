@@ -1,20 +1,21 @@
 package server
 
 import (
-	"github.com/504dev/logr/config"
+	"context"
 	. "github.com/504dev/logr/logger"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"io"
+	"net/http"
 	"os"
+	"time"
 )
 
-func MustListenHTTP() {
-	if err := ListenHTTP(); err != nil {
-		panic(err)
-	}
+type HttpServer struct {
+	server *http.Server
 }
-func ListenHTTP() error {
+
+func NewHttpServer(addr string) (*HttpServer, error) {
 	gin.ForceConsoleColor()
 
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
@@ -23,17 +24,31 @@ func ListenHTTP() error {
 		c.File("./frontend/dist/index.html")
 	}
 
-	// TODO react
-	r := NewRouter()
-	r.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
-	r.GET("/", frontend)
-	r.GET("/demo", frontend)
-	r.GET("/login", frontend)
-	r.GET("/jwt/:token", frontend)
-	r.GET("/dashboards", frontend)
-	r.GET("/dashboard/*rest", frontend)
-	r.GET("/policy", frontend)
-	r.GET("/support", frontend)
+	engine := NewRouter()
+	engine.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
+	engine.GET("/", frontend)
+	engine.GET("/demo", frontend)
+	engine.GET("/login", frontend)
+	engine.GET("/jwt/:token", frontend)
+	engine.GET("/dashboards", frontend)
+	engine.GET("/dashboard/*rest", frontend)
+	engine.GET("/policy", frontend)
+	engine.GET("/support", frontend)
 
-	return r.Run(config.Get().Bind.Http)
+	return &HttpServer{
+		server: &http.Server{
+			Addr:    addr,
+			Handler: engine,
+		},
+	}, nil
+}
+
+func (srv *HttpServer) Listen() error {
+	return srv.server.ListenAndServe()
+}
+
+func (srv *HttpServer) Stop() error {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	return srv.server.Shutdown(ctx)
 }

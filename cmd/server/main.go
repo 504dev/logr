@@ -24,6 +24,7 @@ func main() {
 	log.RunQueue()   // TODO graceful shutdown
 	count.RunQueue() // TODO graceful shutdown
 	logServer, err := server.NewLogServer(
+		config.Get().Bind.Http,
 		config.Get().Bind.Udp,
 		config.Get().Bind.Grpc,
 	)
@@ -31,7 +32,6 @@ func main() {
 		panic(err)
 	}
 	logServer.Run()
-	go server.MustListenHTTP()
 	go func() {
 		for {
 			time.Sleep(10 * time.Second)

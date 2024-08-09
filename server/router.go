@@ -160,7 +160,7 @@ func NewRouter() *gin.Engine {
 	wsController := controllers.WsController{}
 	r.GET("/ws", wsController.Index)
 
-	// github marketplace
+	// GitHub marketplace
 	r.POST("/webhook", func(c *gin.Context) {
 		requestDump, err := httputil.DumpRequest(c.Request, true)
 		if err != nil {
