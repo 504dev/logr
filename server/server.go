@@ -1,64 +1,84 @@
 package server
 
 import (
-	"github.com/504dev/logr-go-client/types"
+	_types "github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr/types"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 	"net/http"
+	"time"
 )
 
 type LogPackageMeta struct {
-	*types.LogPackage
+	*_types.LogPackage
 	Protocol string
 	Size     int
 }
 
 type LogStorage interface {
-	Store(entry *types.Log) error
+	Store(entry *_types.Log) error
 }
 
 type LogServer struct {
 	httpServer *http.Server
-	grpcServer *grpc.Server
+	grpcServer *GrpcServer
 	udpServer  *UdpServer
 	logChannel chan *LogPackageMeta
+	joiner     *types.LogPackageJoiner
 	storage    LogStorage
 	ctx        context.Context
 	cancel     context.CancelFunc
 }
 
-func NewLogServer(udpaddr string) (*LogServer, error) {
+func NewLogServer(udpAddr string, grpcAddr string) (result *LogServer, err error) {
 	ch := make(chan *LogPackageMeta)
-	udp, err := NewUdpServer(udpaddr, ch)
-	if err != nil {
-		return nil, err
-	}
 	ctx, cancel := context.WithCancel(context.Background())
-	return &LogServer{
-		udpServer:  udp,
+	result = &LogServer{
 		logChannel: ch,
+		joiner:     types.NewLogPackageJoiner(time.Second, 5),
 		ctx:        ctx,
 		cancel:     cancel,
-	}, nil
+	}
+	if udpAddr != "" {
+		result.udpServer, err = NewUdpServer(udpAddr, ch)
+		if err != nil {
+			return nil, err
+		}
+	}
+	if grpcAddr != "" {
+		result.grpcServer, err = NewGrpcServer(grpcAddr, ch)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return result, nil
 }
 
-func (srv *LogServer) Handle() {
+func (srv *LogServer) processLogs() {
 	defer close(srv.logChannel)
 	for {
 		select {
 		case <-srv.ctx.Done():
 			return
 		case meta := <-srv.logChannel:
-			HandleLog(meta)
+			srv.handleLog(meta)
 		}
 	}
 
 }
-func (srv *LogServer) ListenUDP() {
-	srv.udpServer.Listen()
+
+func (srv *LogServer) Run() {
+	go srv.processLogs()
+	go srv.udpServer.Listen()
+	go func() {
+		if err := srv.grpcServer.Listen(); err != nil {
+			panic(err)
+		}
+	}()
 }
 
 func (srv *LogServer) Stop() {
 	srv.cancel()
 	srv.udpServer.Stop()
+	_ = srv.grpcServer.Stop()
 }

@@ -3,43 +3,58 @@ package server
 import (
 	pb "github.com/504dev/logr-go-client/protos/gen/go"
 	"github.com/504dev/logr-go-client/types"
-	"github.com/504dev/logr/config"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
 	"net"
 )
 
-type server struct {
+type logRpcService struct {
 	pb.UnimplementedLogRpcServer
+	ch chan<- *LogPackageMeta
 }
 
-func (s *server) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
+func (s *logRpcService) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
 	var lp types.LogPackage
 	lp.FromProto(lrp)
-	HandleLog(&LogPackageMeta{
+	s.ch <- &LogPackageMeta{
 		LogPackage: &lp,
 		Protocol:   "grpc",
 		Size:       proto.Size(lrp),
-	})
+	}
 	return &pb.Response{}, nil
 }
 
-func MustListenGRPC() {
-	if err := ListenGRPC(); err != nil {
-		panic(err)
-	}
+type GrpcServer struct {
+	grpcServer *grpc.Server
+	listener   net.Listener
+	service    *logRpcService
 }
-func ListenGRPC() error {
-	addr := config.Get().Bind.Grpc
-	if addr == "" {
-		return nil
-	}
+
+func NewGrpcServer(addr string, ch chan<- *LogPackageMeta) (*GrpcServer, error) {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	s := grpc.NewServer()
-	pb.RegisterLogRpcServer(s, &server{})
-	return s.Serve(listener)
+	return &GrpcServer{
+		grpcServer: grpc.NewServer(),
+		listener:   listener,
+		service:    &logRpcService{ch: ch},
+	}, nil
+}
+
+func (s *GrpcServer) Listen() error {
+	if s == nil {
+		return nil
+	}
+	pb.RegisterLogRpcServer(s.grpcServer, s.service)
+	return s.grpcServer.Serve(s.listener)
+}
+
+func (s *GrpcServer) Stop() error {
+	if s == nil {
+		return nil
+	}
+	s.grpcServer.Stop()
+	return s.listener.Close()
 }

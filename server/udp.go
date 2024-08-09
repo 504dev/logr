@@ -10,12 +10,12 @@ import (
 
 type UdpServer struct {
 	conn   *net.UDPConn
-	ch     chan *LogPackageMeta
+	ch     chan<- *LogPackageMeta
 	ctx    context.Context
 	cancel context.CancelFunc
 }
 
-func NewUdpServer(addr string, ch chan *LogPackageMeta) (*UdpServer, error) {
+func NewUdpServer(addr string, ch chan<- *LogPackageMeta) (*UdpServer, error) {
 	serverAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, err
@@ -34,6 +34,9 @@ func NewUdpServer(addr string, ch chan *LogPackageMeta) (*UdpServer, error) {
 }
 
 func (srv *UdpServer) Listen() {
+	if srv == nil {
+		return
+	}
 	defer srv.conn.Close()
 	buf := make([]byte, 65536)
 	for {
@@ -66,5 +69,8 @@ func (srv *UdpServer) Listen() {
 }
 
 func (srv *UdpServer) Stop() {
+	if srv == nil {
+		return
+	}
 	srv.cancel()
 }

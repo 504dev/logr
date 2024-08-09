@@ -129,6 +129,7 @@ func NewRouter() *gin.Engine {
 		)
 	}
 
+	// logs
 	logsController := controllers.LogsController{}
 	{
 		r.GET("/api/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
@@ -136,6 +137,7 @@ func NewRouter() *gin.Engine {
 		r.GET("/api/logs/:dash_id/stats", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.StatsByLogname)
 	}
 
+	// counts
 	countsController := controllers.CountsController{}
 	{
 		r.GET("/api/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, countsController.Find)
@@ -145,6 +147,7 @@ func NewRouter() *gin.Engine {
 
 	}
 
+	// admin
 	adminController := controllers.AdminController{}
 	{
 		r.GET("/api/dashboards", auth.EnsureJWT, auth.EnsureAdmin, adminController.Dashboards)
@@ -153,9 +156,11 @@ func NewRouter() *gin.Engine {
 		r.GET("/api/user/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.UserById)
 	}
 
+	// ws
 	wsController := controllers.WsController{}
 	r.GET("/ws", wsController.Index)
 
+	// github marketplace
 	r.POST("/webhook", func(c *gin.Context) {
 		requestDump, err := httputil.DumpRequest(c.Request, true)
 		if err != nil {

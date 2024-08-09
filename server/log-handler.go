@@ -7,13 +7,9 @@ import (
 	"github.com/504dev/logr/models/dashkey"
 	logModel "github.com/504dev/logr/models/log"
 	"github.com/504dev/logr/models/ws"
-	"github.com/504dev/logr/types"
-	"time"
 )
 
-var joiner = types.NewLogPackageJoiner(time.Second, 5)
-
-func HandleLog(meta *LogPackageMeta) {
+func (srv *LogServer) handleLog(meta *LogPackageMeta) {
 	lp := meta.LogPackage
 	dk, err := dashkey.GetByPubCached(lp.PublicKey)
 	if err != nil {
@@ -47,7 +43,7 @@ func HandleLog(meta *LogPackageMeta) {
 
 					// merging of long logs consisting of several chunks
 					if lp.Chunk.N > 1 {
-						complete, joined := joiner.Add(lp)
+						complete, joined := srv.joiner.Add(lp)
 						if !complete {
 							return
 						}
@@ -73,7 +69,7 @@ func HandleLog(meta *LogPackageMeta) {
 			if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
 				ws.GetSockMap().Push(lp.Log)
-				err = logModel.PushToQueue(lp.Log)
+				err = logModel.PushToQueue(lp.Log) // TODO srv.storage
 				if err != nil {
 					Logger.Error("(%v) create log error: %v", meta.Protocol, err)
 					return
@@ -99,7 +95,7 @@ func HandleLog(meta *LogPackageMeta) {
 			if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
 				//Logger.Debug(PROTOCOL+" %v", lp.Count)
-				err = countModel.PushToQueue(lp.Count)
+				err = countModel.PushToQueue(lp.Count) // TODO srv.storage
 				if err != nil {
 					Logger.Error("(%v) create count error: %v", meta.Protocol, err)
 					return
