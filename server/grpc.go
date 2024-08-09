@@ -17,7 +17,11 @@ type server struct {
 func (s *server) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
 	var lp types.LogPackage
 	lp.FromProto(lrp)
-	Handle(&lp, "grpc", proto.Size(lrp))
+	HandleLog(&LogPackageMeta{
+		LogPackage: &lp,
+		Protocol:   "grpc",
+		Size:       proto.Size(lrp),
+	})
 	return &pb.Response{}, nil
 }
 

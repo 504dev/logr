@@ -48,8 +48,8 @@ func (srv *LogServer) Handle() {
 		select {
 		case <-srv.ctx.Done():
 			return
-		case msg := <-srv.logChannel:
-			Handle(msg.LogPackage, msg.Protocol, msg.Size)
+		case meta := <-srv.logChannel:
+			HandleLog(meta)
 		}
 	}
 
