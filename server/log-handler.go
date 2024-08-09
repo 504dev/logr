@@ -53,7 +53,6 @@ func Handle(lp *_types.LogPackage, protocol string, size int) {
 						if !complete {
 							return
 						}
-						joiner.Drop(lp.Chunk.Uid)
 						lp = joined
 					}
 				}

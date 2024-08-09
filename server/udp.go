@@ -3,31 +3,44 @@ package server
 import (
 	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
-	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
+	"golang.org/x/net/context"
 	"net"
 )
 
-func MustListenUDP() {
-	if err := ListenUDP(); err != nil {
-		panic(err)
-	}
+type UdpServer struct {
+	conn   *net.UDPConn
+	ch     chan *LogPackageMeta
+	ctx    context.Context
+	cancel context.CancelFunc
 }
-func ListenUDP() error {
-	serverAddr, err := net.ResolveUDPAddr("udp", config.Get().Bind.Udp)
-	if err != nil {
-		return err
-	}
-	pc, err := net.ListenUDP("udp", serverAddr)
-	if err != nil {
-		return err
-	}
-	defer pc.Close()
 
+func NewUdpServer(addr string, ch chan *LogPackageMeta) (*UdpServer, error) {
+	serverAddr, err := net.ResolveUDPAddr("udp", addr)
+	if err != nil {
+		return nil, err
+	}
+	udpconn, err := net.ListenUDP("udp", serverAddr)
+	if err != nil {
+		return nil, err
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	return &UdpServer{
+		udpconn,
+		ch,
+		ctx,
+		cancel,
+	}, nil
+}
+
+func (srv *UdpServer) Listen() {
+	defer srv.conn.Close()
 	buf := make([]byte, 65536)
-
 	for {
-		size, _, err := pc.ReadFromUDP(buf)
+		if srv.ctx.Err() != nil {
+			return
+		}
+		size, _, err := srv.conn.ReadFromUDP(buf)
 		if err != nil {
 			Logger.Error("UDP read error: %v", err)
 			continue
@@ -43,7 +56,15 @@ func ListenUDP() error {
 				return
 			}
 
-			Handle(&lp, "udp", size)
+			srv.ch <- &LogPackageMeta{
+				LogPackage: &lp,
+				Protocol:   "udp",
+				Size:       size,
+			}
 		}()
 	}
+}
+
+func (srv *UdpServer) Stop() {
+	srv.cancel()
 }

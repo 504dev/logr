@@ -75,5 +75,10 @@ func (m *LogPackageJoiner) Add(lp *_types.LogPackage, tries int) (complete bool,
 
 	m.addItemSafe(lp)
 
-	return m.completeSafe(lp.Chunk.Uid)
+	complete, joined = m.completeSafe(lp.Chunk.Uid)
+	if complete {
+		m.dropSafe(lp.Chunk.Uid)
+	}
+
+	return
 }

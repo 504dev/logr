@@ -23,7 +23,12 @@ func main() {
 	logger.Init()
 	log.RunQueue()   // TODO graceful shutdown
 	count.RunQueue() // TODO graceful shutdown
-	go server.MustListenUDP()
+	logServer, err := server.NewLogServer(config.Get().Bind.Udp)
+	if err != nil {
+		panic(err)
+	}
+	go logServer.Handle()
+	go logServer.ListenUDP()
 	go server.MustListenGRPC()
 	go server.MustListenHTTP()
 	go func() {
