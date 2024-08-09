@@ -8,27 +8,35 @@ import (
 	"time"
 )
 
-var Queue *queue.Queue
+type CountStorage struct {
+	queue *queue.Queue
+}
 
-func RunQueue() {
+func NewCountStorage() *CountStorage {
 	sql := `
 		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, version, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl, time_dur)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	Queue = queue.NewQueue(&queue.QueueConfig{
-		DB:            clickhouse.Conn(),
-		Sql:           sql,
-		FlushInterval: time.Second,
-		FlushCount:    1000,
-	})
-	Queue.Run()
+	return &CountStorage{
+		queue: queue.NewQueue(&queue.QueueConfig{
+			DB:            clickhouse.Conn(),
+			Sql:           sql,
+			FlushInterval: time.Second,
+			FlushCount:    1000,
+		}),
+	}
 }
 
-func StopQueue() error {
-	return Queue.Stop()
+func (storage *CountStorage) RunQueue() *CountStorage {
+	storage.queue.Run()
+	return storage
 }
 
-func PushToQueue(c *_types.Count) error {
+func (storage *CountStorage) StopQueue() error {
+	return storage.queue.Stop()
+}
+
+func (storage *CountStorage) Store(c *_types.Count) error {
 	cv := (*types.CountVector)(c)
-	Queue.Push(cv.AsVector())
+	storage.queue.Push(cv.AsVector())
 	return nil
 }

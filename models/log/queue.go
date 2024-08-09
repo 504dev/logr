@@ -7,28 +7,36 @@ import (
 	"time"
 )
 
-var Queue *queue.Queue
+type LogStorage struct {
+	queue *queue.Queue
+}
 
-func RunQueue() {
+func NewLogStorage() *LogStorage {
 	sql := `
 		INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	Queue = queue.NewQueue(&queue.QueueConfig{
-		DB:            clickhouse.Conn(),
-		Sql:           sql,
-		FlushInterval: time.Second,
-		FlushCount:    1000,
-	})
-	Queue.Run()
+	return &LogStorage{
+		queue: queue.NewQueue(&queue.QueueConfig{
+			DB:            clickhouse.Conn(),
+			Sql:           sql,
+			FlushInterval: time.Second,
+			FlushCount:    1000,
+		}),
+	}
 }
 
-func StopQueue() error {
-	return Queue.Stop()
+func (storage *LogStorage) RunQueue() *LogStorage {
+	storage.queue.Run()
+	return storage
 }
 
-func PushToQueue(log *_types.Log) error {
+func (storage *LogStorage) StopQueue() error {
+	return storage.queue.Stop()
+}
+
+func (storage *LogStorage) Store(log *_types.Log) error {
 	day := time.Unix(0, log.Timestamp).UTC().Format("2006-01-02")
 	values := []interface{}{day, log.Timestamp, log.DashId, log.Hostname, log.Logname, log.Level, log.Message, log.Pid, log.Version}
-	Queue.Push(values)
+	storage.queue.Push(values)
 	return nil
 }

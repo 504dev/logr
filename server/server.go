@@ -2,6 +2,7 @@ package server
 
 import (
 	_types "github.com/504dev/logr-go-client/types"
+	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"golang.org/x/net/context"
 	"time"
@@ -14,28 +15,41 @@ type LogPackageMeta struct {
 }
 
 type LogStorage interface {
-	Store(entry *_types.Log) error
+	Store(*_types.Log) error
+}
+
+type CountStorage interface {
+	Store(*_types.Count) error
 }
 
 type LogServer struct {
-	httpServer *HttpServer
-	grpcServer *GrpcServer
-	udpServer  *UdpServer
-	logChannel chan *LogPackageMeta
-	joiner     *types.LogPackageJoiner
-	storage    LogStorage
-	ctx        context.Context
-	cancel     context.CancelFunc
+	httpServer   *HttpServer
+	grpcServer   *GrpcServer
+	udpServer    *UdpServer
+	channel      chan *LogPackageMeta
+	joiner       *types.LogPackageJoiner
+	logStorage   LogStorage
+	countStorage CountStorage
+	ctx          context.Context
+	cancel       context.CancelFunc
 }
 
-func NewLogServer(httpaddr string, udpAddr string, grpcAddr string) (result *LogServer, err error) {
+func NewLogServer(
+	httpaddr string,
+	udpAddr string,
+	grpcAddr string,
+	logStorage LogStorage,
+	countStorage CountStorage,
+) (result *LogServer, err error) {
 	ch := make(chan *LogPackageMeta)
 	ctx, cancel := context.WithCancel(context.Background())
 	result = &LogServer{
-		logChannel: ch,
-		joiner:     types.NewLogPackageJoiner(time.Second, 5),
-		ctx:        ctx,
-		cancel:     cancel,
+		channel:      ch,
+		joiner:       types.NewLogPackageJoiner(time.Second, 5),
+		logStorage:   logStorage,
+		countStorage: countStorage,
+		ctx:          ctx,
+		cancel:       cancel,
 	}
 	if udpAddr != "" {
 		result.udpServer, err = NewUdpServer(udpAddr, ch)
@@ -59,12 +73,12 @@ func NewLogServer(httpaddr string, udpAddr string, grpcAddr string) (result *Log
 }
 
 func (srv *LogServer) processLogs() {
-	defer close(srv.logChannel)
+	defer close(srv.channel)
 	for {
 		select {
 		case <-srv.ctx.Done():
 			return
-		case meta := <-srv.logChannel:
+		case meta := <-srv.channel:
 			srv.handleLog(meta)
 		}
 	}
@@ -76,7 +90,7 @@ func (srv *LogServer) Run() {
 	go srv.udpServer.Listen()
 	go func() {
 		if err := srv.httpServer.Listen(); err != nil {
-			panic(err)
+			Logger.Error(err)
 		}
 	}()
 	go func() {
@@ -88,7 +102,7 @@ func (srv *LogServer) Run() {
 
 func (srv *LogServer) Stop() {
 	srv.cancel()
-	srv.httpServer.Stop()
 	srv.udpServer.Stop()
 	_ = srv.grpcServer.Stop()
+	_ = srv.httpServer.Stop()
 }

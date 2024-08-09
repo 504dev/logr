@@ -6,13 +6,12 @@ import (
 	"github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/count"
 	"github.com/504dev/logr/models/log"
-	"github.com/504dev/logr/models/ws"
 	"github.com/504dev/logr/mysql"
 	"github.com/504dev/logr/server"
 	"github.com/fatih/color"
 	"os"
 	"os/signal"
-	"time"
+	"syscall"
 )
 
 func main() {
@@ -21,32 +20,28 @@ func main() {
 	clickhouse.Init(args.Retries)
 	mysql.Init(args.Retries)
 	logger.Init()
-	log.RunQueue()   // TODO graceful shutdown
-	count.RunQueue() // TODO graceful shutdown
+
+	logStorage := log.NewLogStorage().RunQueue()
+	countStorage := count.NewCountStorage().RunQueue()
 	logServer, err := server.NewLogServer(
 		config.Get().Bind.Http,
 		config.Get().Bind.Udp,
 		config.Get().Bind.Grpc,
+		logStorage,
+		countStorage,
 	)
 	if err != nil {
 		panic(err)
 	}
 	logServer.Run()
-	go func() {
-		for {
-			time.Sleep(10 * time.Second)
-			logger.Logger.Info("ws.GetSockMap() %v", ws.GetSockMap())
-		}
-	}()
-	HandleExit()
-}
 
-func HandleExit() {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	sig := <-c
+	// Shutdown
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-sigchan
 	logger.Logger.Warn("Exit with code: %v", sig)
-	_ = log.StopQueue()
-	_ = count.StopQueue()
+	//logServer.Stop()
+	_ = logStorage.StopQueue()
+	_ = countStorage.StopQueue()
 	os.Exit(0)
 }

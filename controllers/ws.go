@@ -8,6 +8,7 @@ import (
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/websocket"
+	"time"
 )
 
 type WsController struct{}
@@ -64,4 +65,13 @@ func (wc WsController) Reader(w *websocket.Conn) {
 
 		Logger.Debug("Received: %v %v", sockId, msg)
 	}
+}
+
+func (wc WsController) Info() {
+	go func() {
+		for {
+			time.Sleep(10 * time.Second)
+			Logger.Info("ws.GetSockMap() %v", ws.GetSockMap())
+		}
+	}()
 }

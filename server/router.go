@@ -159,6 +159,7 @@ func NewRouter() *gin.Engine {
 	// ws
 	wsController := controllers.WsController{}
 	r.GET("/ws", wsController.Index)
+	wsController.Info()
 
 	// GitHub marketplace
 	r.POST("/webhook", func(c *gin.Context) {

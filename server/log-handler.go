@@ -3,9 +3,7 @@ package server
 import (
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
-	countModel "github.com/504dev/logr/models/count"
 	"github.com/504dev/logr/models/dashkey"
-	logModel "github.com/504dev/logr/models/log"
 	"github.com/504dev/logr/models/ws"
 )
 
@@ -69,7 +67,7 @@ func (srv *LogServer) handleLog(meta *LogPackageMeta) {
 			if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
 				ws.GetSockMap().Push(lp.Log)
-				err = logModel.PushToQueue(lp.Log) // TODO srv.storage
+				err = srv.logStorage.Store(lp.Log)
 				if err != nil {
 					Logger.Error("(%v) create log error: %v", meta.Protocol, err)
 					return
@@ -94,8 +92,7 @@ func (srv *LogServer) handleLog(meta *LogPackageMeta) {
 
 			if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
-				//Logger.Debug(PROTOCOL+" %v", lp.Count)
-				err = countModel.PushToQueue(lp.Count) // TODO srv.storage
+				err = srv.countStorage.Store(lp.Count)
 				if err != nil {
 					Logger.Error("(%v) create count error: %v", meta.Protocol, err)
 					return

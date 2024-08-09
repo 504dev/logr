@@ -6,6 +6,7 @@ import (
 	. "github.com/504dev/logr/logger"
 	"golang.org/x/net/context"
 	"net"
+	"sync"
 )
 
 type UdpServer struct {
@@ -38,11 +39,16 @@ func (srv *UdpServer) Listen() {
 		return
 	}
 	defer srv.conn.Close()
+
+	wg := sync.WaitGroup{}
+	semaphore := make(chan struct{}, 10) // limit concurrent connections
+
 	buf := make([]byte, 65536)
 	for {
 		if srv.ctx.Err() != nil {
-			return
+			break
 		}
+
 		size, _, err := srv.conn.ReadFromUDP(buf)
 		if err != nil {
 			Logger.Error("UDP read error: %v", err)
@@ -52,7 +58,15 @@ func (srv *UdpServer) Listen() {
 		data := make([]byte, size)
 		copy(data, buf[:size])
 
+		semaphore <- struct{}{}
+		wg.Add(1)
+
 		go func() {
+			defer func() {
+				<-semaphore
+				wg.Done()
+			}()
+
 			lp := _types.LogPackage{}
 			if err := json.Unmarshal(data, &lp); err != nil {
 				Logger.Error("UDP parse json error: %v\n%v", err, string(data))
@@ -66,6 +80,7 @@ func (srv *UdpServer) Listen() {
 			}
 		}()
 	}
+	wg.Wait()
 }
 
 func (srv *UdpServer) Stop() {
