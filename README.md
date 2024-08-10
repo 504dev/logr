@@ -123,13 +123,10 @@ mysql: "logr:logr@tcp(localhost:3306)/logr"
 
 * Golang [github.com/504dev/logr-go-client](https://github.com/504dev/logr-go-client)
 * Node.js [github.com/504dev/logr-node-client](https://github.com/504dev/logr-node-client)
-* Python [github.com/504dev/logr-python-client](https://github.com/504dev/logr-python-client)
-* PHP [github.com/504dev/logr-php-client](https://github.com/504dev/logr-php-client) (logger only, metrics not
-  supported)
 
 ## Utils
 
-* Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
+* File Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
 
 ## Schema
 ![Logr Schema](https://raw.githubusercontent.com/504dev/logr-front/master/static/schema.png)
