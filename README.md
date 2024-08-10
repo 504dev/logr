@@ -12,16 +12,15 @@
 </div>
 
 [![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.png)](http://logr.info/demo)
-
 [Look at the demo page](http://logr.info/demo)
 
 
+* Authorization by `GitHub`
 * logs look like in your `Terminal`
+* `Golang` backend
+* `Vue.js` + `Vite` frontend
 * storing data in `ClickHouse`
 * transport data by `WebSocket`
-* `Golang` backend
-* `Vue.js` frontend
-* Authorization by `GitHub`
 
 ## Usage
 
@@ -124,3 +123,5 @@ mysql: "logr:logr@tcp(localhost:3306)/logr"
 
 * Watcher [github.com/504dev/logr-watch](https://github.com/504dev/logr-watch)
 
+## Schema
+![Logr Schema](https://raw.githubusercontent.com/504dev/logr-front/master/static/schema.png)
