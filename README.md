@@ -46,8 +46,14 @@ logr.info('Hello, Logr!');
 
 ## Docker
 
+For more information, see [documentation on Docker Hub](http://logr.info/demo)
+
+
 ```
-docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
+docker run -d \
+    -v "$(pwd)/clickhouse_data:/var/lib/clickhouse" \
+    -v "$(pwd)/mysql_data:/var/lib/mysql" \
+    -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ```
 ✔ Enjoy: \
 http://localhost:7778/
