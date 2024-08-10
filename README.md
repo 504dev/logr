@@ -1,4 +1,4 @@
-<div align="center">
+<div align="center" style="display: block">
   <a href="https://logr.info/demo">
     <img width="128" height="128" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.png">
   </a>
@@ -12,15 +12,17 @@
 </div>
 
 [![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.png)](http://logr.info/demo)
-[Look at the demo page](http://logr.info/demo)
 
+## About
 
 * Authorization by `GitHub`
-* logs look like in your `Terminal`
+* `Terminal` style log display
 * `Golang` backend
 * `Vue.js` + `Vite` frontend
-* storing data in `ClickHouse`
-* transport data by `WebSocket`
+* `Highcharts` for metrics
+* data storage in `ClickHouse`
+* transport via `WebSocket`
+* [Look at the demo page](http://logr.info/demo)
 
 ## Usage
 
