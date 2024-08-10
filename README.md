@@ -46,7 +46,7 @@ logr.info('Hello, Logr!');
 
 ## Docker
 
-For more information, see [documentation on Docker Hub](http://logr.info/demo)
+For more information, see [documentation on Docker Hub](https://hub.docker.com/r/kozhurkin/logr)
 
 
 ```
