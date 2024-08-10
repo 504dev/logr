@@ -40,7 +40,7 @@ func main() {
 	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-sigchan
 	logger.Logger.Warn("Exit with code: %v", sig)
-	//logServer.Stop()
+	logServer.Stop()
 	_ = logStorage.StopQueue()
 	_ = countStorage.StopQueue()
 	os.Exit(0)

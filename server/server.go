@@ -4,7 +4,7 @@ import (
 	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
-	"golang.org/x/net/context"
+	"golang.org/x/sync/errgroup"
 	"time"
 )
 
@@ -30,8 +30,7 @@ type LogServer struct {
 	joiner       *types.LogPackageJoiner
 	logStorage   LogStorage
 	countStorage CountStorage
-	ctx          context.Context
-	cancel       context.CancelFunc
+	done         chan struct{}
 }
 
 func NewLogServer(
@@ -42,14 +41,12 @@ func NewLogServer(
 	countStorage CountStorage,
 ) (result *LogServer, err error) {
 	ch := make(chan *LogPackageMeta)
-	ctx, cancel := context.WithCancel(context.Background())
 	result = &LogServer{
 		channel:      ch,
 		joiner:       types.NewLogPackageJoiner(time.Second, 5),
 		logStorage:   logStorage,
 		countStorage: countStorage,
-		ctx:          ctx,
-		cancel:       cancel,
+		done:         make(chan struct{}),
 	}
 	if udpAddr != "" {
 		result.udpServer, err = NewUdpServer(udpAddr, ch)
@@ -72,37 +69,41 @@ func NewLogServer(
 	return result, nil
 }
 
-func (srv *LogServer) processLogs() {
-	defer close(srv.channel)
-	for {
-		select {
-		case <-srv.ctx.Done():
-			return
-		case meta := <-srv.channel:
-			srv.handleLog(meta)
-		}
+func (srv *LogServer) processChannel() {
+	for meta := range srv.channel {
+		srv.handleLog(meta)
 	}
-
 }
 
 func (srv *LogServer) Run() {
-	go srv.processLogs()
-	go srv.udpServer.Listen()
 	go func() {
-		if err := srv.httpServer.Listen(); err != nil {
-			Logger.Error(err)
-		}
+		srv.processChannel()
+		close(srv.done) // reading from srv.channel completed
 	}()
 	go func() {
-		if err := srv.grpcServer.Listen(); err != nil {
-			panic(err)
+		if err := srv.httpServer.Listen(); err != nil {
+			Logger.Warn(err)
 		}
+	}()
+	var g errgroup.Group
+	g.Go(func() error {
+		srv.udpServer.Listen()
+		return nil
+	})
+	g.Go(func() error {
+		return srv.grpcServer.Listen()
+	})
+	go func() {
+		if err := g.Wait(); err != nil {
+			Logger.Warn(err)
+		}
+		close(srv.channel) // writing to srv.channel is complete
 	}()
 }
 
 func (srv *LogServer) Stop() {
-	srv.cancel()
 	srv.udpServer.Stop()
 	_ = srv.grpcServer.Stop()
 	_ = srv.httpServer.Stop()
+	<-srv.done
 }

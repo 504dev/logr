@@ -35,8 +35,7 @@ func (q *Queue) Run() {
 	go (func() {
 		for {
 			<-q.Ticker.C
-			err := q.Flush()
-			if err != nil {
+			if err := q.Flush(); err != nil {
 				Logger.Error(err)
 			}
 		}
@@ -51,18 +50,20 @@ func (q *Queue) Stop() error {
 func (q *Queue) Push(values []interface{}) {
 	q.Lock()
 	q.list = append(q.list, values)
+	count := len(q.list)
 	q.Unlock()
-	if len(q.list) >= q.FlushCount {
+	if count >= q.FlushCount {
 		q.Flush()
 	}
 }
 
 func (q *Queue) Flush() error {
+	q.Lock()
 	if len(q.list) == 0 {
+		q.Unlock()
 		return nil
 	}
-	q.Lock()
-	batch := q.list[0:]
+	batch := q.list
 	q.list = make([][]interface{}, 0, q.FlushCount)
 	q.Unlock()
 

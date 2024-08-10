@@ -1,14 +1,9 @@
 package server
 
 import (
-	"context"
-	. "github.com/504dev/logr/logger"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
-	"os"
-	"time"
 )
 
 type HttpServer struct {
@@ -16,10 +11,6 @@ type HttpServer struct {
 }
 
 func NewHttpServer(addr string) (*HttpServer, error) {
-	gin.ForceConsoleColor()
-
-	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
-
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")
 	}
@@ -48,7 +39,5 @@ func (srv *HttpServer) Listen() error {
 }
 
 func (srv *HttpServer) Stop() error {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-	return srv.server.Shutdown(ctx)
+	return srv.server.Close()
 }

@@ -6,6 +6,9 @@ import (
 	"github.com/504dev/logr/logger/demo"
 	"github.com/504dev/logr/models/dashkey"
 	"github.com/504dev/logr/types"
+	"github.com/gin-gonic/gin"
+	"io"
+	"os"
 	"strconv"
 )
 
@@ -33,6 +36,9 @@ func Init() {
 	_, _ = conf.DefaultSystemCounter()
 	_, _ = conf.DefaultProcessCounter()
 
+	gin.ForceConsoleColor()
+	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
+
 	if config.Get().DemoDash.Enabled {
 		conf, _ := createConfig(types.DashboardDemoId)
 		go demo.Run(conf, Logger)
@@ -40,8 +46,8 @@ func Init() {
 }
 
 func GinWriter() *logr.Writer {
-	gin, _ := Logger.Config.NewLogger("gin.log")
-	return gin.CustomWriter(func(log *logr.Log) {
+	ginlog, _ := Logger.Config.NewLogger("gin.log")
+	return ginlog.CustomWriter(func(log *logr.Log) {
 		codestr := log.Message[38:41]
 		code, _ := strconv.Atoi(codestr)
 		if code >= 400 && code <= 499 {
