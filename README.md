@@ -45,9 +45,7 @@ logr.info('Hello, Logr!');
 // 2024-01-30T22:50:04+03:00 info [v1.0.41, pid=60512, cmd/hello.go:41] Hello, Logr!
 ```
 
-## Build & Run
-
-### Docker Hub Pull
+## Docker
 
 ```
 docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
@@ -55,7 +53,7 @@ docker run -d -p 7776:7776/udp -p 7778:7778 --name logr kozhurkin/logr
 ✔ Enjoy: \
 http://localhost:7778/
 
-### Docker-compose
+## Docker-compose
 
 1. Clone repository: \
    `git clone --recurse-submodules https://github.com/504dev/logr.git && cd logr`
@@ -70,8 +68,7 @@ http://localhost:7778/
 ✔ Enjoy: \
    http://localhost:7778/
 
-### Manual
-
+## Manual Build
 
 Requirements: `Node.js v20` `Npm v10` `Golang v1.19` `ClickHouse v23` `Mysql v5.7`
 
