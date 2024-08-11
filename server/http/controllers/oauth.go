@@ -19,13 +19,13 @@ import (
 const DEFAULT_EXPIRE_TIME = 8 * time.Hour
 
 type AuthController struct {
-	iam         *types.AuthService
+	jwtService  *types.JwtService
 	states      *types.States
 	githubOAuth *oauth2.Config
 }
 
-func NewAuthController(iam *types.AuthService) *AuthController {
-	result := &AuthController{iam: iam}
+func NewAuthController(jwtService *types.JwtService) *AuthController {
+	result := &AuthController{jwtService: jwtService}
 	result.init()
 	return result
 }
@@ -200,13 +200,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		},
 	}
 
-	err = claims.EncryptAccessToken(a.iam.Secret())
-	if err != nil {
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-
-	tokenstring, err := a.iam.SignToken(&claims)
+	tokenstring, err := a.jwtService.SignToken(&claims)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -233,19 +227,10 @@ func (a *AuthController) EnsureJWT(c *gin.Context) {
 
 	}
 
-	claims, tkn, err := a.iam.ParseToken(token)
+	claims, tkn, err := a.jwtService.ParseToken(token)
 	if err != nil || !tkn.Valid {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
-	}
-
-	//
-	if claims.AccessTokenCipher != "" {
-		err = claims.DecryptAccessToken(a.iam.Secret())
-		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
-			return
-		}
 	}
 
 	c.Set("claims", claims)

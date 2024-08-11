@@ -12,7 +12,7 @@ import (
 	"os"
 )
 
-func NewRouter(sockmap *types.SockMap, iam *types.AuthService) *gin.Engine {
+func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"GET", "PUT", "POST", "DELETE"},
@@ -40,13 +40,13 @@ func NewRouter(sockmap *types.SockMap, iam *types.AuthService) *gin.Engine {
 		c.JSON(http.StatusOK, globals)
 	})
 
-	demo := controllers.NewDemoController(iam)
+	demo := controllers.NewDemoController(jwtService)
 	{
 		r.GET("/api/free-token", demo.FreeToken)
 	}
 
 	// oauth
-	auth := controllers.NewAuthController(iam)
+	auth := controllers.NewAuthController(jwtService)
 	{
 		r.GET("/oauth/authorize", auth.Authorize)
 		r.GET("/oauth/authorize/callback", auth.AuthorizeCallback)

@@ -11,11 +11,11 @@ import (
 )
 
 type DemoController struct {
-	iam *types.AuthService
+	jwtService *types.JwtService
 }
 
-func NewDemoController(iam *types.AuthService) *DemoController {
-	return &DemoController{iam: iam}
+func NewDemoController(jwtService *types.JwtService) *DemoController {
+	return &DemoController{jwtService: jwtService}
 }
 
 func (d *DemoController) FreeToken(c *gin.Context) {
@@ -34,7 +34,7 @@ func (d *DemoController) FreeToken(c *gin.Context) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			},
 		}
-		tokenstring, err := d.iam.SignToken(&claims)
+		tokenstring, err := d.jwtService.SignToken(&claims)
 		if err != nil {
 			return nil, err
 		}

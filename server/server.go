@@ -26,7 +26,7 @@ type LogServer struct {
 	wsServer     *ws.WsServer
 	grpcServer   *grpc.GrpcServer
 	udpServer    *udp.UdpServer
-	iam          *types.AuthService
+	jwtService   *types.JwtService
 	sockmap      *types.SockMap
 	channel      chan *types.LogPackageMeta
 	joiner       *types.LogPackageJoiner
@@ -63,15 +63,15 @@ func NewLogServer(
 		}
 	}
 
-	iam := types.NewAuthService(jwtSecretFunc)
+	jwtService := types.NewJwtService(jwtSecretFunc)
 	sockmap := sm.GetSockMap()
 
-	httpServer, err = http.NewHttpServer(httpAddr, sockmap, iam)
+	httpServer, err = http.NewHttpServer(httpAddr, sockmap, jwtService)
 	if err != nil {
 		return nil, err
 	}
 
-	wsServer = ws.NewWsServer(sockmap, iam)
+	wsServer = ws.NewWsServer(sockmap, jwtService)
 	wsServer.Bind(httpServer.Engine())
 	wsServer.Info()
 
@@ -80,7 +80,7 @@ func NewLogServer(
 		grpcServer:   grpcServer,
 		httpServer:   httpServer,
 		wsServer:     wsServer,
-		iam:          iam,
+		jwtService:   jwtService,
 		sockmap:      sockmap,
 		channel:      ch,
 		joiner:       types.NewLogPackageJoiner(time.Second, 5),

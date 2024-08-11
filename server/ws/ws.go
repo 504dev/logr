@@ -10,14 +10,14 @@ import (
 )
 
 type WsServer struct {
-	iam     *types.AuthService
-	sockmap *types.SockMap
+	jwtService *types.JwtService
+	sockmap    *types.SockMap
 }
 
-func NewWsServer(sockmap *types.SockMap, iam *types.AuthService) *WsServer {
+func NewWsServer(sockmap *types.SockMap, jwtService *types.JwtService) *WsServer {
 	return &WsServer{
-		iam:     iam,
-		sockmap: sockmap,
+		jwtService: jwtService,
+		sockmap:    sockmap,
 	}
 }
 
@@ -40,7 +40,7 @@ func (ws WsServer) Stream(conn *websocket.Conn) {
 		return
 	}
 
-	claims, tkn, err := ws.iam.ParseToken(tokenstring)
+	claims, tkn, err := ws.jwtService.ParseToken(tokenstring)
 
 	Logger.Debug(claims)
 	Logger.Debug(err, tkn)
