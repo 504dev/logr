@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/models/log"
+	"github.com/504dev/logr/repo/log"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"net/http"

@@ -2,7 +2,7 @@ package dashmember
 
 import (
 	"fmt"
-	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/types"
 )
 

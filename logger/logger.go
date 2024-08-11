@@ -4,7 +4,7 @@ import (
 	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/logger/demo"
-	"github.com/504dev/logr/models/dashkey"
+	"github.com/504dev/logr/repo/dashkey"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"io"

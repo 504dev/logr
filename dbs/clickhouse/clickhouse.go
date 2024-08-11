@@ -1,9 +1,9 @@
-package mysql
+package clickhouse
 
 import (
 	"fmt"
 	"github.com/504dev/logr/config"
-	_ "github.com/go-sql-driver/mysql"
+	_ "github.com/ClickHouse/clickhouse-go"
 	"github.com/jmoiron/sqlx"
 	"github.com/pressly/goose/v3"
 	"os"
@@ -18,13 +18,13 @@ func Conn() *sqlx.DB {
 
 func Init(retries int) {
 	var err error
-	db, err = sqlx.Connect("mysql", config.Get().Mysql+"?parseTime=true")
+	db, err = sqlx.Connect("clickhouse", config.Get().Clickhouse)
 	if err == nil {
 		Migrate()
 		return
 	}
 	if retries > 0 {
-		fmt.Fprintf(os.Stderr, "(%v) mysql connect retry: %s\n", retries, err)
+		fmt.Fprintf(os.Stderr, "(%v) clickhouse connect retry: %s\n", retries, err)
 		<-time.After(time.Second)
 		Init(retries - 1)
 		return
@@ -33,9 +33,9 @@ func Init(retries int) {
 }
 
 func Migrate() {
-	db, _ := sqlx.Connect("mysql", config.Get().Mysql+"?multiStatements=true")
-	_ = goose.SetDialect("mysql")
-	err := goose.Up(db.DB, "./mysql/migrations")
+	db, _ := sqlx.Connect("clickhouse", config.Get().Clickhouse+"&x-multi-statement=true")
+	_ = goose.SetDialect("clickhouse")
+	err := goose.Up(db.DB, "./storage/clickhouse/migrations")
 	if err != nil {
 		panic(err)
 	}

@@ -2,7 +2,7 @@ package controllers
 
 import (
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/models/count"
+	"github.com/504dev/logr/repo/count"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"net/http"

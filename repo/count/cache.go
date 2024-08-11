@@ -2,7 +2,7 @@ package count
 
 import (
 	"fmt"
-	"github.com/504dev/logr/cachify"
+	"github.com/504dev/logr/libs/cachify"
 	"github.com/504dev/logr/types"
 	"time"
 )

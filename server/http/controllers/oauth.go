@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/repo/user"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

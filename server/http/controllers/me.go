@@ -2,10 +2,10 @@ package controllers
 
 import (
 	"fmt"
-	"github.com/504dev/logr/models/dashboard"
-	"github.com/504dev/logr/models/dashkey"
-	"github.com/504dev/logr/models/dashmember"
-	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/repo/dashboard"
+	"github.com/504dev/logr/repo/dashkey"
+	"github.com/504dev/logr/repo/dashmember"
+	"github.com/504dev/logr/repo/user"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v29/github"

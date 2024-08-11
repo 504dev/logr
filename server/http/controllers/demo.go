@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/504dev/logr/cachify"
-	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/libs/cachify"
+	"github.com/504dev/logr/repo/user"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"

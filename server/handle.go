@@ -3,7 +3,7 @@ package server
 import (
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/models/dashkey"
+	"github.com/504dev/logr/repo/dashkey"
 	"github.com/504dev/logr/types"
 )
 

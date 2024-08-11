@@ -3,8 +3,8 @@ package dashkey
 import (
 	"database/sql"
 	"fmt"
-	"github.com/504dev/logr/cipher"
-	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/dbs/mysql"
+	"github.com/504dev/logr/libs/cipher"
 	"github.com/504dev/logr/types"
 )
 

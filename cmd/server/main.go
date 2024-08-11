@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/504dev/logr/clickhouse"
 	"github.com/504dev/logr/config"
+	"github.com/504dev/logr/dbs/clickhouse"
+	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/logger"
-	"github.com/504dev/logr/models/count"
-	"github.com/504dev/logr/models/log"
-	"github.com/504dev/logr/mysql"
+	"github.com/504dev/logr/repo/count"
+	"github.com/504dev/logr/repo/log"
 	"github.com/504dev/logr/server"
 	"github.com/fatih/color"
 	"os"

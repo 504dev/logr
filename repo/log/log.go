@@ -3,7 +3,7 @@ package log
 import (
 	"fmt"
 	_types "github.com/504dev/logr-go-client/types"
-	"github.com/504dev/logr/clickhouse"
+	"github.com/504dev/logr/dbs/clickhouse"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"

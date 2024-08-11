@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"github.com/504dev/logr/models/dashboard"
-	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/repo/dashboard"
+	"github.com/504dev/logr/repo/user"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
