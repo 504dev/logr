@@ -3,7 +3,6 @@ package server
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
-	sm "github.com/504dev/logr/models/ws"
 	"github.com/504dev/logr/server/grpc"
 	"github.com/504dev/logr/server/http"
 	"github.com/504dev/logr/server/udp"
@@ -39,6 +38,7 @@ func NewLogServer(
 	httpAddr string,
 	udpAddr string,
 	grpcAddr string,
+	redisAddr string,
 	jwtSecretFunc func() string,
 	logStorage LogStorage,
 	countStorage CountStorage,
@@ -64,7 +64,15 @@ func NewLogServer(
 	}
 
 	jwtService := types.NewJwtService(jwtSecretFunc)
-	sockmap := sm.GetSockMap()
+	
+	sockmap := types.NewSockMap()
+	if redisAddr != "" {
+		store, err := types.NewRedisSessionStore(redisAddr, 0, time.Hour)
+		if err != nil {
+			return nil, err
+		}
+		sockmap.SetSessionStore(store)
+	}
 
 	httpServer, err = http.NewHttpServer(httpAddr, sockmap, jwtService)
 	if err != nil {
