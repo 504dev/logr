@@ -35,7 +35,7 @@ func Init(retries int) {
 func Migrate() {
 	db, _ := sqlx.Connect("clickhouse", config.Get().Clickhouse+"&x-multi-statement=true")
 	_ = goose.SetDialect("clickhouse")
-	err := goose.Up(db.DB, "./storage/clickhouse/migrations")
+	err := goose.Up(db.DB, "./dbs/clickhouse/migrations")
 	if err != nil {
 		panic(err)
 	}
