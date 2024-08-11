@@ -26,6 +26,7 @@ type LogServer struct {
 	wsServer     *ws.WsServer
 	grpcServer   *grpc.GrpcServer
 	udpServer    *udp.UdpServer
+	iam          *types.AuthService
 	sockmap      *types.SockMap
 	channel      chan *types.LogPackageMeta
 	joiner       *types.LogPackageJoiner
@@ -35,9 +36,10 @@ type LogServer struct {
 }
 
 func NewLogServer(
-	httpaddr string,
+	httpAddr string,
 	udpAddr string,
 	grpcAddr string,
+	jwtSecretFunc func() string,
 	logStorage LogStorage,
 	countStorage CountStorage,
 ) (*LogServer, error) {
@@ -61,14 +63,15 @@ func NewLogServer(
 		}
 	}
 
+	iam := types.NewAuthService(jwtSecretFunc)
 	sockmap := sm.GetSockMap()
 
-	httpServer, err = http.NewHttpServer(httpaddr, sockmap)
+	httpServer, err = http.NewHttpServer(httpAddr, sockmap, iam)
 	if err != nil {
 		return nil, err
 	}
 
-	wsServer = ws.NewWsServer(sockmap)
+	wsServer = ws.NewWsServer(sockmap, iam)
 	wsServer.Bind(httpServer.Engine())
 	wsServer.Info()
 
@@ -77,6 +80,7 @@ func NewLogServer(
 		grpcServer:   grpcServer,
 		httpServer:   httpServer,
 		wsServer:     wsServer,
+		iam:          iam,
 		sockmap:      sockmap,
 		channel:      ch,
 		joiner:       types.NewLogPackageJoiner(time.Second, 5),
@@ -88,7 +92,7 @@ func NewLogServer(
 
 func (srv *LogServer) processChannel() {
 	for meta := range srv.channel {
-		srv.handleLog(meta)
+		srv.handle(meta)
 	}
 }
 

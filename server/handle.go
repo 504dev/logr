@@ -7,7 +7,7 @@ import (
 	"github.com/504dev/logr/types"
 )
 
-func (srv *LogServer) handleLog(meta *types.LogPackageMeta) {
+func (srv *LogServer) handle(meta *types.LogPackageMeta) {
 	lp := meta.LogPackage
 	dk, err := dashkey.GetByPubCached(lp.PublicKey)
 	if err != nil {

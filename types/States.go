@@ -11,13 +11,11 @@ type States struct {
 	data cmap.ConcurrentMap[string, string]
 }
 
-func (s States) Init() *States {
-	s.init()
-	return &s
-}
+func NewStates() *States {
+	return &States{
+		data: cmap.New[string](),
+	}
 
-func (s *States) init() {
-	s.data = cmap.New[string]()
 }
 
 func (s *States) Pop(state string) (string, bool) {

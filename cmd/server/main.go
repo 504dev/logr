@@ -27,6 +27,7 @@ func main() {
 		config.Get().Bind.Http,
 		config.Get().Bind.Udp,
 		config.Get().Bind.Grpc,
+		config.Get().GetJwtSecret,
 		logStorage,
 		countStorage,
 	)

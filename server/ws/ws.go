@@ -1,7 +1,6 @@
 package ws
 
 import (
-	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/user"
 	"github.com/504dev/logr/types"
@@ -11,11 +10,13 @@ import (
 )
 
 type WsServer struct {
+	iam     *types.AuthService
 	sockmap *types.SockMap
 }
 
-func NewWsServer(sockmap *types.SockMap) *WsServer {
+func NewWsServer(sockmap *types.SockMap, iam *types.AuthService) *WsServer {
 	return &WsServer{
+		iam:     iam,
 		sockmap: sockmap,
 	}
 }
@@ -39,9 +40,7 @@ func (ws WsServer) Stream(conn *websocket.Conn) {
 		return
 	}
 
-	// TODO Auth Service IAM
-	claims := &types.Claims{}
-	tkn, err := claims.ParseWithClaims(tokenstring, config.Get().GetJwtSecret())
+	claims, tkn, err := ws.iam.ParseToken(tokenstring)
 
 	Logger.Debug(claims)
 	Logger.Debug(err, tkn)

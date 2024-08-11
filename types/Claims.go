@@ -16,12 +16,6 @@ type Claims struct {
 	jwt.RegisteredClaims
 }
 
-func (claims *Claims) ParseWithClaims(token string, secret string) (*jwt.Token, error) {
-	return jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-		return []byte(secret), nil
-	})
-}
-
 func (claims *Claims) EncryptAccessToken(secret string) error {
 	cipherAccessToken, err := cipher.EncryptAes([]byte(claims.AccessToken), []byte(secret))
 	if err != nil {

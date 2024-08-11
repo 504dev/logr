@@ -9,17 +9,18 @@ import (
 )
 
 type HttpServer struct {
+	iam     *types.AuthService
 	sockmap *types.SockMap
 	engine  *gin.Engine
 	server  *http.Server
 }
 
-func NewHttpServer(addr string, sockmap *types.SockMap) (*HttpServer, error) {
+func NewHttpServer(addr string, sockmap *types.SockMap, iam *types.AuthService) (*HttpServer, error) {
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")
 	}
 
-	engine := router.NewRouter(sockmap)
+	engine := router.NewRouter(sockmap, iam)
 	engine.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
 	engine.GET("/", frontend)
 	engine.GET("/demo", frontend)
@@ -31,6 +32,7 @@ func NewHttpServer(addr string, sockmap *types.SockMap) (*HttpServer, error) {
 	engine.GET("/support", frontend)
 
 	return &HttpServer{
+		iam:     iam,
 		sockmap: sockmap,
 		engine:  engine,
 		server: &http.Server{

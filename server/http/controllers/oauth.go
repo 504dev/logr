@@ -19,31 +19,36 @@ import (
 const DEFAULT_EXPIRE_TIME = 8 * time.Hour
 
 type AuthController struct {
-	*oauth2.Config
-	*types.States
+	iam         *types.AuthService
+	states      *types.States
+	githubOAuth *oauth2.Config
 }
 
-func (a *AuthController) Init() {
-	credentials := config.Get().OAuth.Github
-	scopes := []string{"read:user", "user:email", "read:org"}
-	a.Config = &oauth2.Config{
-		ClientID:     credentials.ClientId,
-		ClientSecret: credentials.ClientSecret,
-		Scopes:       scopes,
+func NewAuthController(iam *types.AuthService) *AuthController {
+	result := &AuthController{iam: iam}
+	result.init()
+	return result
+}
+
+func (a *AuthController) init() {
+	a.githubOAuth = &oauth2.Config{
+		ClientID:     config.Get().OAuth.Github.ClientId,
+		ClientSecret: config.Get().OAuth.Github.ClientSecret,
+		Scopes:       []string{"read:user", "user:email", "read:org"},
 		Endpoint: oauth2.Endpoint{
 			AuthURL:  "https://github.com/login/oauth/authorize",
 			TokenURL: "https://github.com/login/oauth/access_token",
 		},
 	}
-	a.States = types.States{}.Init()
+	a.states = types.NewStates()
 }
 
 func (a *AuthController) Authorize(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	login := c.Query("login")
 	callback := c.Query("callback")
-	state := a.States.Push(callback)
-	authorizeUrl := a.Config.AuthCodeURL(state)
+	state := a.states.Push(callback)
+	authorizeUrl := a.githubOAuth.AuthCodeURL(state)
 	if login != "" {
 		authorizeUrl += "&login=" + login
 	}
@@ -58,7 +63,7 @@ func (a *AuthController) NeedSetup(c *gin.Context) {
 func (a *AuthController) Setup(c *gin.Context) {
 	c.Header("Cache-Control", "no-cache")
 	callback := c.Query("callback")
-	a.States.Set("setup", callback)
+	a.states.Set("setup", callback)
 	c.Redirect(http.StatusTemporaryRedirect, "https://github.com/settings/apps/new")
 }
 
@@ -106,8 +111,8 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 	if err != nil {
 		Logger.Error(err)
 	}
-	defer a.Init()
-	callback, ok := a.States.Pop("setup")
+	defer a.init()
+	callback, ok := a.states.Pop("setup")
 	if !ok {
 		c.JSON(http.StatusOK, data)
 	} else {
@@ -119,20 +124,20 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 	state := c.Query("state")
 	code := c.Query("code")
 
-	callback, ok := a.States.Pop(state)
+	callback, ok := a.states.Pop(state)
 	if !ok {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "incorrect state"})
 		return
 	}
 
-	githubPermit, err := a.Config.Exchange(c, code)
+	githubPermit, err := a.githubOAuth.Exchange(c, code)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	client := github.NewClient(a.Config.Client(c, githubPermit))
+	client := github.NewClient(a.githubOAuth.Client(c, githubPermit))
 	userGithub, _, err := client.Users.Get(c, "")
 	if err != nil {
 		Logger.Error(err)
@@ -195,27 +200,26 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		},
 	}
 
-	err = claims.EncryptAccessToken(config.Get().GetJwtSecret())
+	err = claims.EncryptAccessToken(a.iam.Secret())
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenSigned, err := token.SignedString([]byte(config.Get().GetJwtSecret()))
+	tokenstring, err := a.iam.SignToken(&claims)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
 	if callback != "" {
-		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", callback, tokenSigned))
+		c.Redirect(http.StatusMovedPermanently, fmt.Sprintf("%v%v", callback, tokenstring))
 	} else {
-		c.JSON(http.StatusOK, tokenSigned)
+		c.JSON(http.StatusOK, tokenstring)
 	}
 }
 
-func (_ *AuthController) EnsureJWT(c *gin.Context) {
+func (a *AuthController) EnsureJWT(c *gin.Context) {
 	var token string
 	splitted := strings.Split(c.Request.Header.Get("Authorization"), " ")
 	if len(splitted) == 2 {
@@ -229,9 +233,7 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 
 	}
 
-	claims := &types.Claims{}
-	tkn, err := claims.ParseWithClaims(token, config.Get().GetJwtSecret())
-
+	claims, tkn, err := a.iam.ParseToken(token)
 	if err != nil || !tkn.Valid {
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
@@ -239,7 +241,7 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 
 	//
 	if claims.AccessTokenCipher != "" {
-		err = claims.DecryptAccessToken(config.Get().GetJwtSecret())
+		err = claims.DecryptAccessToken(a.iam.Secret())
 		if err != nil {
 			c.AbortWithStatus(http.StatusUnauthorized)
 			return
@@ -255,7 +257,7 @@ func (_ *AuthController) EnsureJWT(c *gin.Context) {
 	c.Next()
 }
 
-func (_ *AuthController) EnsureAdmin(c *gin.Context) {
+func (a *AuthController) EnsureAdmin(c *gin.Context) {
 	role := c.GetInt("role")
 	if role != types.RoleAdmin {
 		c.AbortWithStatus(http.StatusForbidden)
@@ -264,7 +266,7 @@ func (_ *AuthController) EnsureAdmin(c *gin.Context) {
 	c.Next()
 }
 
-func (_ *AuthController) EnsureUser(c *gin.Context) {
+func (a *AuthController) EnsureUser(c *gin.Context) {
 	role := c.GetInt("role")
 	if role > types.RoleUser {
 		c.AbortWithStatus(http.StatusForbidden)
