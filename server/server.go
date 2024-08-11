@@ -3,16 +3,15 @@ package server
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
+	sm "github.com/504dev/logr/models/ws"
+	"github.com/504dev/logr/server/grpc"
+	"github.com/504dev/logr/server/http"
+	"github.com/504dev/logr/server/udp"
+	"github.com/504dev/logr/server/ws"
 	"github.com/504dev/logr/types"
 	"golang.org/x/sync/errgroup"
 	"time"
 )
-
-type LogPackageMeta struct {
-	*_types.LogPackage
-	Protocol string
-	Size     int
-}
 
 type LogStorage interface {
 	Store(*_types.Log) error
@@ -23,10 +22,12 @@ type CountStorage interface {
 }
 
 type LogServer struct {
-	httpServer   *HttpServer
-	grpcServer   *GrpcServer
-	udpServer    *UdpServer
-	channel      chan *LogPackageMeta
+	httpServer   *http.HttpServer
+	wsServer     *ws.WsServer
+	grpcServer   *grpc.GrpcServer
+	udpServer    *udp.UdpServer
+	sockmap      *types.SockMap
+	channel      chan *types.LogPackageMeta
 	joiner       *types.LogPackageJoiner
 	logStorage   LogStorage
 	countStorage CountStorage
@@ -39,34 +40,50 @@ func NewLogServer(
 	grpcAddr string,
 	logStorage LogStorage,
 	countStorage CountStorage,
-) (result *LogServer, err error) {
-	ch := make(chan *LogPackageMeta)
-	result = &LogServer{
-		channel:      ch,
-		joiner:       types.NewLogPackageJoiner(time.Second, 5),
-		logStorage:   logStorage,
-		countStorage: countStorage,
-		done:         make(chan struct{}),
-	}
+) (*LogServer, error) {
+	var err error
+	var udpServer *udp.UdpServer
+	var grpcServer *grpc.GrpcServer
+	var httpServer *http.HttpServer
+	var wsServer *ws.WsServer
+
+	ch := make(chan *types.LogPackageMeta)
 	if udpAddr != "" {
-		result.udpServer, err = NewUdpServer(udpAddr, ch)
+		udpServer, err = udp.NewUdpServer(udpAddr, ch)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if grpcAddr != "" {
-		result.grpcServer, err = NewGrpcServer(grpcAddr, ch)
+		grpcServer, err = grpc.NewGrpcServer(grpcAddr, ch)
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	result.httpServer, err = NewHttpServer(httpaddr)
+	sockmap := sm.GetSockMap()
+
+	httpServer, err = http.NewHttpServer(httpaddr, sockmap)
 	if err != nil {
 		return nil, err
 	}
 
-	return result, nil
+	wsServer = ws.NewWsServer(sockmap)
+	wsServer.Bind(httpServer.Engine())
+	wsServer.Info()
+
+	return &LogServer{
+		udpServer:    udpServer,
+		grpcServer:   grpcServer,
+		httpServer:   httpServer,
+		wsServer:     wsServer,
+		sockmap:      sockmap,
+		channel:      ch,
+		joiner:       types.NewLogPackageJoiner(time.Second, 5),
+		logStorage:   logStorage,
+		countStorage: countStorage,
+		done:         make(chan struct{}),
+	}, nil
 }
 
 func (srv *LogServer) processChannel() {

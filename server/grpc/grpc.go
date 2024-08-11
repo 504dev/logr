@@ -1,8 +1,9 @@
-package server
+package grpc
 
 import (
 	pb "github.com/504dev/logr-go-client/protos/gen/go"
-	"github.com/504dev/logr-go-client/types"
+	_types "github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr/types"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/proto"
@@ -11,13 +12,13 @@ import (
 
 type logRpcService struct {
 	pb.UnimplementedLogRpcServer
-	ch chan<- *LogPackageMeta
+	ch chan<- *types.LogPackageMeta
 }
 
 func (s *logRpcService) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
-	var lp types.LogPackage
+	var lp _types.LogPackage
 	lp.FromProto(lrp)
-	s.ch <- &LogPackageMeta{
+	s.ch <- &types.LogPackageMeta{
 		LogPackage: &lp,
 		Protocol:   "grpc",
 		Size:       proto.Size(lrp),
@@ -31,7 +32,7 @@ type GrpcServer struct {
 	service    *logRpcService
 }
 
-func NewGrpcServer(addr string, ch chan<- *LogPackageMeta) (*GrpcServer, error) {
+func NewGrpcServer(addr string, ch chan<- *types.LogPackageMeta) (*GrpcServer, error) {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err

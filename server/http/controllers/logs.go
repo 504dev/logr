@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/log"
-	"github.com/504dev/logr/models/ws"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -12,24 +11,32 @@ import (
 	"time"
 )
 
-type LogsController struct{}
+type LogsController struct {
+	sockmap *types.SockMap
+}
 
-func (_ *LogsController) Find(c *gin.Context) {
-	dashId := c.GetInt("dashId")
-	userId := c.GetInt("userId")
+func NewLogsController(sockmap *types.SockMap) *LogsController {
+	return &LogsController{
+		sockmap: sockmap,
+	}
+}
 
-	logname := c.Query("logname")
-	hostname := c.Query("hostname")
-	message := c.Query("message")
-	pattern := c.Query("pattern")
-	level := c.Query("level")
-	version := c.Query("version")
-	pid, _ := strconv.Atoi(c.Query("pid"))
-	limit, _ := strconv.Atoi(c.Query("limit"))
-	offset, _ := strconv.ParseInt(c.Query("offset"), 10, 64)
+func (lc *LogsController) Find(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
+	userId := ctx.GetInt("userId")
+
+	logname := ctx.Query("logname")
+	hostname := ctx.Query("hostname")
+	message := ctx.Query("message")
+	pattern := ctx.Query("pattern")
+	level := ctx.Query("level")
+	version := ctx.Query("version")
+	pid, _ := strconv.Atoi(ctx.Query("pid"))
+	limit, _ := strconv.Atoi(ctx.Query("limit"))
+	offset, _ := strconv.ParseInt(ctx.Query("offset"), 10, 64)
 
 	timestamp := [2]int64{0, 0}
-	for k, v := range c.QueryArray("timestamp[]") {
+	for k, v := range ctx.QueryArray("timestamp[]") {
 		if k > 1 {
 			break
 		}
@@ -50,9 +57,9 @@ func (_ *LogsController) Find(c *gin.Context) {
 		Offset:    offset,
 		Limit:     limit,
 	}
-	sockId := c.Query("sock_id")
+	sockId := ctx.Query("sock_id")
 	if sockId != "" {
-		ws.GetSockMap().SetFilter(userId, sockId, &filter)
+		lc.sockmap.SetFilter(userId, sockId, &filter)
 	}
 	f, _ := json.Marshal(filter)
 	Logger.Info(string(f))
@@ -61,11 +68,11 @@ func (_ *LogsController) Find(c *gin.Context) {
 	logs, err := log.GetByFilter(filter)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
-	c.JSON(http.StatusOK, logs)
+	ctx.JSON(http.StatusOK, logs)
 }
 
 func (_ *LogsController) StatsByLogname(c *gin.Context) {

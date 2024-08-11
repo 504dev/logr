@@ -4,10 +4,10 @@ import (
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/dashkey"
-	"github.com/504dev/logr/models/ws"
+	"github.com/504dev/logr/types"
 )
 
-func (srv *LogServer) handleLog(meta *LogPackageMeta) {
+func (srv *LogServer) handleLog(meta *types.LogPackageMeta) {
 	lp := meta.LogPackage
 	dk, err := dashkey.GetByPubCached(lp.PublicKey)
 	if err != nil {
@@ -66,7 +66,7 @@ func (srv *LogServer) handleLog(meta *LogPackageMeta) {
 
 			if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
-				ws.GetSockMap().Push(lp.Log)
+				srv.sockmap.Push(lp.Log)
 				err = srv.logStorage.Store(lp.Log)
 				if err != nil {
 					Logger.Error("(%v) create log error: %v", meta.Protocol, err)

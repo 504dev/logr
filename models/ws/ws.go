@@ -9,11 +9,11 @@ import (
 )
 
 var once sync.Once
-var sockmap *types.SockCMap
+var sockmap *types.SockMap
 
-func GetSockMap() *types.SockCMap {
+func GetSockMap() *types.SockMap {
 	once.Do(func() {
-		sockmap = types.NewSockCMap()
+		sockmap = types.NewSockMap()
 		if connstring := config.Get().Redis; connstring != "" {
 			store, err := types.NewRedisSessionStore(connstring, 0, time.Hour)
 			if err != nil {

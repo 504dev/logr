@@ -1,9 +1,10 @@
-package server
+package udp
 
 import (
 	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/types"
 	"golang.org/x/net/context"
 	"net"
 	"sync"
@@ -11,12 +12,12 @@ import (
 
 type UdpServer struct {
 	conn   *net.UDPConn
-	ch     chan<- *LogPackageMeta
+	ch     chan<- *types.LogPackageMeta
 	ctx    context.Context
 	cancel context.CancelFunc
 }
 
-func NewUdpServer(addr string, ch chan<- *LogPackageMeta) (*UdpServer, error) {
+func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, error) {
 	serverAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, err
@@ -73,7 +74,7 @@ func (srv *UdpServer) Listen() {
 				return
 			}
 
-			srv.ch <- &LogPackageMeta{
+			srv.ch <- &types.LogPackageMeta{
 				LogPackage: &lp,
 				Protocol:   "udp",
 				Size:       size,

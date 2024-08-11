@@ -1,4 +1,4 @@
-package server
+package router
 
 import (
 	"encoding/json"
@@ -6,9 +6,9 @@ import (
 	"github.com/504dev/logr-go-client/utils"
 	"github.com/504dev/logr/cachify"
 	"github.com/504dev/logr/config"
-	"github.com/504dev/logr/controllers"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/models/user"
+	"github.com/504dev/logr/server/http/controllers"
 	"github.com/504dev/logr/types"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -19,7 +19,7 @@ import (
 	"time"
 )
 
-func NewRouter() *gin.Engine {
+func NewRouter(sockmap *types.SockMap) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"GET", "PUT", "POST", "DELETE"},
@@ -130,7 +130,7 @@ func NewRouter() *gin.Engine {
 	}
 
 	// logs
-	logsController := controllers.LogsController{}
+	logsController := controllers.NewLogsController(sockmap)
 	{
 		r.GET("/api/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.Find)
 		r.GET("/api/logs/:dash_id/lognames", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logsController.StatsByDashboard)
@@ -155,11 +155,6 @@ func NewRouter() *gin.Engine {
 		r.GET("/api/users", auth.EnsureJWT, auth.EnsureAdmin, adminController.Users)
 		r.GET("/api/user/:id", auth.EnsureJWT, auth.EnsureAdmin, adminController.UserById)
 	}
-
-	// ws
-	wsController := controllers.WsController{}
-	r.GET("/ws", wsController.Index)
-	wsController.Info()
 
 	// GitHub marketplace
 	r.POST("/webhook", func(c *gin.Context) {

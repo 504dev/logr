@@ -1,21 +1,25 @@
-package server
+package http
 
 import (
+	"github.com/504dev/logr/server/http/router"
+	"github.com/504dev/logr/types"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
 type HttpServer struct {
-	server *http.Server
+	sockmap *types.SockMap
+	engine  *gin.Engine
+	server  *http.Server
 }
 
-func NewHttpServer(addr string) (*HttpServer, error) {
+func NewHttpServer(addr string, sockmap *types.SockMap) (*HttpServer, error) {
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")
 	}
 
-	engine := NewRouter()
+	engine := router.NewRouter(sockmap)
 	engine.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
 	engine.GET("/", frontend)
 	engine.GET("/demo", frontend)
@@ -27,11 +31,17 @@ func NewHttpServer(addr string) (*HttpServer, error) {
 	engine.GET("/support", frontend)
 
 	return &HttpServer{
+		sockmap: sockmap,
+		engine:  engine,
 		server: &http.Server{
 			Addr:    addr,
 			Handler: engine,
 		},
 	}, nil
+}
+
+func (srv *HttpServer) Engine() *gin.Engine {
+	return srv.engine
 }
 
 func (srv *HttpServer) Listen() error {
