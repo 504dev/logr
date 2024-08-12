@@ -6,7 +6,10 @@ import (
 	"github.com/504dev/logr/types"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/context"
+	"net"
 	"net/http"
+	"time"
 )
 
 type HttpServer struct {
@@ -14,9 +17,15 @@ type HttpServer struct {
 	sockmap    *types.SockMap
 	engine     *gin.Engine
 	server     *http.Server
+	listener   net.Listener
 }
 
-func NewHttpServer(addr string, sockmap *types.SockMap, jwtService *types.JwtService, repos *repo.Repos) (*HttpServer, error) {
+func NewHttpServer(
+	addr string,
+	sockmap *types.SockMap,
+	jwtService *types.JwtService,
+	repos *repo.Repos,
+) (*HttpServer, error) {
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")
 	}
@@ -32,10 +41,16 @@ func NewHttpServer(addr string, sockmap *types.SockMap, jwtService *types.JwtSer
 	engine.GET("/policy", frontend)
 	engine.GET("/support", frontend)
 
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		return nil, err
+	}
+
 	return &HttpServer{
 		jwtService: jwtService,
 		sockmap:    sockmap,
 		engine:     engine,
+		listener:   listener,
 		server: &http.Server{
 			Addr:    addr,
 			Handler: engine,
@@ -48,9 +63,11 @@ func (srv *HttpServer) Engine() *gin.Engine {
 }
 
 func (srv *HttpServer) Listen() error {
-	return srv.server.ListenAndServe()
+	return srv.server.Serve(srv.listener)
 }
 
 func (srv *HttpServer) Stop() error {
-	return srv.server.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+	return srv.server.Shutdown(ctx)
 }

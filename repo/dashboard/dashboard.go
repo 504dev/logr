@@ -163,7 +163,7 @@ func (repo *DashboardRepo) Update(dash *types.Dashboard) error {
 	return nil
 }
 
-func (repo *DashboardRepo) Delete(id int) error {
+func (repo *DashboardRepo) Remove(id int) error {
 	_, err := repo.conn.Exec("DELETE FROM dashboards where id = ?", id)
 	if err != nil {
 		return err

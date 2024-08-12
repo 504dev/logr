@@ -2,7 +2,7 @@ package ai
 
 import (
 	"fmt"
-	lgc "github.com/504dev/logr-go-client"
+	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"regexp"
 	"strings"
@@ -34,7 +34,7 @@ var (
 	chapterWordCount = 300
 )
 
-func Run(conf *lgc.Config) {
+func Run(conf *logr.Config) {
 	ailog, _ := conf.NewLogger("ai.log")
 	ailog.Body = "[{version}] {message}"
 
@@ -52,7 +52,7 @@ func Run(conf *lgc.Config) {
 	}
 }
 
-func generateBook(log *lgc.Logger, ollama *OllamaChat) error {
+func generateBook(log *logr.Logger, ollama *OllamaChat) error {
 	genre := genres[time.Now().Nanosecond()%len(genres)]
 	prompt := fmt.Sprintf(`Imagine that you are a writer in the %v genre.
 Think of the title of a book about a monitoring service called "Logr", which was developed by a 30-year-old developer from Saint-Petersburg named Dima.

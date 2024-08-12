@@ -17,9 +17,9 @@ type QueueConfig struct {
 type Queue struct {
 	sync.Mutex
 	*QueueConfig
-	*time.Ticker
 	list    [][]interface{}
 	flushed time.Time
+	stop    chan struct{}
 }
 
 func NewQueue(c *QueueConfig) *Queue {
@@ -27,23 +27,27 @@ func NewQueue(c *QueueConfig) *Queue {
 		QueueConfig: c,
 		flushed:     time.Now(),
 		list:        make([][]interface{}, 0, c.FlushCount),
+		stop:        make(chan struct{}),
 	}
 }
 
 func (q *Queue) Run() {
-	q.Ticker = time.NewTicker(q.FlushInterval)
 	go (func() {
 		for {
-			<-q.Ticker.C
-			if err := q.Flush(); err != nil {
-				Logger.Error(err)
+			select {
+			case <-time.After(q.FlushInterval):
+				if err := q.Flush(); err != nil {
+					Logger.Error(err)
+				}
+			case <-q.stop:
+				return
 			}
 		}
 	})()
 }
 
 func (q *Queue) Stop() error {
-	q.Ticker.Stop()
+	close(q.stop)
 	return q.Flush()
 }
 

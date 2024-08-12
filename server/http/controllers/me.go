@@ -203,7 +203,7 @@ func (me *MeController) EditDashboard(c *gin.Context) {
 }
 
 func (me *MeController) DeleteDashboard(c *gin.Context) {
-	err := me.repos.Dashboard.Delete(c.GetInt("dashId"))
+	err := me.repos.Dashboard.Remove(c.GetInt("dashId"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return

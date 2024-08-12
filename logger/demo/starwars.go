@@ -1,14 +1,14 @@
 package demo
 
 import (
-	lgc "github.com/504dev/logr-go-client"
+	logr "github.com/504dev/logr-go-client"
 	"github.com/fatih/color"
 	"math/rand"
 	"strings"
 	"time"
 )
 
-func starwars(conf *lgc.Config) {
+func starwars(conf *logr.Config) {
 	starwarslog, _ := conf.NewLogger("starwars.log")
 	for {
 		c := crowls[rand.Intn(len(crowls))]

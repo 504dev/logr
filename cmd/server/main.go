@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func main() {
@@ -40,12 +41,13 @@ func main() {
 	logServer.Run()
 
 	// Shutdown
-	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
-	sig := <-sigchan
+	exit := make(chan os.Signal, 1)
+	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
+	sig := <-exit
+	ts := time.Now()
 	logger.Logger.Warn("Exit with code: %v", sig)
 	logServer.Stop()
 	_ = logStorage.StopQueue()
 	_ = countStorage.StopQueue()
-	os.Exit(0)
+	logger.Logger.Debug(time.Since(ts))
 }

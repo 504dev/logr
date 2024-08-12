@@ -10,6 +10,7 @@ import (
 	"github.com/504dev/logr/server/ws"
 	"github.com/504dev/logr/types"
 	"golang.org/x/sync/errgroup"
+	nethttp "net/http"
 	"time"
 )
 
@@ -115,19 +116,23 @@ func (srv *LogServer) Run() {
 	}()
 	go func() {
 		if err := srv.httpServer.Listen(); err != nil {
-			Logger.Warn(err)
+			if err == nethttp.ErrServerClosed {
+				Logger.Warn(err)
+				return
+			}
+			panic(err)
 		}
 	}()
-	var g errgroup.Group
-	g.Go(func() error {
+	var wg errgroup.Group
+	wg.Go(func() error {
 		srv.udpServer.Listen()
 		return nil
 	})
-	g.Go(func() error {
+	wg.Go(func() error {
 		return srv.grpcServer.Listen()
 	})
 	go func() {
-		if err := g.Wait(); err != nil {
+		if err := wg.Wait(); err != nil {
 			Logger.Warn(err)
 		}
 		close(srv.channel) // writing to srv.channel is complete
