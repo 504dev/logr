@@ -15,7 +15,6 @@ func NewStates() *States {
 	return &States{
 		data: cmap.New[string](),
 	}
-
 }
 
 func (s *States) Pop(state string) (string, bool) {
@@ -23,6 +22,7 @@ func (s *States) Pop(state string) (string, bool) {
 	s.data.Remove(state)
 	return v, ok
 }
+
 func (s *States) Push(v string) string {
 	state := fmt.Sprintf("%v_%v", time.Now().Nanosecond(), rand.Int())
 	s.data.Set(state, v)

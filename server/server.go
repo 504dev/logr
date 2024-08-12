@@ -64,10 +64,10 @@ func NewLogServer(
 	}
 
 	jwtService := types.NewJwtService(jwtSecretFunc)
-	
+
 	sockmap := types.NewSockMap()
 	if redisAddr != "" {
-		store, err := types.NewRedisSessionStore(redisAddr, 0, time.Hour)
+		store, err := types.NewRedisSessionStore(redisAddr, time.Hour)
 		if err != nil {
 			return nil, err
 		}

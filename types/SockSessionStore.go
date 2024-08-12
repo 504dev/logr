@@ -25,7 +25,7 @@ func (s MemorySessionStore) Del(key string) error {
 	return nil
 }
 
-func NewRedisSessionStore(addr string, db int, ttl time.Duration) (*RedisSessionStore, error) {
+func NewRedisSessionStore(addr string, ttl time.Duration) (*RedisSessionStore, error) {
 	opt, err := redis.ParseURL(addr)
 	if err != nil {
 		return nil, err

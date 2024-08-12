@@ -26,6 +26,7 @@ func (j *LogPackageJoiner) dropSafe(uid string) {
 	delete(j.data, uid)
 	j.mx.Unlock()
 }
+
 func (j *LogPackageJoiner) createSafe(lp *_types.LogPackage, lifetime time.Duration) {
 	uid := lp.Chunk.Uid
 	size := lp.Chunk.N
@@ -68,6 +69,7 @@ func (j *LogPackageJoiner) completeSafe(uid string) (complete bool, joined *_typ
 func (j *LogPackageJoiner) Add(lp *_types.LogPackage) (complete bool, joined *_types.LogPackage) {
 	return j.addNTries(lp, j.tries)
 }
+
 func (j *LogPackageJoiner) addNTries(lp *_types.LogPackage, tries int) (complete bool, joined *_types.LogPackage) {
 	if lp.Chunk.I == 0 {
 		j.createSafe(lp, time.Duration(j.tries)*j.delay)
