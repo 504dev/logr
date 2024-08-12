@@ -4,7 +4,7 @@ import (
 	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/logger/demo"
-	"github.com/504dev/logr/repo/dashkey"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -18,7 +18,7 @@ func createConfig(dashId int) (*logr.Config, error) {
 		Grpc:     config.Get().Bind.Grpc,
 		NoCipher: false,
 	}
-	dk, err := dashkey.GetById(dashId)
+	dk, err := repo.GetRepos().DashboardKey.GetById(dashId)
 	if err != nil {
 		return nil, err
 	}

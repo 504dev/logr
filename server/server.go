@@ -3,6 +3,7 @@ package server
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/grpc"
 	"github.com/504dev/logr/server/http"
 	"github.com/504dev/logr/server/udp"
@@ -31,6 +32,7 @@ type LogServer struct {
 	joiner       *types.LogPackageJoiner
 	logStorage   LogStorage
 	countStorage CountStorage
+	repos        *repo.Repos
 	done         chan struct{}
 }
 
@@ -42,6 +44,7 @@ func NewLogServer(
 	jwtSecretFunc func() string,
 	logStorage LogStorage,
 	countStorage CountStorage,
+	repos *repo.Repos,
 ) (*LogServer, error) {
 	var err error
 	var udpServer *udp.UdpServer
@@ -74,12 +77,12 @@ func NewLogServer(
 		sockmap.SetSessionStore(store)
 	}
 
-	httpServer, err = http.NewHttpServer(httpAddr, sockmap, jwtService)
+	httpServer, err = http.NewHttpServer(httpAddr, sockmap, jwtService, repos)
 	if err != nil {
 		return nil, err
 	}
 
-	wsServer = ws.NewWsServer(sockmap, jwtService)
+	wsServer = ws.NewWsServer(sockmap, jwtService, repos)
 	wsServer.Bind(httpServer.Engine())
 	wsServer.Info()
 
@@ -94,6 +97,7 @@ func NewLogServer(
 		joiner:       types.NewLogPackageJoiner(time.Second, 5),
 		logStorage:   logStorage,
 		countStorage: countStorage,
+		repos:        repos,
 		done:         make(chan struct{}),
 	}, nil
 }

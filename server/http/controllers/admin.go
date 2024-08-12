@@ -1,33 +1,40 @@
 package controllers
 
 import (
-	"github.com/504dev/logr/repo/dashboard"
-	"github.com/504dev/logr/repo/user"
+	"github.com/504dev/logr/repo"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 )
 
-type AdminController struct{}
+type AdminController struct {
+	repos *repo.Repos
+}
 
-func (_ *AdminController) Users(c *gin.Context) {
-	users, _ := user.GetAll()
+func NewAdminController(repos *repo.Repos) *AdminController {
+	return &AdminController{
+		repos: repos,
+	}
+}
+
+func (adm *AdminController) Users(c *gin.Context) {
+	users, _ := adm.repos.User.GetAll()
 	c.JSON(http.StatusOK, users)
 }
 
-func (_ *AdminController) UserById(c *gin.Context) {
+func (adm *AdminController) UserById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	usr, _ := user.GetById(id)
+	usr, _ := adm.repos.User.GetById(id)
 	c.JSON(http.StatusOK, usr)
 }
 
-func (_ *AdminController) Dashboards(c *gin.Context) {
-	dashboards, _ := dashboard.GetAll()
+func (adm *AdminController) Dashboards(c *gin.Context) {
+	dashboards, _ := adm.repos.Dashboard.GetAll()
 	c.JSON(http.StatusOK, dashboards)
 }
 
-func (_ *AdminController) DashboardById(c *gin.Context) {
+func (adm *AdminController) DashboardById(c *gin.Context) {
 	id, _ := strconv.Atoi(c.Param("id"))
-	dash, _ := dashboard.GetById(id)
+	dash, _ := adm.repos.Dashboard.GetById(id)
 	c.JSON(http.StatusOK, dash)
 }

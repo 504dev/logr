@@ -6,10 +6,20 @@ import (
 	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/libs/cipher"
 	"github.com/504dev/logr/types"
+	"github.com/jmoiron/sqlx"
 )
 
-func Create(key *types.DashKey, tx *sql.Tx) error {
+type DashboardKeyRepo struct {
+	conn *sqlx.DB
+}
 
+func NewDashboardKeyRepo() *DashboardKeyRepo {
+	return &DashboardKeyRepo{
+		conn: mysql.Conn(),
+	}
+}
+
+func (repo *DashboardKeyRepo) Create(key *types.DashKey, tx *sql.Tx) error {
 	var err error
 	var values []interface{}
 	var sqltext string
@@ -26,7 +36,7 @@ func Create(key *types.DashKey, tx *sql.Tx) error {
 	if tx != nil {
 		res, err = tx.Exec(sqltext, values...)
 	} else {
-		res, err = mysql.Conn().Exec(sqltext, values...)
+		res, err = repo.conn.Exec(sqltext, values...)
 	}
 
 	if err != nil {
@@ -43,22 +53,21 @@ func Create(key *types.DashKey, tx *sql.Tx) error {
 	return nil
 }
 
-func findAllByField(fieldname string, val interface{}, limit int) (types.DashKeys, error) {
-	conn := mysql.Conn()
+func (repo *DashboardKeyRepo) findAllByField(fieldname string, val interface{}, limit int) (types.DashKeys, error) {
 	keys := types.DashKeys{}
 	sqltext := fmt.Sprintf("SELECT id, dash_id, name, public_key, private_key FROM dashboard_keys WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sqltext = fmt.Sprintf("%v LIMIT %v", sqltext, limit)
 	}
-	err := conn.Select(&keys, sqltext, val)
+	err := repo.conn.Select(&keys, sqltext, val)
 	if err != nil {
 		return nil, err
 	}
 	return keys, nil
 }
 
-func findOneByField(fieldname string, val interface{}) (*types.DashKey, error) {
-	keys, err := findAllByField(fieldname, val, 1)
+func (repo *DashboardKeyRepo) findOneByField(fieldname string, val interface{}) (*types.DashKey, error) {
+	keys, err := repo.findAllByField(fieldname, val, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -68,14 +77,14 @@ func findOneByField(fieldname string, val interface{}) (*types.DashKey, error) {
 	return keys[0], nil
 }
 
-func GetById(id int) (*types.DashKey, error) {
-	return findOneByField("id", id)
+func (repo *DashboardKeyRepo) GetById(id int) (*types.DashKey, error) {
+	return repo.findOneByField("id", id)
 }
 
-func GetByDashId(id int) (types.DashKeys, error) {
-	return findAllByField("dash_id", id, 0)
+func (repo *DashboardKeyRepo) GetByDashId(id int) (types.DashKeys, error) {
+	return repo.findAllByField("dash_id", id, 0)
 }
 
-func GetByPub(pub string) (*types.DashKey, error) {
-	return findOneByField("public_key", pub)
+func (repo *DashboardKeyRepo) GetByPub(pub string) (*types.DashKey, error) {
+	return repo.findOneByField("public_key", pub)
 }

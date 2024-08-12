@@ -4,24 +4,34 @@ import (
 	"fmt"
 	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/types"
+	"github.com/jmoiron/sqlx"
 )
 
-func findAllByField(fieldname string, val interface{}, limit int) (types.DashMembers, error) {
-	conn := mysql.Conn()
+type DashboardMemberRepo struct {
+	conn *sqlx.DB
+}
+
+func NewDashboardMemberRepo() *DashboardMemberRepo {
+	return &DashboardMemberRepo{
+		conn: mysql.Conn(),
+	}
+}
+
+func (repo *DashboardMemberRepo) findAllByField(fieldname string, val interface{}, limit int) (types.DashMembers, error) {
 	members := types.DashMembers{}
 	sqltext := fmt.Sprintf("SELECT id, dash_id, user_id, status FROM dashboard_members WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sqltext = fmt.Sprintf("%v LIMIT %v", sqltext, limit)
 	}
-	err := conn.Select(&members, sqltext, val)
+	err := repo.conn.Select(&members, sqltext, val)
 	if err != nil {
 		return nil, err
 	}
 	return members, nil
 }
 
-func findOneByField(fieldname string, val interface{}) (*types.DashMember, error) {
-	members, err := findAllByField(fieldname, val, 1)
+func (repo *DashboardMemberRepo) findOneByField(fieldname string, val interface{}) (*types.DashMember, error) {
+	members, err := repo.findAllByField(fieldname, val, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -31,25 +41,23 @@ func findOneByField(fieldname string, val interface{}) (*types.DashMember, error
 	return members[0], nil
 }
 
-func GetById(id int) (*types.DashMember, error) {
-	return findOneByField("id", id)
+func (repo *DashboardMemberRepo) GetById(id int) (*types.DashMember, error) {
+	return repo.findOneByField("id", id)
 }
 
-func GetAllByDashId(id int) (types.DashMembers, error) {
-	return findAllByField("dash_id", id, 0)
+func (repo *DashboardMemberRepo) GetAllByDashId(id int) (types.DashMembers, error) {
+	return repo.findAllByField("dash_id", id, 0)
 }
 
-func GetAllByUserId(id int) (types.DashMembers, error) {
-	return findAllByField("user_id", id, 0)
+func (repo *DashboardMemberRepo) GetAllByUserId(id int) (types.DashMembers, error) {
+	return repo.findAllByField("user_id", id, 0)
 }
 
-func Create(m *types.DashMember) error {
-	conn := mysql.Conn()
-
+func (repo *DashboardMemberRepo) Create(m *types.DashMember) error {
 	values := []interface{}{m.DashId, m.UserId, types.MemberStatusApproved}
 	sqltext := "INSERT INTO dashboard_members (dash_id, user_id, status) VALUES (?, ?, ?)"
 
-	res, err := conn.Exec(sqltext, values...)
+	res, err := repo.conn.Exec(sqltext, values...)
 
 	if err != nil {
 		return err
@@ -65,10 +73,8 @@ func Create(m *types.DashMember) error {
 	return nil
 }
 
-func Remove(id int) error {
-	conn := mysql.Conn()
-
-	_, err := conn.Exec("DELETE FROM dashboard_members WHERE id = ?", id)
+func (repo *DashboardMemberRepo) Remove(id int) error {
+	_, err := repo.conn.Exec("DELETE FROM dashboard_members WHERE id = ?", id)
 
 	if err != nil {
 		return err

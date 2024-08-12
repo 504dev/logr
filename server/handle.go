@@ -3,13 +3,12 @@ package server
 import (
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/repo/dashkey"
 	"github.com/504dev/logr/types"
 )
 
 func (srv *LogServer) handle(meta *types.LogPackageMeta) {
 	lp := meta.LogPackage
-	dk, err := dashkey.GetByPubCached(lp.PublicKey)
+	dk, err := srv.repos.DashboardKey.GetByPubCached(lp.PublicKey)
 	if err != nil {
 		Logger.Error("(%v) dash error: %v", meta.Protocol, err)
 		return

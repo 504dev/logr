@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/repo/user"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -19,13 +19,17 @@ import (
 const DEFAULT_EXPIRE_TIME = 8 * time.Hour
 
 type AuthController struct {
+	repos       *repo.Repos
 	jwtService  *types.JwtService
 	states      *types.States
 	githubOAuth *oauth2.Config
 }
 
-func NewAuthController(jwtService *types.JwtService) *AuthController {
-	result := &AuthController{jwtService: jwtService}
+func NewAuthController(jwtService *types.JwtService, repos *repo.Repos) *AuthController {
+	result := &AuthController{
+		repos:      repos,
+		jwtService: jwtService,
+	}
 	result.init()
 	return result
 }
@@ -98,7 +102,7 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	_, err = user.Create(data.Owner.ID, data.Owner.Login, types.RoleAdmin)
+	_, err = a.repos.User.Create(data.Owner.ID, data.Owner.Login, types.RoleAdmin)
 	if err != nil {
 		Logger.Error(err)
 	}
@@ -172,7 +176,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		}
 	}
 
-	userDb, err := user.Upsert(*userGithub.ID, *userGithub.Login, types.RoleUser)
+	userDb, err := a.repos.User.Upsert(*userGithub.ID, *userGithub.Login, types.RoleUser)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -180,7 +184,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 	}
 
 	Logger.Debug(userDb)
-	_ = user.LoginAt(userDb.Id)
+	_ = a.repos.User.LoginAt(userDb.Id)
 
 	var expiresAt time.Time
 	if githubPermit.Expiry.IsZero() {

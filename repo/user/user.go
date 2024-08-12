@@ -4,24 +4,34 @@ import (
 	"fmt"
 	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/types"
+	"github.com/jmoiron/sqlx"
 )
 
-func findAllByField(fieldname string, val interface{}, limit int) (types.Users, error) {
-	conn := mysql.Conn()
+type UserRepo struct {
+	conn *sqlx.DB
+}
+
+func NewUserRepo() *UserRepo {
+	return &UserRepo{
+		conn: mysql.Conn(),
+	}
+}
+
+func (repo *UserRepo) findAllByField(fieldname string, val interface{}, limit int) (types.Users, error) {
 	users := types.Users{}
 	sql := fmt.Sprintf("SELECT id, github_id, username, role, login_at, created_at FROM users WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sql = fmt.Sprintf("%v LIMIT %v", sql, limit)
 	}
-	err := conn.Select(&users, sql, val)
+	err := repo.conn.Select(&users, sql, val)
 	if err != nil {
 		return nil, err
 	}
 	return users, nil
 }
 
-func findOneByField(fieldname string, val interface{}) (*types.User, error) {
-	users, err := findAllByField(fieldname, val, 1)
+func (repo *UserRepo) findOneByField(fieldname string, val interface{}) (*types.User, error) {
+	users, err := repo.findAllByField(fieldname, val, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -31,10 +41,9 @@ func findOneByField(fieldname string, val interface{}) (*types.User, error) {
 	return users[0], nil
 }
 
-func GetAll() (types.Users, error) {
-	conn := mysql.Conn()
+func (repo *UserRepo) GetAll() (types.Users, error) {
 	users := types.Users{}
-	err := conn.Select(&users, "SELECT id, github_id, username, role, login_at, created_at FROM users")
+	err := repo.conn.Select(&users, "SELECT id, github_id, username, role, login_at, created_at FROM users")
 	if err != nil {
 		return nil, err
 	}
@@ -42,25 +51,25 @@ func GetAll() (types.Users, error) {
 	return users, nil
 }
 
-func GetById(id int) (*types.User, error) {
-	return findOneByField("id", id)
+func (repo *UserRepo) GetById(id int) (*types.User, error) {
+	return repo.findOneByField("id", id)
 }
 
-func GetByUsername(username string) (*types.User, error) {
-	return findOneByField("username", username)
+func (repo *UserRepo) GetByUsername(username string) (*types.User, error) {
+	return repo.findOneByField("username", username)
 }
 
-func GetByGithubId(id int64) (*types.User, error) {
-	return findOneByField("github_id", id)
+func (repo *UserRepo) GetByGithubId(id int64) (*types.User, error) {
+	return repo.findOneByField("github_id", id)
 }
 
-func Upsert(githubId int64, username string, role int) (*types.User, error) {
-	user, err := GetByGithubId(githubId)
+func (repo *UserRepo) Upsert(githubId int64, username string, role int) (*types.User, error) {
+	user, err := repo.GetByGithubId(githubId)
 	if err != nil {
 		return nil, err
 	}
 	if user == nil {
-		user, err = Create(githubId, username, role)
+		user, err = repo.Create(githubId, username, role)
 		if err != nil {
 			return nil, err
 		}
@@ -68,9 +77,7 @@ func Upsert(githubId int64, username string, role int) (*types.User, error) {
 	return user, nil
 }
 
-func Create(githubId int64, username string, role int) (*types.User, error) {
-	conn := mysql.Conn()
-
+func (repo *UserRepo) Create(githubId int64, username string, role int) (*types.User, error) {
 	sql := `
 		INSERT INTO users (github_id, username, role)
 		VALUES (?, ?, ?)
@@ -78,19 +85,18 @@ func Create(githubId int64, username string, role int) (*types.User, error) {
 	`
 	values := []interface{}{githubId, username, role}
 
-	_, err := conn.Exec(sql, values...)
+	_, err := repo.conn.Exec(sql, values...)
 	if err != nil {
 		return nil, err
 	}
 
-	user, err := GetByGithubId(githubId)
+	user, err := repo.GetByGithubId(githubId)
 
 	return user, err
 }
 
-func LoginAt(id int) error {
-	conn := mysql.Conn()
-	_, err := conn.Exec("UPDATE users SET login_at = NOW() WHERE id = ?", id)
+func (repo *UserRepo) LoginAt(id int) error {
+	_, err := repo.conn.Exec("UPDATE users SET login_at = NOW() WHERE id = ?", id)
 
 	return err
 }

@@ -7,35 +7,51 @@ import (
 	"github.com/504dev/logr/repo/dashkey"
 	"github.com/504dev/logr/repo/dashmember"
 	"github.com/504dev/logr/types"
+	"github.com/jmoiron/sqlx"
 	"strings"
 )
 
-func GetAll() (types.Dashboards, error) {
-	conn := mysql.Conn()
+type DashboardRepo struct {
+	conn            *sqlx.DB
+	DashboardMember *dashmember.DashboardMemberRepo
+	DashboardKey    *dashkey.DashboardKeyRepo
+}
+
+func NewDashboardRepo(
+	dashboardMemberRepo *dashmember.DashboardMemberRepo,
+	dashboardKeyRepo *dashkey.DashboardKeyRepo,
+) *DashboardRepo {
+	return &DashboardRepo{
+		conn:            mysql.Conn(),
+		DashboardMember: dashboardMemberRepo,
+		DashboardKey:    dashboardKeyRepo,
+	}
+}
+
+func (repo *DashboardRepo) GetAll() (types.Dashboards, error) {
 	dashboards := types.Dashboards{}
-	err := conn.Select(&dashboards, "SELECT id, owner_id, name FROM dashboards")
+	err := repo.conn.Select(&dashboards, "SELECT id, owner_id, name FROM dashboards")
 	if err != nil {
 		return nil, err
 	}
 	return dashboards, nil
 }
 
-func findAllByField(fieldname string, val interface{}, limit int) (types.Dashboards, error) {
-	conn := mysql.Conn()
+func (repo *DashboardRepo) findAllByField(fieldname string, val interface{}, limit int) (types.Dashboards, error) {
 	dashboards := types.Dashboards{}
 	sqltext := fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sqltext = fmt.Sprintf("%v LIMIT %v", sqltext, limit)
 	}
-	err := conn.Select(&dashboards, sqltext, val)
+	err := repo.conn.Select(&dashboards, sqltext, val)
 	if err != nil {
 		return nil, err
 	}
 	return dashboards, nil
 }
 
-func findOneByField(fieldname string, val interface{}) (*types.Dashboard, error) {
-	dashboards, err := findAllByField(fieldname, val, 1)
+func (repo *DashboardRepo) findOneByField(fieldname string, val interface{}) (*types.Dashboard, error) {
+	dashboards, err := repo.findAllByField(fieldname, val, 1)
 	if err != nil {
 		return nil, err
 	}
@@ -45,15 +61,15 @@ func findOneByField(fieldname string, val interface{}) (*types.Dashboard, error)
 	return dashboards[0], nil
 }
 
-func GetById(id int) (*types.Dashboard, error) {
-	return findOneByField("id", id)
+func (repo *DashboardRepo) GetById(id int) (*types.Dashboard, error) {
+	return repo.findOneByField("id", id)
 }
 
-func GetUserDashboards(id int) (types.Dashboards, error) {
-	return findAllByField("owner_id", id, 0)
+func (repo *DashboardRepo) GetUserDashboards(id int) (types.Dashboards, error) {
+	return repo.findAllByField("owner_id", id, 0)
 }
 
-func GetSystemIds(role int) []int {
+func (repo *DashboardRepo) GetSystemIds(role int) []int {
 	ids := make([]int, 0, 2)
 	if role == types.RoleAdmin {
 		ids = append(ids, types.DashboardSystemId)
@@ -63,39 +79,37 @@ func GetSystemIds(role int) []int {
 	}
 	return ids
 }
-func GetShared(userId int, role int) (types.Dashboards, error) {
-	members, err := dashmember.GetAllByUserId(userId)
-	if err != nil {
-		return nil, err
-	}
-	ids := members.DashIds()
-	ids = append(ids, GetSystemIds(role)...)
-	if len(ids) == 0 {
-		return types.Dashboards{}, nil
-	}
-	return GetByIds(ids)
-}
 
-func GetByIds(ids []int) (types.Dashboards, error) {
-	conn := mysql.Conn()
+func (repo *DashboardRepo) GetByIds(ids []int) (types.Dashboards, error) {
 	dashboards := types.Dashboards{}
 	inString := strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]")
 	sqltext := fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", inString)
-	err := conn.Select(&dashboards, sqltext)
+	err := repo.conn.Select(&dashboards, sqltext)
 	if err != nil {
 		return nil, err
 	}
 	return dashboards, nil
 }
 
-func Create(dash *types.Dashboard) error {
-	conn := mysql.Conn()
+func (repo *DashboardRepo) GetShared(userId int, role int) (types.Dashboards, error) {
+	members, err := repo.DashboardMember.GetAllByUserId(userId)
+	if err != nil {
+		return nil, err
+	}
+	ids := members.DashIds()
+	ids = append(ids, repo.GetSystemIds(role)...)
+	if len(ids) == 0 {
+		return types.Dashboards{}, nil
+	}
+	return repo.GetByIds(ids)
+}
 
+func (repo *DashboardRepo) Create(dash *types.Dashboard) error {
 	var err error
 	var values []interface{}
 	var sqltext string
 
-	tx, err := conn.Begin()
+	tx, err := repo.conn.Begin()
 	if err != nil {
 		return err
 	}
@@ -119,7 +133,7 @@ func Create(dash *types.Dashboard) error {
 
 	dashId := int(id)
 	dk := &types.DashKey{DashId: dashId, Name: "Default"}
-	err = dashkey.Create(dk, tx)
+	err = repo.DashboardKey.Create(dk, tx)
 	if err != nil {
 		return err
 	}
@@ -130,18 +144,16 @@ func Create(dash *types.Dashboard) error {
 	return tx.Commit()
 }
 
-func Update(dash *types.Dashboard) error {
-	conn := mysql.Conn()
-
+func (repo *DashboardRepo) Update(dash *types.Dashboard) error {
 	values := []interface{}{dash.Name, dash.Id}
 	sqltext := "UPDATE dashboards SET name = ? where id = ?"
 
-	_, err := conn.Exec(sqltext, values...)
+	_, err := repo.conn.Exec(sqltext, values...)
 	if err != nil {
 		return err
 	}
 
-	item, err := GetById(dash.Id)
+	item, err := repo.GetById(dash.Id)
 	if err != nil {
 		return err
 	}
@@ -151,10 +163,8 @@ func Update(dash *types.Dashboard) error {
 	return nil
 }
 
-func Delete(id int) error {
-	conn := mysql.Conn()
-
-	_, err := conn.Exec("DELETE FROM dashboards where id = ?", id)
+func (repo *DashboardRepo) Delete(id int) error {
+	_, err := repo.conn.Exec("DELETE FROM dashboards where id = ?", id)
 	if err != nil {
 		return err
 	}

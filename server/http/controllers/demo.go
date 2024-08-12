@@ -2,7 +2,7 @@ package controllers
 
 import (
 	"github.com/504dev/logr/libs/cachify"
-	"github.com/504dev/logr/repo/user"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -11,15 +11,19 @@ import (
 )
 
 type DemoController struct {
+	repos      *repo.Repos
 	jwtService *types.JwtService
 }
 
-func NewDemoController(jwtService *types.JwtService) *DemoController {
-	return &DemoController{jwtService: jwtService}
+func NewDemoController(jwtService *types.JwtService, repos *repo.Repos) *DemoController {
+	return &DemoController{
+		repos:      repos,
+		jwtService: jwtService,
+	}
 }
 
-func (d *DemoController) FreeToken(c *gin.Context) {
-	usr, err := user.GetById(types.UserDemoId)
+func (demo *DemoController) FreeToken(c *gin.Context) {
+	usr, err := demo.repos.User.GetById(types.UserDemoId)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
@@ -34,7 +38,7 @@ func (d *DemoController) FreeToken(c *gin.Context) {
 				ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
 			},
 		}
-		tokenstring, err := d.jwtService.SignToken(&claims)
+		tokenstring, err := demo.jwtService.SignToken(&claims)
 		if err != nil {
 			return nil, err
 		}

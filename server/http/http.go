@@ -1,6 +1,7 @@
 package http
 
 import (
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/http/router"
 	"github.com/504dev/logr/types"
 	"github.com/gin-contrib/static"
@@ -15,12 +16,12 @@ type HttpServer struct {
 	server     *http.Server
 }
 
-func NewHttpServer(addr string, sockmap *types.SockMap, jwtService *types.JwtService) (*HttpServer, error) {
+func NewHttpServer(addr string, sockmap *types.SockMap, jwtService *types.JwtService, repos *repo.Repos) (*HttpServer, error) {
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")
 	}
 
-	engine := router.NewRouter(sockmap, jwtService)
+	engine := router.NewRouter(sockmap, jwtService, repos)
 	engine.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
 	engine.GET("/", frontend)
 	engine.GET("/demo", frontend)

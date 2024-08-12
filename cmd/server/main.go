@@ -5,6 +5,7 @@ import (
 	"github.com/504dev/logr/dbs/clickhouse"
 	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/logger"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/repo/count"
 	"github.com/504dev/logr/repo/log"
 	"github.com/504dev/logr/server"
@@ -31,6 +32,7 @@ func main() {
 		config.Get().GetJwtSecret,
 		logStorage,
 		countStorage,
+		repo.GetRepos(),
 	)
 	if err != nil {
 		panic(err)

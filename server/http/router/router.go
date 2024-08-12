@@ -4,6 +4,7 @@ import (
 	"github.com/504dev/logr-go-client/utils"
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/http/controllers"
 	"github.com/504dev/logr/types"
 	"github.com/gin-contrib/cors"
@@ -12,7 +13,7 @@ import (
 	"os"
 )
 
-func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService) *gin.Engine {
+func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo.Repos) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"GET", "PUT", "POST", "DELETE"},
@@ -40,13 +41,13 @@ func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService) *gin.Engine
 		c.JSON(http.StatusOK, globals)
 	})
 
-	demo := controllers.NewDemoController(jwtService)
+	demo := controllers.NewDemoController(jwtService, repos)
 	{
 		r.GET("/api/free-token", demo.FreeToken)
 	}
 
 	// oauth
-	auth := controllers.NewAuthController(jwtService)
+	auth := controllers.NewAuthController(jwtService, repos)
 	{
 		r.GET("/oauth/authorize", auth.Authorize)
 		r.GET("/oauth/authorize/callback", auth.AuthorizeCallback)
@@ -55,7 +56,7 @@ func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService) *gin.Engine
 	}
 
 	// me
-	me := controllers.MeController{}
+	me := controllers.NewMeController(repos)
 	{
 		r.GET("/api/me", auth.EnsureJWT, me.Me)
 		r.GET("/api/me/dashboards", auth.EnsureJWT, me.Dashboards)
