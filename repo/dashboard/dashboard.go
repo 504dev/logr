@@ -65,7 +65,7 @@ func (repo *DashboardRepo) GetById(id int) (*types.Dashboard, error) {
 	return repo.findOneByField("id", id)
 }
 
-func (repo *DashboardRepo) GetUserDashboards(id int) (types.Dashboards, error) {
+func (repo *DashboardRepo) GetByOwnerId(id int) (types.Dashboards, error) {
 	return repo.findAllByField("owner_id", id, 0)
 }
 
@@ -92,7 +92,7 @@ func (repo *DashboardRepo) GetByIds(ids []int) (types.Dashboards, error) {
 }
 
 func (repo *DashboardRepo) GetShared(userId int, role int) (types.Dashboards, error) {
-	members, err := repo.DashboardMember.GetAllByUserId(userId)
+	members, err := repo.DashboardMember.GetByUserId(userId)
 	if err != nil {
 		return nil, err
 	}

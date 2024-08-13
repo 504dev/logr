@@ -45,11 +45,11 @@ func (repo *DashboardMemberRepo) GetById(id int) (*types.DashMember, error) {
 	return repo.findOneByField("id", id)
 }
 
-func (repo *DashboardMemberRepo) GetAllByDashId(id int) (types.DashMembers, error) {
+func (repo *DashboardMemberRepo) GetByDashId(id int) (types.DashMembers, error) {
 	return repo.findAllByField("dash_id", id, 0)
 }
 
-func (repo *DashboardMemberRepo) GetAllByUserId(id int) (types.DashMembers, error) {
+func (repo *DashboardMemberRepo) GetByUserId(id int) (types.DashMembers, error) {
 	return repo.findAllByField("user_id", id, 0)
 }
 

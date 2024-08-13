@@ -42,7 +42,7 @@ func (me *MeController) AddMember(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": "share to owner denied"})
 		return
 	}
-	members, err := me.repos.DashboardMember.GetAllByDashId(dash.Id)
+	members, err := me.repos.DashboardMember.GetByDashId(dash.Id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
@@ -100,7 +100,7 @@ func (me *MeController) RemoveMember(c *gin.Context) {
 
 func (me *MeController) DashboardsOwn(c *gin.Context) {
 	userId := c.GetInt("userId")
-	dashboards, err := me.repos.Dashboard.GetUserDashboards(userId)
+	dashboards, err := me.repos.Dashboard.GetByOwnerId(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
@@ -108,7 +108,7 @@ func (me *MeController) DashboardsOwn(c *gin.Context) {
 	for _, dash := range dashboards {
 		dash.Keys, _ = me.repos.DashboardKey.GetByDashId(dash.Id)
 		dash.Owner, _ = me.repos.User.GetById(dash.OwnerId)
-		dash.Members, _ = me.repos.DashboardMember.GetAllByDashId(dash.Id)
+		dash.Members, _ = me.repos.DashboardMember.GetByDashId(dash.Id)
 		for _, member := range dash.Members {
 			member.User, _ = me.repos.User.GetById(member.UserId)
 		}
@@ -125,7 +125,7 @@ func (me *MeController) DashboardsShared(c *gin.Context) {
 	}
 	for _, dash := range shared {
 		dash.Owner, _ = me.repos.User.GetById(dash.OwnerId)
-		dash.Members, _ = me.repos.DashboardMember.GetAllByDashId(dash.Id)
+		dash.Members, _ = me.repos.DashboardMember.GetByDashId(dash.Id)
 		for _, member := range dash.Members {
 			member.User, _ = me.repos.User.GetById(member.UserId)
 		}
@@ -135,7 +135,7 @@ func (me *MeController) DashboardsShared(c *gin.Context) {
 
 func (me *MeController) Dashboards(c *gin.Context) {
 	userId := c.GetInt("userId")
-	dashboards, err := me.repos.Dashboard.GetUserDashboards(userId)
+	dashboards, err := me.repos.Dashboard.GetByOwnerId(userId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
@@ -151,7 +151,7 @@ func (me *MeController) Dashboards(c *gin.Context) {
 	dashboards = append(dashboards, shared...)
 	for _, dash := range dashboards {
 		dash.Owner, _ = me.repos.User.GetById(dash.OwnerId)
-		dash.Members, _ = me.repos.DashboardMember.GetAllByDashId(dash.Id)
+		dash.Members, _ = me.repos.DashboardMember.GetByDashId(dash.Id)
 		for _, member := range dash.Members {
 			member.User, _ = me.repos.User.GetById(member.UserId)
 		}
@@ -256,7 +256,7 @@ func (me *MeController) MyDashOrShared(c *gin.Context) {
 	}
 	systemIds := me.repos.Dashboard.GetSystemIds(role)
 	if sort.SearchInts(systemIds, dash.Id) == len(systemIds) {
-		members, err := me.repos.DashboardMember.GetAllByUserId(userId)
+		members, err := me.repos.DashboardMember.GetByUserId(userId)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 			return
