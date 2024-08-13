@@ -12,8 +12,23 @@ env:
 
 
 jobs:
+  testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.19'
+
+      - name: Run tests
+        run: go test ./tests -run=. -v -race -count=1
+
   image-build-and-push:
     runs-on: ubuntu-latest
+    needs: testing
     steps:
       - name: Checkout tag with submodules
         uses: actions/checkout@v3
