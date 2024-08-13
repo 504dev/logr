@@ -53,15 +53,15 @@ func NewLogServer(
 	var httpServer *http.HttpServer
 	var wsServer *ws.WsServer
 
-	ch := make(chan *types.LogPackageMeta)
+	channel := make(chan *types.LogPackageMeta)
 	if udpAddr != "" {
-		udpServer, err = udp.NewUdpServer(udpAddr, ch)
+		udpServer, err = udp.NewUdpServer(udpAddr, channel)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if grpcAddr != "" {
-		grpcServer, err = grpc.NewGrpcServer(grpcAddr, ch)
+		grpcServer, err = grpc.NewGrpcServer(grpcAddr, channel)
 		if err != nil {
 			return nil, err
 		}
@@ -94,7 +94,7 @@ func NewLogServer(
 		wsServer:     wsServer,
 		jwtService:   jwtService,
 		sockmap:      sockmap,
-		channel:      ch,
+		channel:      channel,
 		joiner:       types.NewLogPackageJoiner(time.Second, 5),
 		logStorage:   logStorage,
 		countStorage: countStorage,
@@ -103,15 +103,15 @@ func NewLogServer(
 	}, nil
 }
 
-func (srv *LogServer) processChannel() {
+func (srv *LogServer) recieve() {
 	for meta := range srv.channel {
-		srv.handle(meta)
+		go srv.handle(meta)
 	}
 }
 
 func (srv *LogServer) Run() {
 	go func() {
-		srv.processChannel()
+		srv.recieve()
 		close(srv.done) // reading from srv.channel completed
 	}()
 	go func() {
