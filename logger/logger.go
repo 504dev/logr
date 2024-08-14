@@ -1,10 +1,10 @@
 package logger
 
 import (
+	"errors"
 	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/logger/demo"
-	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"io"
@@ -12,26 +12,22 @@ import (
 	"strconv"
 )
 
-func createConfig(dashId int) (*logr.Config, error) {
-	conf := logr.Config{
-		Udp:      config.Get().Bind.Udp,
-		Grpc:     config.Get().Bind.Grpc,
-		NoCipher: false,
+func createConfig(dashkey *types.DashKey) *logr.Config {
+	if dashkey == nil {
+		panic(errors.New("no dashkey provided"))
 	}
-	dk, err := repo.GetRepos().DashboardKey.GetById(dashId)
-	if err != nil {
-		return nil, err
+	return &logr.Config{
+		Udp:        config.Get().Bind.Udp,
+		Grpc:       config.Get().Bind.Grpc,
+		DashId:     dashkey.DashId,
+		PublicKey:  dashkey.PublicKey,
+		PrivateKey: dashkey.PrivateKey,
+		NoCipher:   false,
 	}
-	if dk != nil {
-		conf.DashId = dk.DashId
-		conf.PublicKey = dk.PublicKey
-		conf.PrivateKey = dk.PrivateKey
-	}
-	return &conf, err
 }
 
-func Init() {
-	conf, _ := createConfig(types.DashboardSystemId)
+func Init(dashkeys types.DashKeys) {
+	conf := createConfig(dashkeys.Get(types.DASHKEY_SYSTEM_ID))
 	Logger, _ = conf.NewLogger("main.log")
 	_, _ = conf.DefaultSystemCounter()
 	_, _ = conf.DefaultProcessCounter()
@@ -40,7 +36,7 @@ func Init() {
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
 
 	if config.Get().DemoDash.Enabled {
-		conf, _ := createConfig(types.DashboardDemoId)
+		conf := createConfig(dashkeys.Get(types.DASHKEY_DEMO_ID))
 		go demo.Run(conf, Logger)
 	}
 }

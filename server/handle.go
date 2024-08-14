@@ -66,7 +66,7 @@ func (srv *LogServer) handle(meta *types.LogPackageMeta) {
 			if lp.Log != nil {
 				lp.Log.DashId = dk.DashId
 				go srv.sockmap.Push(lp.Log)
-				err = srv.logStorage.Store(lp.Log)
+				err = srv.repos.Log.Store(lp.Log)
 				if err != nil {
 					Logger.Error("(%v) create log error: %v", meta.Protocol, err)
 					return
@@ -91,7 +91,7 @@ func (srv *LogServer) handle(meta *types.LogPackageMeta) {
 
 			if lp.Count != nil {
 				lp.Count.DashId = dk.DashId
-				err = srv.countStorage.Store(lp.Count)
+				err = srv.repos.Count.Store(lp.Count)
 				if err != nil {
 					Logger.Error("(%v) create count error: %v", meta.Protocol, err)
 					return

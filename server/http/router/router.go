@@ -96,7 +96,7 @@ func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo
 	}
 
 	// logs
-	logs := controllers.NewLogsController(sockmap)
+	logs := controllers.NewLogsController(sockmap, repos)
 	{
 		r.GET("/api/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logs.Find)
 		r.GET("/api/logs/:dash_id/lognames", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logs.StatsByDashboard)
@@ -104,7 +104,7 @@ func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo
 	}
 
 	// counts
-	counts := controllers.CountsController{}
+	counts := controllers.NewCountsController(repos)
 	{
 		r.GET("/api/counts", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, counts.Find)
 		r.GET("/api/counts/:dash_id/snippet", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, counts.FindSnippet)

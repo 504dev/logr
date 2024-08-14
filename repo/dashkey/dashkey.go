@@ -7,6 +7,8 @@ import (
 	"github.com/504dev/logr/libs/cipher"
 	"github.com/504dev/logr/types"
 	"github.com/jmoiron/sqlx"
+	"strconv"
+	"strings"
 )
 
 type DashboardKeyRepo struct {
@@ -54,11 +56,11 @@ func (repo *DashboardKeyRepo) Create(key *types.DashKey, tx *sql.Tx) error {
 }
 
 func (repo *DashboardKeyRepo) findAllByField(fieldname string, val interface{}, limit int) (types.DashKeys, error) {
-	keys := types.DashKeys{}
 	sqltext := fmt.Sprintf("SELECT id, dash_id, name, public_key, private_key FROM dashboard_keys WHERE %v = ?", fieldname)
 	if limit > 0 {
 		sqltext = fmt.Sprintf("%v LIMIT %v", sqltext, limit)
 	}
+	keys := types.DashKeys{}
 	err := repo.conn.Select(&keys, sqltext, val)
 	if err != nil {
 		return nil, err
@@ -87,4 +89,21 @@ func (repo *DashboardKeyRepo) GetByDashId(id int) (types.DashKeys, error) {
 
 func (repo *DashboardKeyRepo) GetByPub(pub string) (*types.DashKey, error) {
 	return repo.findOneByField("public_key", pub)
+}
+
+func (repo *DashboardKeyRepo) GetByIds(ids []int) (types.DashKeys, error) {
+	placeholders := make([]string, len(ids))
+	for i, v := range ids {
+		placeholders[i] = strconv.Itoa(v)
+	}
+	sqltext := fmt.Sprintf(
+		"SELECT id, dash_id, name, public_key, private_key, name FROM dashboard_keys WHERE id IN (%s)",
+		strings.Join(placeholders, ","),
+	)
+	dashkeys := types.DashKeys{}
+	err := repo.conn.Select(&dashkeys, sqltext)
+	if err != nil {
+		return nil, err
+	}
+	return dashkeys, nil
 }

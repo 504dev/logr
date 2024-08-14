@@ -1,7 +1,6 @@
 package server
 
 import (
-	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/grpc"
@@ -14,27 +13,17 @@ import (
 	"time"
 )
 
-type LogStorage interface {
-	Store(*_types.Log) error
-}
-
-type CountStorage interface {
-	Store(*_types.Count) error
-}
-
 type LogServer struct {
-	httpServer   *http.HttpServer
-	wsServer     *ws.WsServer
-	grpcServer   *grpc.GrpcServer
-	udpServer    *udp.UdpServer
-	jwtService   *types.JwtService
-	sockmap      *types.SockMap
-	channel      chan *types.LogPackageMeta
-	joiner       *types.LogPackageJoiner
-	logStorage   LogStorage
-	countStorage CountStorage
-	repos        *repo.Repos
-	done         chan struct{}
+	httpServer *http.HttpServer
+	wsServer   *ws.WsServer
+	grpcServer *grpc.GrpcServer
+	udpServer  *udp.UdpServer
+	jwtService *types.JwtService
+	sockmap    *types.SockMap
+	channel    chan *types.LogPackageMeta
+	joiner     *types.LogPackageJoiner
+	repos      *repo.Repos
+	done       chan struct{}
 }
 
 func NewLogServer(
@@ -43,8 +32,6 @@ func NewLogServer(
 	grpcAddr string,
 	redisAddr string,
 	jwtSecretFunc func() string,
-	logStorage LogStorage,
-	countStorage CountStorage,
 	repos *repo.Repos,
 ) (*LogServer, error) {
 	var err error
@@ -88,18 +75,16 @@ func NewLogServer(
 	wsServer.Info()
 
 	return &LogServer{
-		udpServer:    udpServer,
-		grpcServer:   grpcServer,
-		httpServer:   httpServer,
-		wsServer:     wsServer,
-		jwtService:   jwtService,
-		sockmap:      sockmap,
-		channel:      channel,
-		joiner:       types.NewLogPackageJoiner(time.Second, 5),
-		logStorage:   logStorage,
-		countStorage: countStorage,
-		repos:        repos,
-		done:         make(chan struct{}),
+		udpServer:  udpServer,
+		grpcServer: grpcServer,
+		httpServer: httpServer,
+		wsServer:   wsServer,
+		jwtService: jwtService,
+		sockmap:    sockmap,
+		channel:    channel,
+		joiner:     types.NewLogPackageJoiner(time.Second, 5),
+		repos:      repos,
+		done:       make(chan struct{}),
 	}, nil
 }
 
@@ -143,5 +128,7 @@ func (srv *LogServer) Stop() {
 	srv.udpServer.Stop()
 	_ = srv.grpcServer.Stop()
 	_ = srv.httpServer.Stop()
+	_ = srv.repos.Count.StopQueue()
+	_ = srv.repos.Log.StopQueue()
 	<-srv.done
 }

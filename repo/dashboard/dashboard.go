@@ -72,10 +72,10 @@ func (repo *DashboardRepo) GetByOwnerId(id int) (types.Dashboards, error) {
 func (repo *DashboardRepo) GetSystemIds(role int) []int {
 	ids := make([]int, 0, 2)
 	if role == types.RoleAdmin {
-		ids = append(ids, types.DashboardSystemId)
+		ids = append(ids, types.DASHBOARD_SYSTEM_ID)
 	}
 	if config.Get().DemoDash.Enabled {
-		ids = append(ids, types.DashboardDemoId)
+		ids = append(ids, types.DASHBOARD_DEMO_ID)
 	}
 	return ids
 }

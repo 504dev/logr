@@ -3,7 +3,7 @@ package controllers
 import (
 	"encoding/json"
 	. "github.com/504dev/logr/logger"
-	"github.com/504dev/logr/repo/log"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -13,15 +13,17 @@ import (
 
 type LogsController struct {
 	sockmap *types.SockMap
+	repos   *repo.Repos
 }
 
-func NewLogsController(sockmap *types.SockMap) *LogsController {
+func NewLogsController(sockmap *types.SockMap, repos *repo.Repos) *LogsController {
 	return &LogsController{
 		sockmap: sockmap,
+		repos:   repos,
 	}
 }
 
-func (lc *LogsController) Find(ctx *gin.Context) {
+func (c *LogsController) Find(ctx *gin.Context) {
 	dashId := ctx.GetInt("dashId")
 	userId := ctx.GetInt("userId")
 
@@ -59,13 +61,13 @@ func (lc *LogsController) Find(ctx *gin.Context) {
 	}
 	sockId := ctx.Query("sock_id")
 	if sockId != "" {
-		lc.sockmap.SetFilter(userId, sockId, &filter)
+		c.sockmap.SetFilter(userId, sockId, &filter)
 	}
 	f, _ := json.Marshal(filter)
 	Logger.Info(string(f))
 
 	duration := Logger.Time("response:/logs", time.Millisecond)
-	logs, err := log.GetByFilter(filter)
+	logs, err := c.repos.Log.GetByFilter(filter)
 	if err != nil {
 		Logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
@@ -75,30 +77,30 @@ func (lc *LogsController) Find(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, logs)
 }
 
-func (_ *LogsController) StatsByLogname(c *gin.Context) {
-	dashId := c.GetInt("dashId")
-	logname := c.Query("logname")
+func (c *LogsController) StatsByLogname(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
+	logname := ctx.Query("logname")
 	duration := Logger.Time("response:/logs/stats", time.Millisecond)
 
-	stats, err := log.StatsByLognameCached(dashId, logname)
+	stats, err := c.repos.Log.StatsByLognameCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
-	c.JSON(http.StatusOK, stats)
+	ctx.JSON(http.StatusOK, stats)
 }
 
-func (_ *LogsController) StatsByDashboard(c *gin.Context) {
-	dashId := c.GetInt("dashId")
+func (c *LogsController) StatsByDashboard(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
 	duration := Logger.Time("response:/logs/lognames", time.Millisecond)
-	stats, err := log.StatsByDashboardCached(dashId)
+	stats, err := c.repos.Log.StatsByDashboardCached(dashId)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
-	c.JSON(http.StatusOK, stats)
+	ctx.JSON(http.StatusOK, stats)
 }

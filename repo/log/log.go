@@ -4,28 +4,43 @@ import (
 	"fmt"
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/dbs/clickhouse"
+	"github.com/504dev/logr/dbs/clickhouse/queue"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"
 )
 
-func GetByFilter(f types.Filter) (_types.Logs, error) {
-	where, values, err := f.ToSql()
+func NewLogRepo() *LogRepo {
+	sql := `
+		INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	return &LogRepo{
+		queue: queue.NewQueue(&queue.QueueConfig{
+			DB:            clickhouse.Conn(),
+			Sql:           sql,
+			FlushInterval: time.Second,
+			FlushCount:    1000,
+		}),
+	}
+}
+
+func (repo *LogRepo) GetByFilter(filter types.Filter) (_types.Logs, error) {
+	where, values, err := filter.ToSql()
 	if err != nil {
 		return nil, err
 	}
-	limit := f.Limit
+	limit := filter.Limit
 	if limit == 0 {
 		limit = 100
 	}
-	if f.Pattern == "" {
+	if filter.Pattern == "" {
 		now := time.Now()
-		if f.Offset != 0 {
-			now = time.Unix(0, f.Offset)
+		if filter.Offset != 0 {
+			now = time.Unix(0, filter.Offset)
 		}
 		day := now.UTC().Format(time.RFC3339)[0:10]
 		w1 := fmt.Sprintf("%v AND day = '%v'", where, day)
-		logs, err := getByFilter(w1, values, limit)
+		logs, err := repo.getByFilter(w1, values, limit)
 		if err != nil {
 			return nil, err
 		}
@@ -34,16 +49,16 @@ func GetByFilter(f types.Filter) (_types.Logs, error) {
 			return logs, nil
 		}
 		w2 := fmt.Sprintf("%v AND day < '%v'", where, day)
-		tmp, err := getByFilter(w2, values, rest)
+		tmp, err := repo.getByFilter(w2, values, rest)
 		if err != nil {
 			return nil, err
 		}
 		return append(logs, tmp...), nil
 	}
-	return getByFilter(where, values, limit)
+	return repo.getByFilter(where, values, limit)
 }
 
-func getByFilter(where string, values []interface{}, limit int) (_types.Logs, error) {
+func (repo *LogRepo) getByFilter(where string, values []interface{}, limit int) (_types.Logs, error) {
 	conn := clickhouse.Conn()
 	delta := Logger.Duration()
 	sql := `
@@ -57,7 +72,7 @@ func getByFilter(where string, values []interface{}, limit int) (_types.Logs, er
 	return logs, err
 }
 
-func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
+func (repo *LogRepo) StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT hostname, level, version, count(*) AS cnt, max(timestamp) AS updated
       FROM logs
@@ -72,7 +87,7 @@ func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
+func (repo *LogRepo) StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT logname, level, count(*) AS cnt, max(timestamp) AS updated, substring(anyLast(message), 1, 100) as message
       FROM logs

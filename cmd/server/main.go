@@ -6,9 +6,8 @@ import (
 	"github.com/504dev/logr/dbs/mysql"
 	"github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
-	"github.com/504dev/logr/repo/count"
-	"github.com/504dev/logr/repo/log"
 	"github.com/504dev/logr/server"
+	"github.com/504dev/logr/types"
 	"github.com/fatih/color"
 	"os"
 	"os/signal"
@@ -21,23 +20,24 @@ func main() {
 	args := config.Init()
 	clickhouse.Init(args.Retries)
 	mysql.Init(args.Retries)
-	logger.Init()
 
-	logStorage := log.NewLogStorage().RunQueue()
-	countStorage := count.NewCountStorage().RunQueue()
+	repos := repo.GetRepos()
+
+	keys, err := repos.DashboardKey.GetByIds([]int{types.DASHKEY_SYSTEM_ID, types.DASHKEY_DEMO_ID})
+	if err != nil {
+		panic(err)
+	}
+	logger.Init(keys)
+
 	logServer, err := server.NewLogServer(
 		config.Get().Bind.Http,
 		config.Get().Bind.Udp,
 		config.Get().Bind.Grpc,
 		config.Get().Redis,
 		config.Get().GetJwtSecret,
-		logStorage,
-		countStorage,
-		repo.GetRepos(),
+		repos,
 	)
-	if err != nil {
-		panic(err)
-	}
+
 	logServer.Run()
 
 	// Shutdown
@@ -47,7 +47,5 @@ func main() {
 	ts := time.Now()
 	logger.Logger.Warn("Exit with code: %v", sig)
 	logServer.Stop()
-	_ = logStorage.StopQueue()
-	_ = countStorage.StopQueue()
 	logger.Logger.Debug(time.Since(ts))
 }

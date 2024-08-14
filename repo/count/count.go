@@ -3,6 +3,7 @@ package count
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/dbs/clickhouse"
+	"github.com/504dev/logr/dbs/clickhouse/queue"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
 	"time"
@@ -15,7 +16,25 @@ const (
 	AggDay      = "d"
 )
 
-func Find(filter types.Filter, agg string) (types.Counts, error) {
+type CountRepo struct {
+	queue *queue.Queue
+}
+
+func NewCountRepo() *CountRepo {
+	sql := `
+		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, version, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl, time_dur)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+	return &CountRepo{
+		queue: queue.NewQueue(&queue.QueueConfig{
+			DB:            clickhouse.Conn(),
+			Sql:           sql,
+			FlushInterval: time.Second,
+			FlushCount:    1000,
+		}),
+	}
+}
+
+func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, error) {
 	where := `dash_id = ? and logname = ?`
 	values := []interface{}{filter.DashId, filter.Logname}
 	if filter.Hostname != "" {
@@ -111,7 +130,7 @@ func Find(filter types.Filter, agg string) (types.Counts, error) {
 	return counts, nil
 }
 
-func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
+func (repo *CountRepo) StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT hostname, version, count(*) AS cnt, max(toUnixTimestamp(timestamp)) AS updated
       FROM counts
@@ -127,7 +146,7 @@ func StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {
 	return stats, nil
 }
 
-func StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
+func (repo *CountRepo) StatsByDashboard(dashId int) ([]*types.DashStatRow, error) {
 	sql := `
       SELECT logname, count(*) AS cnt
       FROM counts

@@ -1,8 +1,8 @@
 package types
 
 const (
-	DashboardSystemId = 1
-	DashboardDemoId   = 2
+	DASHBOARD_SYSTEM_ID = 1
+	DASHBOARD_DEMO_ID   = 2
 )
 
 type Dashboard struct {
@@ -14,6 +14,7 @@ type Dashboard struct {
 	Owner   *User       `json:"owner"`
 }
 type Dashboards []*Dashboard
+type DashMap map[int]*Dashboard
 
 func (ds Dashboards) Ids() []int {
 	ids := make([]int, len(ds))
@@ -22,8 +23,8 @@ func (ds Dashboards) Ids() []int {
 	}
 	return ids
 }
-func (ds Dashboards) ByPrimary() map[int]*Dashboard {
-	res := make(map[int]*Dashboard, len(ds))
+func (ds Dashboards) ByPrimary() DashMap {
+	res := make(DashMap, len(ds))
 	for _, v := range ds {
 		res[v.Id] = v
 	}

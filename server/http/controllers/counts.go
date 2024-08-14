@@ -2,6 +2,7 @@ package controllers
 
 import (
 	. "github.com/504dev/logr/logger"
+	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/repo/count"
 	"github.com/504dev/logr/types"
 	"github.com/gin-gonic/gin"
@@ -10,17 +11,25 @@ import (
 	"time"
 )
 
-type CountsController struct{}
+type CountsController struct {
+	repos *repo.Repos
+}
 
-func (_ *CountsController) Find(c *gin.Context) {
-	dashId := c.GetInt("dashId")
-	logname := c.Query("logname")
-	hostname := c.Query("hostname")
-	version := c.Query("version")
-	agg := c.Query("agg")
+func NewCountsController(repos *repo.Repos) *CountsController {
+	return &CountsController{
+		repos: repos,
+	}
+}
+
+func (c *CountsController) Find(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
+	logname := ctx.Query("logname")
+	hostname := ctx.Query("hostname")
+	version := ctx.Query("version")
+	agg := ctx.Query("agg")
 
 	if logname == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "logname required"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "logname required"})
 		return
 	}
 
@@ -32,30 +41,30 @@ func (_ *CountsController) Find(c *gin.Context) {
 	}
 
 	duration := Logger.Time("response:/counts", time.Millisecond)
-	counts, err := count.Find(filter, agg)
+	counts, err := c.repos.Count.Find(filter, agg)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
-	c.JSON(http.StatusOK, counts.Format())
+	ctx.JSON(http.StatusOK, counts.Format())
 }
 
-func (_ *CountsController) FindSnippet(c *gin.Context) {
-	dashId := c.GetInt("dashId")
-	logname := c.Query("logname")
-	hostname := c.Query("hostname")
-	keyname := c.Query("keyname")
-	kind := c.Query("kind")
-	timestamp, _ := strconv.ParseInt(c.Query("timestamp"), 10, 64)
+func (c *CountsController) FindSnippet(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
+	logname := ctx.Query("logname")
+	hostname := ctx.Query("hostname")
+	keyname := ctx.Query("keyname")
+	kind := ctx.Query("kind")
+	timestamp, _ := strconv.ParseInt(ctx.Query("timestamp"), 10, 64)
 
 	if logname == "" || hostname == "" || keyname == "" || kind == "" || timestamp == 0 {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "logname, hostname, kind, keyname and timestamp required"})
+		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "logname, hostname, kind, keyname and timestamp required"})
 		return
 	}
 
-	limit, _ := strconv.ParseInt(c.Query("limit"), 10, 64)
+	limit, _ := strconv.ParseInt(ctx.Query("limit"), 10, 64)
 	if limit > 60 {
 		limit = 60
 	}
@@ -72,47 +81,47 @@ func (_ *CountsController) FindSnippet(c *gin.Context) {
 		Keyname:   keyname,
 	}
 
-	counts, err := count.Find(filter, count.AggMinute)
+	counts, err := c.repos.Count.Find(filter, count.AggMinute)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 
 	list := counts.Format()
 	for _, v := range list {
 		if kind == v.Kind {
-			c.JSON(http.StatusOK, v)
+			ctx.JSON(http.StatusOK, v)
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, nil)
 }
 
-func (_ *CountsController) StatsByLogname(c *gin.Context) {
-	dashId := c.GetInt("dashId")
-	logname := c.Query("logname")
+func (c *CountsController) StatsByLogname(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
+	logname := ctx.Query("logname")
 	duration := Logger.Time("response:/counts/stats", time.Millisecond)
-	stats, err := count.StatsByLognameCached(dashId, logname)
+	stats, err := c.repos.Count.StatsByLognameCached(dashId, logname)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
-	c.JSON(http.StatusOK, stats)
+	ctx.JSON(http.StatusOK, stats)
 }
 
-func (_ *CountsController) StatsByDashboard(c *gin.Context) {
-	dashId := c.GetInt("dashId")
+func (c *CountsController) StatsByDashboard(ctx *gin.Context) {
+	dashId := ctx.GetInt("dashId")
 	duration := Logger.Time("response:/counts/lognames", time.Millisecond)
-	stats, err := count.StatsByDashboardCached(dashId)
+	stats, err := c.repos.Count.StatsByDashboardCached(dashId)
 	if err != nil {
 		Logger.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
 	duration()
-	c.JSON(http.StatusOK, stats)
+	ctx.JSON(http.StatusOK, stats)
 }
