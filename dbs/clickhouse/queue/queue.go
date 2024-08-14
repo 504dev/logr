@@ -7,6 +7,8 @@ import (
 	"time"
 )
 
+// deprecated use clickhouse/batcher
+
 type QueueConfig struct {
 	*sqlx.DB
 	FlushInterval time.Duration

@@ -55,7 +55,8 @@ func (repo *CountRepo) BatchInsert(batch []*_types.Count) error {
 	defer stmt.Close()
 
 	for _, v := range batch {
-		_, err = stmt.Exec((*types.CountVector)(v).AsVector()...)
+		values := (*types.CountVector)(v).AsVector()
+		_, err = stmt.Exec(values...)
 		if err != nil {
 			return err
 		}

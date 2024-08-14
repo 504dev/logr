@@ -4,12 +4,12 @@ import (
 	_types "github.com/504dev/logr-go-client/types"
 )
 
-func (repo *CountRepo) RunQueue() *CountRepo {
+func (repo *CountRepo) RunBatcher() *CountRepo {
 	go repo.batcher.Run()
 	return repo
 }
 
-func (repo *CountRepo) StopQueue() error {
+func (repo *CountRepo) StopBatcher() error {
 	repo.batcher.Stop()
 	return nil
 }

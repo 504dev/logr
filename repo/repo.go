@@ -54,7 +54,7 @@ type CountRepo interface {
 	StatsByDashboardCached(dashId int) ([]*types.DashStatRow, error)
 	StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, error)
 	Store(count *_types.Count) error
-	StopQueue() error
+	StopBatcher() error
 }
 
 type LogRepo interface {
@@ -62,7 +62,7 @@ type LogRepo interface {
 	StatsByDashboardCached(dashId int) ([]*types.DashStatRow, error)
 	StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, error)
 	Store(log *_types.Log) error
-	StopQueue() error
+	StopBatcher() error
 }
 
 type Repos struct {
@@ -86,8 +86,8 @@ func GetRepos() *Repos {
 			Dashboard:       dashboard.NewDashboardRepo(dashboardMemberRepo, dashboardKeyRepo),
 			DashboardMember: dashboardMemberRepo,
 			DashboardKey:    dashboardKeyRepo,
-			Count:           count.NewCountRepo().RunQueue(),
-			Log:             log.NewLogRepo().RunQueue(),
+			Count:           count.NewCountRepo().RunBatcher(),
+			Log:             log.NewLogRepo().RunBatcher(),
 		}
 	})
 	return repos
@@ -95,7 +95,7 @@ func GetRepos() *Repos {
 
 func (r *Repos) Stop() error {
 	var wg errgroup.Group
-	wg.Go(r.Count.StopQueue)
-	wg.Go(r.Log.StopQueue)
+	wg.Go(r.Count.StopBatcher)
+	wg.Go(r.Log.StopBatcher)
 	return wg.Wait()
 }

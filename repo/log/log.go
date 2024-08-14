@@ -4,24 +4,57 @@ import (
 	"fmt"
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/dbs/clickhouse"
-	"github.com/504dev/logr/dbs/clickhouse/queue"
+	"github.com/504dev/logr/dbs/clickhouse/batcher"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
-func NewLogRepo() *LogRepo {
+type LogRepo struct {
+	conn    *sqlx.DB
+	batcher *batcher.Batcher[*_types.Log]
+}
+
+func NewLogRepo() (result *LogRepo) {
+	return &LogRepo{
+		conn: clickhouse.Conn(),
+		batcher: batcher.NewBatcher(1000, time.Second, func(batch []*_types.Log) {
+			err := result.BatchInsert(batch)
+			Logger.InfoErr(err, "Batch insert %v %v", len(batch), err)
+		}),
+	}
+}
+
+func (repo *LogRepo) BatchInsert(batch []*_types.Log) error {
 	sql := `
 		INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	return &LogRepo{
-		queue: queue.NewQueue(&queue.QueueConfig{
-			DB:            clickhouse.Conn(),
-			Sql:           sql,
-			FlushInterval: time.Second,
-			FlushCount:    1000,
-		}),
+	tx, err := repo.conn.Begin()
+	if err != nil {
+		return err
 	}
+
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, v := range batch {
+		day := time.Unix(0, v.Timestamp).UTC().Format("2006-01-02")
+		values := []any{day, v.Timestamp, v.DashId, v.Hostname, v.Logname, v.Level, v.Message, v.Pid, v.Version}
+		_, err = stmt.Exec(values...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (repo *LogRepo) GetByFilter(filter types.Filter) (_types.Logs, error) {
@@ -59,7 +92,6 @@ func (repo *LogRepo) GetByFilter(filter types.Filter) (_types.Logs, error) {
 }
 
 func (repo *LogRepo) getByFilter(where string, values []interface{}, limit int) (_types.Logs, error) {
-	conn := clickhouse.Conn()
 	delta := Logger.Duration()
 	sql := `
       SELECT timestamp, dash_id, hostname, logname, level, message
@@ -67,7 +99,7 @@ func (repo *LogRepo) getByFilter(where string, values []interface{}, limit int) 
       ORDER BY day DESC, timestamp DESC
       LIMIT ` + fmt.Sprint(limit)
 	logs := _types.Logs{}
-	err := conn.Select(&logs, sql, values...)
+	err := repo.conn.Select(&logs, sql, values...)
 	Logger.Debug("%v\n%v\ncount: %v, time: %v", sql, values, len(logs), delta())
 	return logs, err
 }
@@ -80,7 +112,7 @@ func (repo *LogRepo) StatsByLogname(dashId int, logname string) ([]*types.DashSt
       GROUP BY hostname, level, version
     `
 	stats := types.DashStatRows{}
-	err := clickhouse.Conn().Select(&stats, sql, dashId, logname)
+	err := repo.conn.Select(&stats, sql, dashId, logname)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +130,7 @@ func (repo *LogRepo) StatsByDashboard(dashId int) ([]*types.DashStatRow, error) 
       GROUP BY logname, level
     `
 	stats := types.DashStatRows{}
-	err := clickhouse.Conn().Select(&stats, sql, dashId)
+	err := repo.conn.Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}

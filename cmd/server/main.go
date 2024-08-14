@@ -37,7 +37,9 @@ func main() {
 		config.Get().GetJwtSecret,
 		repos,
 	)
-
+	if err != nil {
+		panic(err)
+	}
 	logServer.Run()
 
 	// Shutdown
