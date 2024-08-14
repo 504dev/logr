@@ -3,9 +3,10 @@ package count
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/dbs/clickhouse"
-	"github.com/504dev/logr/dbs/clickhouse/queue"
+	"github.com/504dev/logr/dbs/clickhouse/batcher"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
+	"github.com/jmoiron/sqlx"
 	"time"
 )
 
@@ -17,21 +18,50 @@ const (
 )
 
 type CountRepo struct {
-	queue *queue.Queue
+	conn    *sqlx.DB
+	batcher *batcher.Batcher[*_types.Count]
 }
 
-func NewCountRepo() *CountRepo {
+func NewCountRepo() (result *CountRepo) {
+	result = &CountRepo{
+		conn: clickhouse.Conn(),
+		batcher: batcher.NewBatcher(1000, time.Second, func(batch []*_types.Count) {
+			Logger.Debug("Batch insert %v", len(batch))
+			if err := result.BatchInsert(batch); err != nil {
+				Logger.Error(err)
+			}
+		}),
+	}
+	return result
+}
+
+func (repo *CountRepo) BatchInsert(batch []*_types.Count) error {
 	sql := `
 		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, version, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl, time_dur)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-	return &CountRepo{
-		queue: queue.NewQueue(&queue.QueueConfig{
-			DB:            clickhouse.Conn(),
-			Sql:           sql,
-			FlushInterval: time.Second,
-			FlushCount:    1000,
-		}),
+	tx, err := repo.conn.Begin()
+	if err != nil {
+		return err
 	}
+
+	defer func() {
+		_ = tx.Rollback()
+	}()
+
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, v := range batch {
+		_, err = stmt.Exec((*types.CountVector)(v).AsVector()...)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
 }
 
 func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, error) {
@@ -89,7 +119,7 @@ func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, erro
     `
 	Logger.Debug("%v %v", sql, values)
 
-	rows, err := clickhouse.Conn().Query(sql, values...)
+	rows, err := repo.conn.Query(sql, values...)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +169,7 @@ func (repo *CountRepo) StatsByLogname(dashId int, logname string) ([]*types.Dash
     `
 	Logger.Debug("%v %v", sql, []interface{}{dashId, logname})
 	stats := types.DashStatRows{}
-	err := clickhouse.Conn().Select(&stats, sql, dashId, logname)
+	err := repo.conn.Select(&stats, sql, dashId, logname)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +187,7 @@ func (repo *CountRepo) StatsByDashboard(dashId int) ([]*types.DashStatRow, error
       GROUP BY logname
     `
 	stats := types.DashStatRows{}
-	err := clickhouse.Conn().Select(&stats, sql, dashId)
+	err := repo.conn.Select(&stats, sql, dashId)
 	if err != nil {
 		return nil, err
 	}

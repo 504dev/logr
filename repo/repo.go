@@ -10,6 +10,7 @@ import (
 	"github.com/504dev/logr/repo/log"
 	"github.com/504dev/logr/repo/user"
 	"github.com/504dev/logr/types"
+	"golang.org/x/sync/errgroup"
 	"sync"
 )
 
@@ -90,4 +91,11 @@ func GetRepos() *Repos {
 		}
 	})
 	return repos
+}
+
+func (r *Repos) Stop() error {
+	var wg errgroup.Group
+	wg.Go(r.Count.StopQueue)
+	wg.Go(r.Log.StopQueue)
+	return wg.Wait()
 }

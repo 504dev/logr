@@ -128,7 +128,6 @@ func (srv *LogServer) Stop() {
 	srv.udpServer.Stop()
 	_ = srv.grpcServer.Stop()
 	_ = srv.httpServer.Stop()
-	_ = srv.repos.Count.StopQueue()
-	_ = srv.repos.Log.StopQueue()
+	_ = srv.repos.Stop()
 	<-srv.done
 }
