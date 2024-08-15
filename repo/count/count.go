@@ -26,10 +26,8 @@ func NewCountRepo() (result *CountRepo) {
 	result = &CountRepo{
 		conn: clickhouse.Conn(),
 		batcher: batcher.NewBatcher(1000, time.Second, func(batch []*_types.Count) {
-			Logger.Debug("Batch insert %v", len(batch))
-			if err := result.BatchInsert(batch); err != nil {
-				Logger.Error(err)
-			}
+			err := result.BatchInsert(batch)
+			Logger.InfoErr(err, "Batch insert %v %v", len(batch), err)
 		}),
 	}
 	return result

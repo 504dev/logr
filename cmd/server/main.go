@@ -7,7 +7,6 @@ import (
 	"github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server"
-	"github.com/504dev/logr/types"
 	"os"
 	"os/signal"
 	"syscall"
@@ -22,11 +21,7 @@ func main() {
 
 	repos := repo.GetRepos()
 
-	keys, err := repos.DashboardKey.GetByIds([]int{types.DASHKEY_SYSTEM_ID, types.DASHKEY_DEMO_ID})
-	if err != nil {
-		panic(err)
-	}
-	logger.Init(keys)
+	logger.Init(repos.DashboardKey)
 
 	logServer, err := server.NewLogServer(
 		config.Get().Bind.Http,

@@ -6,6 +6,7 @@ import (
 )
 
 func Run(conf *logr.Config, mainlog *logr.Logger) {
+
 	go ai.Run(conf)
 	go starwars(conf)
 	go crypto(conf, mainlog)

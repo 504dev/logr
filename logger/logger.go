@@ -5,6 +5,7 @@ import (
 	logr "github.com/504dev/logr-go-client"
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/logger/demo"
+	"github.com/504dev/logr/repo/interfaces"
 	"github.com/504dev/logr/types"
 	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,11 @@ import (
 	"strconv"
 )
 
-func createConfig(dashkey *types.DashKey) *logr.Config {
+func createConfig(repo interfaces.DashboardKeyRepo, id int) *logr.Config {
+	dashkey, err := repo.GetById(id)
+	if err != nil {
+		panic(err)
+	}
 	if dashkey == nil {
 		panic(errors.New("no dashkey provided"))
 	}
@@ -27,10 +32,10 @@ func createConfig(dashkey *types.DashKey) *logr.Config {
 	}
 }
 
-func Init(dashkeys types.DashKeys) {
+func Init(repo interfaces.DashboardKeyRepo) {
 	color.NoColor = false
 
-	conf := createConfig(dashkeys.Get(types.DASHKEY_SYSTEM_ID))
+	conf := createConfig(repo, types.DASHKEY_SYSTEM_ID)
 	Logger, _ = conf.NewLogger("main.log")
 	_, _ = conf.DefaultSystemCounter()
 	_, _ = conf.DefaultProcessCounter()
@@ -39,7 +44,7 @@ func Init(dashkeys types.DashKeys) {
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
 
 	if config.Get().DemoDash.Enabled {
-		conf := createConfig(dashkeys.Get(types.DASHKEY_DEMO_ID))
+		conf := createConfig(repo, types.DASHKEY_DEMO_ID)
 		go demo.Run(conf, Logger)
 	}
 }

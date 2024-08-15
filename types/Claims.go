@@ -11,8 +11,8 @@ type Claims struct {
 	Role              int    `json:"role"`
 	GihubId           int64  `json:"github_id"`
 	Username          string `json:"username"`
-	AccessToken       string `json:"access_token,omitempty"`
-	AccessTokenCipher string `json:"access_token_cipher"`
+	AccessToken       string `json:"-"`
+	AccessTokenCipher string `json:"access_token_cipher,omitempty"`
 	jwt.RegisteredClaims
 }
 
