@@ -16,36 +16,36 @@ func (id uid) String() string {
 
 type SockMap struct {
 	clients *cmap.ConcurrentMap[uid, *cmap.ConcurrentMap[string, *Sock]]
-	SockSessionStore
+	store   SessionStore
 }
 
 func NewSockMap() *SockMap {
 	clients := cmap.NewStringer[uid, *cmap.ConcurrentMap[string, *Sock]]()
 	sm := SockMap{
-		clients:          &clients,
-		SockSessionStore: &MemorySessionStore{},
+		clients: &clients,
+		store:   &MemorySessionStore{},
 	}
 	return &sm
 }
 
-func (sm *SockMap) SetSessionStore(store SockSessionStore) {
-	sm.SockSessionStore = store
+func (sm *SockMap) SetSessionStore(store SessionStore) {
+	sm.store = store
 }
 
 func (sm *SockMap) Register(s *Sock) {
-	s.SockSession = &SockSession{}
-	s.SockSessionStore = sm.SockSessionStore
+	s.session = &session{}
+	s.store = sm.store
 	// load session
-	session, err := sm.SockSessionStore.Get(s.SockId)
+	session, err := sm.store.Get(s.SockId)
 	if err == nil && session != nil {
-		s.SockSession = session
+		s.session = session
 	}
-	go sm.SockSessionStore.Set(s.SockId, session)
+	go sm.store.Set(s.SockId, session)
 	sm.add(s)
 }
 
 func (sm *SockMap) Unregister(s *Sock) {
-	go sm.SockSessionStore.Del(s.SockId)
+	go sm.store.Del(s.SockId)
 	sm.delete(s)
 }
 

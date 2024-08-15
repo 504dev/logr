@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-type SockSession struct {
+type session struct {
 	Paused    bool           `json:"paused"`
 	Listeners map[string]int `json:"listeners"`
 	*Filter   `json:"filter"`
@@ -15,8 +15,8 @@ type SockSession struct {
 
 type Sock struct {
 	sync.RWMutex
-	*SockSession
-	SockSessionStore
+	session         *session
+	store           SessionStore
 	SockId          string `json:"sock_id"`
 	JwtToken        string `json:"jwt_token"`
 	*User           `json:"user"`
@@ -40,7 +40,7 @@ func (s *Sock) HandleMessage(msg *SockMessage) {
 		paused := msg.Payload.(bool)
 		s.SetPaused(paused)
 	}
-	go s.SockSessionStore.Set(s.SockId, s.SockSession)
+	go s.store.Set(s.SockId, s.session)
 }
 
 func (s *Sock) SendLog(lg *_types.Log) error {
@@ -60,43 +60,43 @@ func (s *Sock) IsExpired() bool {
 func (s *Sock) HasListener(path string) bool {
 	s.RLock()
 	defer s.RUnlock()
-	return s.Listeners != nil && s.Listeners[path] != 0
+	return s.session.Listeners != nil && s.session.Listeners[path] != 0
 }
 
 func (s *Sock) AddListener(path string) {
 	s.Lock()
-	if s.Listeners == nil {
-		s.Listeners = make(map[string]int)
+	if s.session.Listeners == nil {
+		s.session.Listeners = make(map[string]int)
 	}
-	s.Listeners[path] += 1
+	s.session.Listeners[path] += 1
 	s.Unlock()
 }
 
 func (s *Sock) RemoveListener(path string) {
 	s.Lock()
-	s.Listeners[path] -= 1
+	s.session.Listeners[path] -= 1
 	s.Unlock()
 }
 
 func (s *Sock) GetFilter() *Filter {
 	s.RLock()
 	defer s.RUnlock()
-	return s.Filter
+	return s.session.Filter
 }
 func (s *Sock) SetFilter(f *Filter) {
 	s.Lock()
-	s.Filter = f
+	s.session.Filter = f
 	s.Unlock()
-	go s.SockSessionStore.Set(s.SockId, s.SockSession)
+	go s.store.Set(s.SockId, s.session)
 }
 
 func (s *Sock) IsPaused() bool {
 	s.RLock()
 	defer s.RUnlock()
-	return s.Paused
+	return s.session.Paused
 }
 func (s *Sock) SetPaused(state bool) {
 	s.Lock()
-	s.Paused = state
+	s.session.Paused = state
 	s.Unlock()
 }
