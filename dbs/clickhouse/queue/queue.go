@@ -2,38 +2,34 @@ package queue
 
 import (
 	. "github.com/504dev/logr/logger"
-	"github.com/jmoiron/sqlx"
 	"sync"
 	"time"
 )
 
 // deprecated use clickhouse/batcher
 
-type QueueConfig struct {
-	*sqlx.DB
+type QueueConfig[T any] struct {
+	Handler       func([]T)
 	FlushInterval time.Duration
 	FlushCount    int
-	Sql           string
 }
 
-type Queue struct {
+type Queue[T any] struct {
 	sync.Mutex
-	*QueueConfig
-	list    [][]interface{}
-	flushed time.Time
-	stop    chan struct{}
+	*QueueConfig[T]
+	batch []T
+	stop  chan struct{}
 }
 
-func NewQueue(c *QueueConfig) *Queue {
-	return &Queue{
+func NewQueue[T any](c *QueueConfig[T]) *Queue[T] {
+	return &Queue[T]{
 		QueueConfig: c,
-		flushed:     time.Now(),
-		list:        make([][]interface{}, 0, c.FlushCount),
+		batch:       make([]T, 0, c.FlushCount),
 		stop:        make(chan struct{}),
 	}
 }
 
-func (q *Queue) Run() {
+func (q *Queue[T]) Run() {
 	go (func() {
 		for {
 			select {
@@ -48,52 +44,32 @@ func (q *Queue) Run() {
 	})()
 }
 
-func (q *Queue) Stop() error {
+func (q *Queue[T]) Stop() error {
 	close(q.stop)
 	return q.Flush()
 }
 
-func (q *Queue) Push(values []interface{}) {
+func (q *Queue[T]) Push(item T) {
 	q.Lock()
-	q.list = append(q.list, values)
-	count := len(q.list)
+	q.batch = append(q.batch, item)
+	count := len(q.batch)
 	q.Unlock()
 	if count >= q.FlushCount {
 		q.Flush()
 	}
 }
 
-func (q *Queue) Flush() error {
+func (q *Queue[T]) Flush() error {
 	q.Lock()
-	if len(q.list) == 0 {
+	if len(q.batch) == 0 {
 		q.Unlock()
 		return nil
 	}
-	batch := q.list
-	q.list = make([][]interface{}, 0, q.FlushCount)
+	batch := q.batch
+	q.batch = make([]T, 0, q.FlushCount)
 	q.Unlock()
 
-	tx, err := q.DB.Begin()
-	if err != nil {
-		return err
-	}
+	q.Handler(batch)
 
-	defer func() {
-		_ = tx.Rollback()
-	}()
-
-	stmt, err := tx.Prepare(q.Sql)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	for _, v := range batch {
-		_, err = stmt.Exec(v...)
-		if err != nil {
-			return err
-		}
-	}
-
-	return tx.Commit()
+	return nil
 }

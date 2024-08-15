@@ -9,12 +9,12 @@ func (repo *LogRepo) RunBatcher() *LogRepo {
 	return repo
 }
 
-func (repo *LogRepo) StopBatcher() error {
-	repo.batcher.Stop()
+func (repo *LogRepo) Store(log *_types.Log) error {
+	repo.batcher.Push(log)
 	return nil
 }
 
-func (repo *LogRepo) Store(log *_types.Log) error {
-	repo.batcher.Push(log)
+func (repo *LogRepo) StopBatcher() error {
+	repo.batcher.Stop()
 	return nil
 }

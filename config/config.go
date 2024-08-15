@@ -4,21 +4,24 @@ import (
 	"flag"
 )
 
-var args Args
+var args CommandLineArgs
 var config Config
 
-func ParseArgs() {
+func parseCommandLineArgs(args *CommandLineArgs) {
 	flag.StringVar(&args.Configpath, "config", "./config.yml", "set the logr configuration file")
 	flag.IntVar(&args.Retries, "retries", 0, "set the number of attempts to reconnect to databases")
 	flag.Parse()
 }
 
-func Init() Args {
-	ParseArgs()
-	err := config.FromFile(args.Configpath)
+func MustLoad() {
+	parseCommandLineArgs(&args)
+	err := config.ReadFromFile(args.Configpath)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func GetCommandLineArgs() CommandLineArgs {
 	return args
 }
 
@@ -31,5 +34,5 @@ func Set(set func(c *ConfigData)) {
 }
 
 func Save() error {
-	return config.ToFile(args.Configpath)
+	return config.Save()
 }

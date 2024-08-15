@@ -8,7 +8,6 @@ import (
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server"
 	"github.com/504dev/logr/types"
-	"github.com/fatih/color"
 	"os"
 	"os/signal"
 	"syscall"
@@ -16,10 +15,10 @@ import (
 )
 
 func main() {
-	color.NoColor = false
-	args := config.Init()
-	clickhouse.Init(args.Retries)
-	mysql.Init(args.Retries)
+	config.MustLoad()
+
+	clickhouse.Init(config.GetCommandLineArgs().Retries)
+	mysql.Init(config.GetCommandLineArgs().Retries)
 
 	repos := repo.GetRepos()
 
@@ -42,7 +41,7 @@ func main() {
 	}
 	logServer.Run()
 
-	// Shutdown
+	// Exit & Graceful Shutdown
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
 	sig := <-exit

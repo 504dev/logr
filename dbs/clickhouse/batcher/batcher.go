@@ -72,7 +72,6 @@ func (b *Batcher[T]) flush() int {
 }
 
 func (b *Batcher[T]) drain() {
-	close(b.channel)
 	for {
 		select {
 		case item, ok := <-b.channel:
@@ -82,7 +81,7 @@ func (b *Batcher[T]) drain() {
 			}
 			b.append(item)
 		default:
-			return
+			close(b.channel)
 		}
 	}
 }

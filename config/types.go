@@ -8,7 +8,7 @@ import (
 	"sync"
 )
 
-type Args struct {
+type CommandLineArgs struct {
 	Configpath string
 	Retries    int
 }
@@ -45,22 +45,24 @@ func (c *ConfigData) GetJwtSecret() string {
 	hash := sha256.Sum256([]byte(c.OAuth.Github.ClientSecret))
 	return base64.StdEncoding.EncodeToString(hash[:])
 }
-func (c *ConfigData) NeedSetup() bool {
+func (c *ConfigData) IsSetupRequired() bool {
 	return c.OAuth.Github.ClientId == "" || c.OAuth.Github.ClientSecret == ""
 }
 
 type Config struct {
-	sync.RWMutex
-	Data ConfigData
+	mu         sync.RWMutex
+	data       ConfigData
+	configpath string
 }
 
-func (c *Config) FromFile(configpath string) error {
+func (c *Config) ReadFromFile(configpath string) error {
+	c.configpath = configpath
 	yamlFile, err := os.ReadFile(configpath)
 	if err != nil {
 		return err
 	}
 	yamlFile = []byte(os.ExpandEnv(string(yamlFile)))
-	err = yaml.Unmarshal(yamlFile, &c.Data)
+	err = yaml.Unmarshal(yamlFile, &c.data)
 	if err != nil {
 		return err
 	}
@@ -68,27 +70,27 @@ func (c *Config) FromFile(configpath string) error {
 }
 
 func (c *Config) Get() *ConfigData {
-	c.RLock()
-	defer c.RUnlock()
-	return &c.Data
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return &c.data
 }
 
-func (c *Config) Set(set func(c *ConfigData)) {
-	c.Lock()
-	clone := c.Data
-	set(&clone)
-	c.Data = clone
-	c.Unlock()
+func (c *Config) Set(setterFunc func(c *ConfigData)) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	clone := c.data
+	setterFunc(&clone)
+	c.data = clone
 }
 
-func (c *Config) ToFile(configpath string) error {
-	d, err := yaml.Marshal(&c.Data)
+func (c *Config) Save() error {
+	return c.SaveToFile(c.configpath)
+}
+
+func (c *Config) SaveToFile(configpath string) error {
+	data, err := yaml.Marshal(&c.data)
 	if err != nil {
 		return err
 	}
-	err = os.WriteFile(configpath, d, 0644)
-	if err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(configpath, data, 0644)
 }

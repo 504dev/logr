@@ -60,7 +60,7 @@ func (a *AuthController) Authorize(c *gin.Context) {
 }
 
 func (a *AuthController) NeedSetup(c *gin.Context) {
-	if !config.Get().NeedSetup() {
+	if !config.Get().IsSetupRequired() {
 		c.AbortWithStatus(http.StatusForbidden)
 	}
 }

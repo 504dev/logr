@@ -25,7 +25,7 @@ func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo
 		globals := map[string]interface{}{
 			"version": Logger.GetVersion(),
 			"org":     config.Get().OAuth.Github.Org,
-			"setup":   config.Get().NeedSetup(),
+			"setup":   config.Get().IsSetupRequired(),
 		}
 		if wd, err := os.Getwd(); err == nil {
 			wd = wd + "/frontend"

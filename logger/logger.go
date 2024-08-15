@@ -6,6 +6,7 @@ import (
 	"github.com/504dev/logr/config"
 	"github.com/504dev/logr/logger/demo"
 	"github.com/504dev/logr/types"
+	"github.com/fatih/color"
 	"github.com/gin-gonic/gin"
 	"io"
 	"os"
@@ -27,6 +28,8 @@ func createConfig(dashkey *types.DashKey) *logr.Config {
 }
 
 func Init(dashkeys types.DashKeys) {
+	color.NoColor = false
+
 	conf := createConfig(dashkeys.Get(types.DASHKEY_SYSTEM_ID))
 	Logger, _ = conf.NewLogger("main.log")
 	_, _ = conf.DefaultSystemCounter()

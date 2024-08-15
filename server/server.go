@@ -88,7 +88,7 @@ func NewLogServer(
 	}, nil
 }
 
-func (srv *LogServer) recieve() {
+func (srv *LogServer) recieveLoop() {
 	for meta := range srv.channel {
 		go srv.handle(meta)
 	}
@@ -96,7 +96,7 @@ func (srv *LogServer) recieve() {
 
 func (srv *LogServer) Run() {
 	go func() {
-		srv.recieve()
+		srv.recieveLoop()
 		close(srv.done) // reading from srv.channel completed
 	}()
 	go func() {
