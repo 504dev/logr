@@ -90,3 +90,11 @@ func (b *Batcher[T]) Stop() {
 	close(b.stop)
 	<-b.done
 }
+
+func (b *Batcher[T]) HasStopped() <-chan struct{} {
+	return b.stop
+}
+
+func (b *Batcher[T]) Done() <-chan struct{} {
+	return b.done
+}
