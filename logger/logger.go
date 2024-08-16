@@ -45,7 +45,7 @@ func Init(repo interfaces.DashboardKeyRepo) {
 
 	if config.Get().DemoDash.Enabled {
 		conf := createConfig(repo, types.DASHKEY_DEMO_ID)
-		go demo.Run(conf, Logger)
+		go demo.Start(conf, Logger)
 	}
 }
 

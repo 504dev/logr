@@ -88,17 +88,13 @@ func NewLogServer(
 	}, nil
 }
 
-func (srv *LogServer) recieveLoop() {
+func (srv *LogServer) handleLoop() {
 	for meta := range srv.channel {
 		go srv.handle(meta)
 	}
 }
 
 func (srv *LogServer) Run() {
-	go func() {
-		srv.recieveLoop()
-		close(srv.done) // reading from srv.channel completed
-	}()
 	go func() {
 		if err := srv.httpServer.Listen(); err != nil {
 			if err == nethttp.ErrServerClosed {
@@ -108,6 +104,8 @@ func (srv *LogServer) Run() {
 			panic(err)
 		}
 	}()
+
+	// start recieving log packages
 	var wg errgroup.Group
 	wg.Go(srv.udpServer.Listen)
 	wg.Go(srv.grpcServer.Listen)
@@ -117,6 +115,10 @@ func (srv *LogServer) Run() {
 		}
 		close(srv.channel) // writing to srv.channel is complete
 	}()
+
+	// start handling
+	srv.handleLoop()
+	close(srv.done) // reading from srv.channel completed
 }
 
 func (srv *LogServer) Stop() error {

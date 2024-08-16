@@ -16,8 +16,8 @@ import (
 func main() {
 	config.MustLoad()
 
-	clickhouse.Init(config.GetCommandLineArgs().Retries)
-	mysql.Init(config.GetCommandLineArgs().Retries)
+	clickhouse.MustInit(config.GetCommandLineArgs().Retries)
+	mysql.MustInit(config.GetCommandLineArgs().Retries)
 
 	repos := repo.GetRepos()
 
@@ -34,7 +34,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	logServer.Run()
+	go logServer.Run()
 
 	// Exit & Graceful Shutdown
 	exit := make(chan os.Signal, 1)

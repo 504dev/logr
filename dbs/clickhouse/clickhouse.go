@@ -16,7 +16,7 @@ func Conn() *sqlx.DB {
 	return db
 }
 
-func Init(retries int) {
+func MustInit(retries int) {
 	var err error
 	db, err = sqlx.Connect("clickhouse", config.Get().Clickhouse)
 	if err == nil {
@@ -26,7 +26,7 @@ func Init(retries int) {
 	if retries > 0 {
 		fmt.Fprintf(os.Stderr, "(%v) clickhouse connect retry: %s\n", retries, err)
 		<-time.After(time.Second)
-		Init(retries - 1)
+		MustInit(retries - 1)
 		return
 	}
 	panic(err)
