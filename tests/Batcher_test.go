@@ -3,6 +3,7 @@ package tests
 import (
 	"github.com/504dev/logr/dbs/clickhouse/batcher"
 	"github.com/504dev/logr/dbs/clickhouse/queue"
+	"github.com/stretchr/testify/assert"
 	"sync"
 	"testing"
 	"time"
@@ -33,7 +34,6 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 		result := make([][2]int, 0)
 		processor := create(50, time.Second, func(batch []int) {
 			result = append(result, [2]int{len(batch), int(time.Since(ts).Seconds())})
-			//t.Log(result)
 		})
 		t.Log(processor)
 		fill := func(n int) {
@@ -53,9 +53,7 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 		processor.Run()
 
 		t.Log("result", result)
-		if !equal(result, expected) {
-			t.Errorf("Unexpected result: got %v, want %v", result, expected)
-		}
+		assert.Equal(t, expected, result, "Unexpected result")
 	})
 
 	t.Run("Basic functionality", func(t *testing.T) {
@@ -74,15 +72,9 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 
 		processor.Stop()
 
-		if len(results) != 2 {
-			t.Fatalf("Expected 2 batches, got %d, results: %v", len(results), results)
-		}
-		if !equal(results[0], []int{1, 2, 3}) {
-			t.Errorf("First batch incorrect: %v", results[0])
-		}
-		if !equal(results[1], []int{4, 5}) {
-			t.Errorf("Second batch incorrect: %v", results[1])
-		}
+		assert.Len(t, results, 2, "Expected 2 batches")
+		assert.Equal(t, []int{1, 2, 3}, results[0], "First batch incorrect")
+		assert.Equal(t, []int{4, 5}, results[1], "Second batch incorrect")
 	})
 
 	t.Run("Time limit", func(t *testing.T) {
@@ -100,12 +92,8 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 
 		processor.Stop()
 
-		if len(results) != 1 {
-			t.Fatalf("Expected 1 batch, got %d, results: %v", len(results), results)
-		}
-		if !equal(results[0], []int{1, 2}) {
-			t.Errorf("Batch incorrect: %v", results[0])
-		}
+		assert.Len(t, results, 1, "Expected 1 batch")
+		assert.Equal(t, []int{1, 2}, results[0], "Batch incorrect")
 	})
 
 	t.Run("Concurrent pushes", func(t *testing.T) {
@@ -135,27 +123,14 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 			totalItems += len(batch)
 		}
 
-		if totalItems != 20 {
-			t.Errorf("Expected 20 items in total, got %d", totalItems)
-		}
+		assert.Equal(t, 20, totalItems, "Expected 20 items in total")
 	})
 }
 
 func TestBatcher(t *testing.T) {
 	testBatchProcessor(t, createBatcher[int])
 }
+
 func TestQueue(t *testing.T) {
 	testBatchProcessor(t, createQueue[int])
-}
-
-func equal[T comparable](a, b []T) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i, v := range a {
-		if v != b[i] {
-			return false
-		}
-	}
-	return true
 }
