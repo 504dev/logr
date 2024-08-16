@@ -9,7 +9,7 @@ import (
 type LogPackageJoiner struct {
 	delay time.Duration
 	tries int
-	data  map[string]LogPackageRow
+	data  map[string]_types.LogPackageChunks
 	mx    sync.RWMutex
 }
 
@@ -17,7 +17,7 @@ func NewLogPackageJoiner(delay time.Duration, tries int) *LogPackageJoiner {
 	return &LogPackageJoiner{
 		delay: delay,
 		tries: tries,
-		data:  make(map[string]LogPackageRow, 100),
+		data:  make(map[string]_types.LogPackageChunks, 100),
 	}
 }
 
@@ -31,7 +31,7 @@ func (j *LogPackageJoiner) createSafe(lp *_types.LogPackage, lifetime time.Durat
 	uid := lp.Chunk.Uid
 	size := lp.Chunk.N
 	j.mx.Lock()
-	j.data[uid] = make(LogPackageRow, size)
+	j.data[uid] = make(_types.LogPackageChunks, size)
 	j.data[uid][lp.Chunk.I] = lp
 	j.mx.Unlock()
 	go func() {

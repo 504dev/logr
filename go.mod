@@ -3,7 +3,7 @@ module github.com/504dev/logr
 go 1.19
 
 require (
-	github.com/504dev/logr-go-client v1.60.8
+	github.com/504dev/logr-go-client v1.60.10
 	github.com/ClickHouse/clickhouse-go v1.5.4
 	github.com/dustin/go-humanize v1.0.1
 	github.com/fatih/color v1.16.0
