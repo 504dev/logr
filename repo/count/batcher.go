@@ -2,19 +2,29 @@ package count
 
 import (
 	_types "github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr/dbs/clickhouse/batcher"
+	. "github.com/504dev/logr/logger"
+	"time"
 )
 
-func (repo *CountRepo) RunBatcher() *CountRepo {
+func (repo *CountRepo) StartBatcher() {
+	repo.batcher = batcher.NewBatcher(1000, time.Second, func(batch []*_types.Count) {
+		err := repo.BatchInsert(batch)
+		Logger.InfoErr(err, "Batch insert %v %v", len(batch), err)
+	})
 	go repo.batcher.Run()
-	return repo
 }
 
 func (repo *CountRepo) Store(count *_types.Count) error {
-	repo.batcher.Push(count)
-	return nil
+	if repo.batcher != nil {
+		repo.batcher.Push(count)
+		return nil
+	}
+	return repo.Insert(count)
 }
 
-func (repo *CountRepo) StopBatcher() error {
-	repo.batcher.Stop()
-	return nil
+func (repo *CountRepo) StopBatcher() {
+	if repo.batcher != nil {
+		repo.batcher.Stop()
+	}
 }

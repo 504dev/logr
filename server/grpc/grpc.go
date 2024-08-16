@@ -57,5 +57,5 @@ func (s *GrpcServer) Stop() error {
 		return nil
 	}
 	s.grpcServer.GracefulStop()
-	return s.listener.Close()
+	return nil
 }

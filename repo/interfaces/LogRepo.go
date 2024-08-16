@@ -10,5 +10,5 @@ type LogRepo interface {
 	StatsByDashboardCached(dashId int) ([]*types.DashStatRow, error)
 	StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, error)
 	Store(log *_types.Log) error
-	StopBatcher() error
+	StopBatcher()
 }

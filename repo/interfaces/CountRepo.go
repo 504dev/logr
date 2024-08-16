@@ -10,5 +10,5 @@ type CountRepo interface {
 	StatsByDashboardCached(dashId int) ([]*types.DashStatRow, error)
 	StatsByLognameCached(dashId int, logname string) ([]*types.DashStatRow, error)
 	Store(count *_types.Count) error
-	StopBatcher() error
+	StopBatcher()
 }

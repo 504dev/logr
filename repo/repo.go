@@ -8,7 +8,6 @@ import (
 	"github.com/504dev/logr/repo/interfaces"
 	"github.com/504dev/logr/repo/log"
 	"github.com/504dev/logr/repo/user"
-	"golang.org/x/sync/errgroup"
 	"sync"
 )
 
@@ -28,21 +27,24 @@ func GetRepos() *Repos {
 	once.Do(func() {
 		dashboardMemberRepo := dashmember.NewDashboardMemberRepo()
 		dashboardKeyRepo := dashkey.NewDashboardKeyRepo()
+		countRepo := count.NewCountRepo()
+		logRepo := log.NewLogRepo()
 		repos = &Repos{
 			User:            user.NewUserRepo(),
 			Dashboard:       dashboard.NewDashboardRepo(dashboardMemberRepo, dashboardKeyRepo),
 			DashboardMember: dashboardMemberRepo,
 			DashboardKey:    dashboardKeyRepo,
-			Count:           count.NewCountRepo().RunBatcher(),
-			Log:             log.NewLogRepo().RunBatcher(),
+			Count:           countRepo,
+			Log:             logRepo,
 		}
+		// use batching for clickhouse repos
+		logRepo.StartBatcher()
+		countRepo.StartBatcher()
 	})
 	return repos
 }
 
-func (r *Repos) Stop() error {
-	var wg errgroup.Group
-	wg.Go(r.Count.StopBatcher)
-	wg.Go(r.Log.StopBatcher)
-	return wg.Wait()
+func (r *Repos) Stop() {
+	r.Count.StopBatcher()
+	r.Log.StopBatcher()
 }

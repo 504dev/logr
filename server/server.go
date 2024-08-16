@@ -109,13 +109,8 @@ func (srv *LogServer) Run() {
 		}
 	}()
 	var wg errgroup.Group
-	wg.Go(func() error {
-		srv.udpServer.Listen()
-		return nil
-	})
-	wg.Go(func() error {
-		return srv.grpcServer.Listen()
-	})
+	wg.Go(srv.udpServer.Listen)
+	wg.Go(srv.grpcServer.Listen)
 	go func() {
 		if err := wg.Wait(); err != nil {
 			Logger.Warn(err)
@@ -124,10 +119,15 @@ func (srv *LogServer) Run() {
 	}()
 }
 
-func (srv *LogServer) Stop() {
-	srv.udpServer.Stop()
-	_ = srv.grpcServer.Stop()
-	_ = srv.httpServer.Stop()
-	_ = srv.repos.Stop()
+func (srv *LogServer) Stop() error {
+	var wg errgroup.Group
+	wg.Go(srv.udpServer.Stop)
+	wg.Go(srv.grpcServer.Stop)
+	wg.Go(srv.httpServer.Stop)
+	if err := wg.Wait(); err != nil {
+		return err
+	}
+	srv.repos.Stop()
 	<-srv.done
+	return nil
 }

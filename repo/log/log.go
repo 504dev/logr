@@ -16,20 +16,21 @@ type LogRepo struct {
 	batcher *batcher.Batcher[*_types.Log]
 }
 
-func NewLogRepo() (result *LogRepo) {
+func NewLogRepo() *LogRepo {
 	return &LogRepo{
 		conn: clickhouse.Conn(),
-		batcher: batcher.NewBatcher(1000, time.Second, func(batch []*_types.Log) {
-			err := result.BatchInsert(batch)
-			Logger.InfoErr(err, "Batch insert %v %v", len(batch), err)
-		}),
 	}
 }
 
+func (repo *LogRepo) Insert(log *_types.Log) error {
+	return repo.BatchInsert([]*_types.Log{log})
+}
+
 func (repo *LogRepo) BatchInsert(batch []*_types.Log) error {
-	sql := `
+	const sql = `
 		INSERT INTO logs (day, timestamp, dash_id, hostname, logname, level, message, pid, version)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`
+
 	tx, err := repo.conn.Begin()
 	if err != nil {
 		return err

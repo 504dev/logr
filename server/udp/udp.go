@@ -15,6 +15,7 @@ type UdpServer struct {
 	ch     chan<- *types.LogPackageMeta
 	ctx    context.Context
 	cancel context.CancelFunc
+	done   chan struct{}
 }
 
 func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, error) {
@@ -28,18 +29,18 @@ func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, err
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	return &UdpServer{
-		udpconn,
-		ch,
-		ctx,
-		cancel,
+		conn:   udpconn,
+		ch:     ch,
+		ctx:    ctx,
+		cancel: cancel,
+		done:   make(chan struct{}),
 	}, nil
 }
 
-func (srv *UdpServer) Listen() {
+func (srv *UdpServer) Listen() error {
 	if srv == nil {
-		return
+		return nil
 	}
-	defer srv.conn.Close()
 
 	wg := sync.WaitGroup{}
 	semaphore := make(chan struct{}, 10) // limit concurrent connections
@@ -82,11 +83,16 @@ func (srv *UdpServer) Listen() {
 		}()
 	}
 	wg.Wait()
+	close(srv.done)
+
+	return nil
 }
 
-func (srv *UdpServer) Stop() {
+func (srv *UdpServer) Stop() error {
 	if srv == nil {
-		return
+		return nil
 	}
 	srv.cancel()
+	<-srv.done
+	return srv.conn.Close()
 }

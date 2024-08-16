@@ -22,19 +22,18 @@ type CountRepo struct {
 	batcher *batcher.Batcher[*_types.Count]
 }
 
-func NewCountRepo() (result *CountRepo) {
-	result = &CountRepo{
+func NewCountRepo() *CountRepo {
+	return &CountRepo{
 		conn: clickhouse.Conn(),
-		batcher: batcher.NewBatcher(1000, time.Second, func(batch []*_types.Count) {
-			err := result.BatchInsert(batch)
-			Logger.InfoErr(err, "Batch insert %v %v", len(batch), err)
-		}),
 	}
-	return result
+}
+
+func (repo *CountRepo) Insert(count *_types.Count) error {
+	return repo.BatchInsert([]*_types.Count{count})
 }
 
 func (repo *CountRepo) BatchInsert(batch []*_types.Count) error {
-	sql := `
+	const sql = `
 		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, version, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl, time_dur)
 		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	tx, err := repo.conn.Begin()

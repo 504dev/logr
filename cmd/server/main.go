@@ -42,6 +42,9 @@ func main() {
 	sig := <-exit
 	ts := time.Now()
 	logger.Logger.Warn("Exit with code: %v", sig)
-	logServer.Stop()
+	err = logServer.Stop()
+	if err != nil {
+		logger.Logger.Error(err)
+	}
 	logger.Logger.Debug(time.Since(ts))
 }
