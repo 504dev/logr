@@ -9,24 +9,20 @@ import (
 	"time"
 )
 
-// BatchProcessor - интерфейс для обобщения Batcher и Queue
 type BatchProcessor[T any] interface {
 	Push(item T) bool
 	Run()
 	Stop()
 }
 
-// createBatcher - функция для создания Batcher
 func createBatcher[T any](size int, interval time.Duration, handler func([]T)) BatchProcessor[T] {
 	return batcher.NewBatcher(size, interval, handler)
 }
 
-// createQueue - функция для создания Queue
 func createQueue[T any](size int, interval time.Duration, handler func([]T)) BatchProcessor[T] {
 	return queue.NewQueue(size, interval, handler)
 }
 
-// testBatchProcessor - общая функция для тестирования BatchProcessor
 func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int)) BatchProcessor[int]) {
 	t.Run("Boss test", func(t *testing.T) {
 		ts := time.Now()

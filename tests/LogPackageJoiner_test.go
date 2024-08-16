@@ -10,25 +10,19 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Предположим, что _types.LogPackage и _types.LogPackageChunks определены в отдельном пакете
-// Для целей тестирования мы создадим упрощенные версии этих структур
-
 func TestLogPackageJoiner_Add(t *testing.T) {
 	joiner := types.NewLogPackageJoiner(time.Millisecond*10, 3)
 
-	// Тест добавления первого чанка
 	lp1 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test1", I: 0, N: 3}, PlainLog: []byte("chunk1")}
 	complete, joined := joiner.Add(lp1)
 	assert.False(t, complete)
 	assert.Nil(t, joined)
 
-	// Тест добавления второго чанка
 	lp2 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test1", I: 1, N: 3}, PlainLog: []byte("chunk2")}
 	complete, joined = joiner.Add(lp2)
 	assert.False(t, complete)
 	assert.Nil(t, joined)
 
-	// Тест добавления последнего чанка и завершения пакета
 	lp3 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test1", I: 2, N: 3}, PlainLog: []byte("chunk3")}
 	complete, joined = joiner.Add(lp3)
 	assert.True(t, complete)
@@ -73,7 +67,7 @@ func TestLogPackageJoiner_AddTimeout(t *testing.T) {
 	lp1 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test3", I: 0, N: 2}, PlainLog: []byte("chunk1")}
 	joiner.Add(lp1)
 
-	time.Sleep(time.Millisecond * 30) // Ждем, пока пакет устареет
+	time.Sleep(time.Millisecond * 30)
 
 	lp2 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test3", I: 1, N: 2}, PlainLog: []byte("chunk2")}
 	complete, joined := joiner.Add(lp2)
