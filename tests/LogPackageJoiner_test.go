@@ -55,9 +55,9 @@ func TestLogPackageJoiner_AddOutOfOrder(t *testing.T) {
 			complete, j := joiner.Add(lp)
 			if complete {
 				joined = j
-				assert.NotNil(t, joined)
+				assert.NotNil(t, j)
 			} else {
-				assert.Nil(t, joined)
+				assert.Nil(t, j)
 			}
 		}(i, lp)
 	}
