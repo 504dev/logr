@@ -77,13 +77,15 @@ func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, erro
 		where += ` and version = ?`
 		values = append(values, filter.Version)
 	}
-	if filter.Timestamp[0] != 0 {
-		where += " AND timestamp > ?"
-		values = append(values, filter.Timestamp[0])
-	}
-	if filter.Timestamp[1] != 0 {
-		where += " AND timestamp <= ?"
-		values = append(values, filter.Timestamp[1])
+	if filter.Timestamp != nil {
+		if filter.Timestamp[0] != 0 {
+			where += " AND timestamp > ?"
+			values = append(values, filter.Timestamp[0])
+		}
+		if filter.Timestamp[1] != 0 {
+			where += " AND timestamp <= ?"
+			values = append(values, filter.Timestamp[1])
+		}
 	}
 	aggmap := map[string][]string{
 		AggMinute:   {"toStartOfMinute", "6 hour"},
