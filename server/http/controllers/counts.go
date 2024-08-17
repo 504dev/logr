@@ -75,7 +75,7 @@ func (c *CountsController) FindSnippet(ctx *gin.Context) {
 
 	filter := types.Filter{
 		DashId:    dashId,
-		Timestamp: [2]int64{from, timestamp},
+		Timestamp: &[2]int64{from, timestamp},
 		Logname:   logname,
 		Hostname:  hostname,
 		Keyname:   keyname,

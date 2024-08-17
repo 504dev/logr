@@ -8,18 +8,18 @@ import (
 )
 
 type Filter struct {
-	DashId    int      `json:"dash_id"`
-	Hostname  string   `json:"hostname"`
-	Logname   string   `json:"logname"`
-	Level     string   `json:"level"`
-	Pid       int      `json:"pid"`
-	Version   string   `json:"version"`
-	Message   string   `json:"message"`
-	Timestamp [2]int64 `json:"timestamp"`
-	Pattern   string   `json:"pattern"`
-	Offset    int64    `json:"offset"`
-	Limit     int      `json:"limit"`
-	Keyname   string   `json:"keyname"`
+	DashId    int       `json:"dash_id,omitempty"`
+	Hostname  string    `json:"hostname,omitempty"`
+	Logname   string    `json:"logname,omitempty"`
+	Level     string    `json:"level,omitempty"`
+	Pid       int       `json:"pid,omitempty"`
+	Version   string    `json:"version,omitempty"`
+	Message   string    `json:"message,omitempty"`
+	Timestamp *[2]int64 `json:"timestamp,omitempty"`
+	Pattern   string    `json:"pattern,omitempty"`
+	Offset    int64     `json:"offset,omitempty"`
+	Limit     int       `json:"limit,omitempty"`
+	Keyname   string    `json:"keyname,omitempty"`
 }
 
 func (f *Filter) Match(log *_types.Log) bool {
@@ -41,11 +41,13 @@ func (f *Filter) Match(log *_types.Log) bool {
 	if f.Pid != 0 && f.Pid != log.Pid {
 		return false
 	}
-	if f.Timestamp[0] != 0 && log.Timestamp < f.Timestamp[0] {
-		return false
-	}
-	if f.Timestamp[1] != 0 && log.Timestamp > f.Timestamp[1] {
-		return false
+	if f.Timestamp != nil {
+		if f.Timestamp[0] != 0 && log.Timestamp < f.Timestamp[0] {
+			return false
+		}
+		if f.Timestamp[1] != 0 && log.Timestamp > f.Timestamp[1] {
+			return false
+		}
 	}
 	if f.Message != "" {
 		re, err := regexp.Compile(f.Message)
@@ -121,17 +123,19 @@ func (f *Filter) ToSql() (string, []interface{}, error) {
 			values = append(values, r)
 		}
 	}
-	if f.Timestamp[0] != 0 {
-		sql += " AND timestamp > ?"
-		values = append(values, f.Timestamp[0])
-	}
-	to := f.Timestamp[1]
-	if f.Offset != 0 {
-		to = f.Offset
-	}
-	if to != 0 {
-		sql += " AND timestamp < ?"
-		values = append(values, to)
+	if f.Timestamp != nil {
+		if f.Timestamp[0] != 0 {
+			sql += " AND timestamp > ?"
+			values = append(values, f.Timestamp[0])
+		}
+		to := f.Timestamp[1]
+		if f.Offset != 0 {
+			to = f.Offset
+		}
+		if to != 0 {
+			sql += " AND timestamp < ?"
+			values = append(values, to)
+		}
 	}
 	if f.Message != "" {
 		if _, err := regexp.Compile(f.Message); err != nil {

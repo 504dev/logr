@@ -37,27 +37,17 @@ func (c *LogsController) Find(ctx *gin.Context) {
 	limit, _ := strconv.Atoi(ctx.Query("limit"))
 	offset, _ := strconv.ParseInt(ctx.Query("offset"), 10, 64)
 
-	timestamp := [2]int64{0, 0}
-	for k, v := range ctx.QueryArray("timestamp[]") {
-		if k > 1 {
-			break
-		}
-		t, _ := strconv.ParseInt(v, 10, 64)
-		timestamp[k] = t
-	}
-
 	filter := types.Filter{
-		DashId:    dashId,
-		Timestamp: timestamp,
-		Pattern:   pattern,
-		Logname:   logname,
-		Hostname:  hostname,
-		Level:     level,
-		Version:   version,
-		Pid:       pid,
-		Message:   message,
-		Offset:    offset,
-		Limit:     limit,
+		DashId:   dashId,
+		Pattern:  pattern,
+		Logname:  logname,
+		Hostname: hostname,
+		Level:    level,
+		Version:  version,
+		Pid:      pid,
+		Message:  message,
+		Offset:   offset,
+		Limit:    limit,
 	}
 	sockId := ctx.Query("sock_id")
 	if sockId != "" {
