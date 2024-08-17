@@ -8,17 +8,17 @@ import (
 )
 
 type SessionStore interface {
-	Set(key string, value *session) error
-	Get(key string) (*session, error)
+	Set(key string, value *SockSession) error
+	Get(key string) (*SockSession, error)
 	Del(key string) error
 }
 
 type MemorySessionStore struct{}
 
-func (s MemorySessionStore) Set(key string, value *session) error {
+func (s MemorySessionStore) Set(key string, value *SockSession) error {
 	return nil
 }
-func (s MemorySessionStore) Get(key string) (*session, error) {
+func (s MemorySessionStore) Get(key string) (*SockSession, error) {
 	return nil, nil
 }
 func (s MemorySessionStore) Del(key string) error {
@@ -52,16 +52,16 @@ type RedisSessionStore struct {
 	ttl    time.Duration
 }
 
-func (store *RedisSessionStore) Set(key string, value *session) error {
-	json, err := json.Marshal(value)
+func (store *RedisSessionStore) Set(key string, value *SockSession) error {
+	bytes, err := json.Marshal(value)
 	if err != nil {
 		return err
 	}
 
-	return store.client.Set(store.ctx, key, json, store.ttl).Err()
+	return store.client.Set(store.ctx, key, bytes, store.ttl).Err()
 }
 
-func (store *RedisSessionStore) Get(key string) (*session, error) {
+func (store *RedisSessionStore) Get(key string) (*SockSession, error) {
 	val, err := store.client.Get(store.ctx, key).Result()
 	if err != nil {
 		if err == redis.Nil {
@@ -70,7 +70,7 @@ func (store *RedisSessionStore) Get(key string) (*session, error) {
 		return nil, err
 	}
 
-	var session session
+	var session SockSession
 	err = json.Unmarshal([]byte(val), &session)
 	if err != nil {
 		return nil, err

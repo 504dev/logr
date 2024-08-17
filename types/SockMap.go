@@ -33,19 +33,12 @@ func (sm *SockMap) SetSessionStore(store SessionStore) {
 }
 
 func (sm *SockMap) Register(s *Sock) {
-	s.session = &session{}
-	s.store = sm.store
-	// load session
-	session, err := sm.store.Get(s.SockId)
-	if err == nil && session != nil {
-		s.session = session
-	}
-	go sm.store.Set(s.SockId, session)
+	s.SetStore(sm.store)
+	s.LoadSession()
 	sm.add(s)
 }
 
 func (sm *SockMap) Unregister(s *Sock) {
-	go sm.store.Del(s.SockId)
 	sm.delete(s)
 }
 
@@ -110,8 +103,8 @@ func (sm *SockMap) add(s *Sock) {
 func (sm *SockMap) delete(s *Sock) bool {
 	if us, ok := sm.clients.Get(uid(s.User.Id)); ok {
 		if s, ok := us.Get(s.SockId); ok {
-			_ = s.Close()
 			us.Remove(s.SockId)
+			_ = s.Delete()
 			return true
 		}
 	}

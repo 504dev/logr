@@ -1,27 +1,29 @@
 package types
 
 import (
+	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
 	"golang.org/x/net/websocket"
+	"io"
 	"sync"
 	"time"
 )
 
-type session struct {
+type SockSession struct {
 	Paused    bool           `json:"paused"`
 	Listeners map[string]int `json:"listeners"`
 	*Filter   `json:"filter"`
 }
 
 type Sock struct {
-	sync.RWMutex
-	session         *session
-	store           SessionStore
-	SockId          string `json:"sock_id"`
-	JwtToken        string `json:"jwt_token"`
-	*User           `json:"user"`
-	*Claims         `json:"claims"`
-	*websocket.Conn `json:"conn"` // TODO interface
+	mu       sync.RWMutex
+	store    SessionStore
+	SockId   string         `json:"sock_id"`
+	Session  *SockSession   `json:"session"`
+	Conn     io.WriteCloser `json:"conn"`
+	JwtToken string         `json:"jwt_token"`
+	*User    `json:"user"`
+	*Claims  `json:"claims"`
 }
 
 type SockMessage struct {
@@ -40,63 +42,89 @@ func (s *Sock) HandleMessage(msg *SockMessage) {
 		paused := msg.Payload.(bool)
 		s.SetPaused(paused)
 	}
-	go s.store.Set(s.SockId, s.session)
+	go s.store.Set(s.SockId, s.Session)
+}
+
+func (s *Sock) LoadSession() {
+	s.Session = &SockSession{}
+	if sess, err := s.store.Get(s.SockId); err == nil && sess != nil {
+		s.Session = sess
+	}
+}
+
+func (s *Sock) SetStore(store SessionStore) {
+	s.store = store
 }
 
 func (s *Sock) SendLog(lg *_types.Log) error {
-	m := SockMessage{
+	msg := SockMessage{
 		Path:    "/log",
 		Payload: lg,
 	}
-	return websocket.JSON.Send(s.Conn, m)
+	switch conn := s.Conn.(type) {
+	case *websocket.Conn:
+		return websocket.JSON.Send(conn, msg)
+	default:
+		bytes, err := json.Marshal(msg)
+		if err != nil {
+			return err
+		}
+		_, err = s.Conn.Write(bytes)
+		return err
+	}
 }
 
 func (s *Sock) IsExpired() bool {
-	s.RLock()
-	defer s.RUnlock()
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	return s.RegisteredClaims.ExpiresAt.Before(time.Now())
 }
 
 func (s *Sock) HasListener(path string) bool {
-	s.RLock()
-	defer s.RUnlock()
-	return s.session.Listeners != nil && s.session.Listeners[path] != 0
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.Session.Listeners != nil && s.Session.Listeners[path] != 0
 }
 
 func (s *Sock) AddListener(path string) {
-	s.Lock()
-	if s.session.Listeners == nil {
-		s.session.Listeners = make(map[string]int)
+	s.mu.Lock()
+	if s.Session.Listeners == nil {
+		s.Session.Listeners = make(map[string]int)
 	}
-	s.session.Listeners[path] += 1
-	s.Unlock()
+	s.Session.Listeners[path] += 1
+	s.mu.Unlock()
 }
 
 func (s *Sock) RemoveListener(path string) {
-	s.Lock()
-	s.session.Listeners[path] -= 1
-	s.Unlock()
+	s.mu.Lock()
+	s.Session.Listeners[path] -= 1
+	s.mu.Unlock()
 }
 
 func (s *Sock) GetFilter() *Filter {
-	s.RLock()
-	defer s.RUnlock()
-	return s.session.Filter
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.Session.Filter
 }
 func (s *Sock) SetFilter(f *Filter) {
-	s.Lock()
-	s.session.Filter = f
-	s.Unlock()
-	go s.store.Set(s.SockId, s.session)
+	s.mu.Lock()
+	s.Session.Filter = f
+	s.mu.Unlock()
+	go s.store.Set(s.SockId, s.Session)
 }
 
 func (s *Sock) IsPaused() bool {
-	s.RLock()
-	defer s.RUnlock()
-	return s.session.Paused
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	return s.Session.Paused
 }
 func (s *Sock) SetPaused(state bool) {
-	s.Lock()
-	s.session.Paused = state
-	s.Unlock()
+	s.mu.Lock()
+	s.Session.Paused = state
+	s.mu.Unlock()
+}
+
+func (s *Sock) Delete() error {
+	go s.store.Del(s.SockId)
+	return s.Conn.Close()
 }

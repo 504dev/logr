@@ -10,7 +10,7 @@ type LogPackageJoiner struct {
 	delay time.Duration
 	tries int
 	data  map[string]_types.LogPackageChunks
-	mx    sync.RWMutex
+	mu    sync.RWMutex
 }
 
 func NewLogPackageJoiner(delay time.Duration, tries int) *LogPackageJoiner {
@@ -22,18 +22,18 @@ func NewLogPackageJoiner(delay time.Duration, tries int) *LogPackageJoiner {
 }
 
 func (j *LogPackageJoiner) dropSafe(uid string) {
-	j.mx.Lock()
+	j.mu.Lock()
 	delete(j.data, uid)
-	j.mx.Unlock()
+	j.mu.Unlock()
 }
 
 func (j *LogPackageJoiner) createSafe(lp *_types.LogPackage, lifetime time.Duration) {
 	uid := lp.Chunk.Uid
 	size := lp.Chunk.N
-	j.mx.Lock()
+	j.mu.Lock()
 	j.data[uid] = make(_types.LogPackageChunks, size)
 	j.data[uid][lp.Chunk.I] = lp
-	j.mx.Unlock()
+	j.mu.Unlock()
 	go func() {
 		<-time.After(lifetime)
 		j.dropSafe(uid)
@@ -41,8 +41,8 @@ func (j *LogPackageJoiner) createSafe(lp *_types.LogPackage, lifetime time.Durat
 }
 
 func (j *LogPackageJoiner) addItemSafe(lp *_types.LogPackage) bool {
-	j.mx.Lock()
-	defer j.mx.Unlock()
+	j.mu.Lock()
+	defer j.mu.Unlock()
 	if j.data[lp.Chunk.Uid] != nil {
 		j.data[lp.Chunk.Uid][lp.Chunk.I] = lp
 		return true
@@ -51,14 +51,14 @@ func (j *LogPackageJoiner) addItemSafe(lp *_types.LogPackage) bool {
 }
 
 func (j *LogPackageJoiner) hasSafe(uid string) bool {
-	j.mx.RLock()
-	defer j.mx.RUnlock()
+	j.mu.RLock()
+	defer j.mu.RUnlock()
 	return j.data[uid] != nil
 }
 
 func (j *LogPackageJoiner) completeSafe(uid string) (complete bool, joined *_types.LogPackage) {
-	j.mx.RLock()
-	defer j.mx.RUnlock()
+	j.mu.RLock()
+	defer j.mu.RUnlock()
 	if j.data[uid] == nil {
 		return false, nil
 	}
