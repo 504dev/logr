@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	AggMinute   = "m"
-	Agg5Minutes = "5m"
-	AggHour     = "h"
-	AggDay      = "d"
+	AGG_MINUTE   = "m"
+	AGG_5MINUTES = "5m"
+	AGG_HOUR     = "h"
+	AGG_DAY      = "d"
 )
 
 type CountRepo struct {
@@ -88,14 +88,14 @@ func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, erro
 		}
 	}
 	aggmap := map[string][]string{
-		AggMinute:   {"toStartOfMinute", "6 hour"},
-		Agg5Minutes: {"toStartOfFiveMinute", "1 day"},
-		AggHour:     {"toStartOfHour", "14 day"},
-		AggDay:      {"toStartOfDay", "366 day"},
+		AGG_MINUTE:   {"toStartOfMinute", "6 hour"},
+		AGG_5MINUTES: {"toStartOfFiveMinute", "1 day"},
+		AGG_HOUR:     {"toStartOfHour", "14 day"},
+		AGG_DAY:      {"toStartOfDay", "366 day"},
 	}
 	aggvalues, ok := aggmap[agg]
 	if !ok {
-		aggvalues = aggmap[AggMinute]
+		aggvalues = aggmap[AGG_MINUTE]
 	}
 	where += " and timestamp > now() - interval " + aggvalues[1]
 	sql := `

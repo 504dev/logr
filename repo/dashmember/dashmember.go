@@ -54,7 +54,7 @@ func (repo *DashboardMemberRepo) GetByUserId(id int) (types.DashMembers, error) 
 }
 
 func (repo *DashboardMemberRepo) Create(m *types.DashMember) error {
-	values := []interface{}{m.DashId, m.UserId, types.MemberStatusApproved}
+	values := []interface{}{m.DashId, m.UserId, types.MEMBER_STATUS_APPROVED}
 	sqltext := "INSERT INTO dashboard_members (dash_id, user_id, status) VALUES (?, ?, ?)"
 
 	res, err := repo.conn.Exec(sqltext, values...)

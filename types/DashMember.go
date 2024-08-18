@@ -1,10 +1,10 @@
 package types
 
 const (
-	MemberStatusRejected  = 0
-	MemberStatusApproved  = 1
-	MemberStatusInvited   = 2
-	MemberStatusRequested = 3
+	MEMBER_STATUS_REJECTED  = 0
+	MEMBER_STATUS_APPROVED  = 1
+	MEMBER_STATUS_INVITED   = 2
+	MEMBER_STATUS_REQUESTED = 3
 )
 
 type DashMember struct {
@@ -27,7 +27,7 @@ func (dm DashMembers) DashIds() []int {
 func (dm DashMembers) ApprovedOnly() DashMembers {
 	res := make(DashMembers, 0, len(dm))
 	for _, m := range dm {
-		if m.Status == MemberStatusApproved {
+		if m.Status == MEMBER_STATUS_APPROVED {
 			res = append(res, m)
 		}
 	}

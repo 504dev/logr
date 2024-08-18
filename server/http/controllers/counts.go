@@ -81,7 +81,7 @@ func (c *CountsController) FindSnippet(ctx *gin.Context) {
 		Keyname:   keyname,
 	}
 
-	counts, err := c.repos.Count.Find(filter, count.AggMinute)
+	counts, err := c.repos.Count.Find(filter, count.AGG_MINUTE)
 	if err != nil {
 		Logger.Error(err)
 		ctx.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
