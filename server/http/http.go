@@ -47,14 +47,16 @@ func NewHTTPServer(
 		return nil, err
 	}
 
+	const readHeaderTimeout = 10 * time.Second
 	return &HTTPServer{
 		jwtService: jwtService,
 		sockMap:    sockMap,
 		engine:     engine,
 		listener:   listener,
 		server: &http.Server{
-			Addr:    addr,
-			Handler: engine,
+			Addr:              addr,
+			Handler:           engine,
+			ReadHeaderTimeout: readHeaderTimeout,
 		},
 	}, nil
 }

@@ -33,7 +33,7 @@ type ResponseBody struct {
 
 func NewOllamaChat(url string) (*OllamaChat, error) {
 	matches := urlRegex.FindStringSubmatch(url)
-	if len(matches) != 3 {
+	if len(matches) != 3 { // nolint:gomnd
 		return nil, errors.New("invalid llm url")
 	}
 

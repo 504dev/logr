@@ -1,20 +1,25 @@
-run:
-  timeout: 1m
-
 linters:
   enable:
+#    - wsl
+#    - nlreturn
+#    - wrapcheck
+
+    - stylecheck
     - errcheck
     - govet
     - staticcheck
     - gofmt
+    - gosec
+    - gomnd
 
 linters-settings:
   govet:
     disable:
       - printf
-
-issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
+  stylecheck:
+    checks: ["all", "-ST1001", "-ST1003"]
+  gosec:
+    excludes:
+      - G404 # Use of weak random number generator
+      - G107 # Potential HTTP request made with variable url
+      - G306 # Expect WriteFile permissions to be 0600 or less

@@ -14,10 +14,11 @@ type LogPackageJoiner struct {
 }
 
 func NewLogPackageJoiner(delay time.Duration, tries int) *LogPackageJoiner {
+	const initialMapCap = 100
 	return &LogPackageJoiner{
 		delay: delay,
 		tries: tries,
-		data:  make(map[string]_types.LogPackageChunks, 100),
+		data:  make(map[string]_types.LogPackageChunks, initialMapCap),
 	}
 }
 

@@ -66,7 +66,7 @@ func (sm *SockMap) Push(lg *_types.Log) int {
 				if err := s.SendLog(lg); err != nil {
 					sm.Unregister(s)
 				}
-				cnt += 1
+				cnt++
 			}
 		}
 	}

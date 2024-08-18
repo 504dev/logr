@@ -98,10 +98,11 @@ func crypto(conf *logr.Config, mainlog *logr.Logger) {
 				humanize.Comma(int64(binV)),
 			)
 
+			const snippetSize = 30
 			cryptolog.Notice(
 				"%v price %v widget!",
 				color.New(color.Bold).SprintFunc()(base),
-				cryptolog.Snippet("avg", fmt.Sprintf("price:%v", sym), 30),
+				cryptolog.Snippet("avg", fmt.Sprintf("price:%v", sym), snippetSize),
 			)
 
 			totalV := hitV + bitV + binV

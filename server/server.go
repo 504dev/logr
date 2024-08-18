@@ -86,7 +86,7 @@ func NewLogServer(
 		jwtService: jwtService,
 		sockMap:    sockMap,
 		channel:    channel,
-		joiner:     types.NewLogPackageJoiner(time.Second, 5),
+		joiner:     types.NewLogPackageJoiner(time.Second, 5), // nolint:gomnd
 		repos:      repos,
 		done:       make(chan struct{}),
 	}, nil

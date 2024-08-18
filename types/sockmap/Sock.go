@@ -38,7 +38,10 @@ func (s *Sock) HandleMessage(msg *SockMessage) {
 		paused, _ := msg.Payload.(bool)
 		s.SetPaused(paused)
 	}
-	go s.store.Set(s.SockId, s.Session)
+
+	go func() {
+		_ = s.store.Set(s.SockId, s.Session)
+	}()
 }
 
 func (s *Sock) LoadSession() {
@@ -87,13 +90,13 @@ func (s *Sock) AddListener(path string) {
 	if s.Session.Listeners == nil {
 		s.Session.Listeners = make(map[string]int)
 	}
-	s.Session.Listeners[path] += 1
+	s.Session.Listeners[path]++
 	s.mu.Unlock()
 }
 
 func (s *Sock) RemoveListener(path string) {
 	s.mu.Lock()
-	s.Session.Listeners[path] -= 1
+	s.Session.Listeners[path]++
 	s.mu.Unlock()
 }
 
@@ -106,7 +109,9 @@ func (s *Sock) SetFilter(f *types.Filter) {
 	s.mu.Lock()
 	s.Session.Filter = f
 	s.mu.Unlock()
-	go s.store.Set(s.SockId, s.Session)
+	go func() {
+		_ = s.store.Set(s.SockId, s.Session)
+	}()
 }
 
 func (s *Sock) IsPaused() bool {
@@ -121,6 +126,9 @@ func (s *Sock) SetPaused(state bool) {
 }
 
 func (s *Sock) Delete() error {
-	go s.store.Del(s.SockId)
+	go func() {
+		_ = s.store.Del(s.SockId)
+	}()
+
 	return s.Conn.Close()
 }

@@ -228,7 +228,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 func (a *AuthController) EnsureJWT(c *gin.Context) {
 	var token string
 	splitted := strings.Split(c.Request.Header.Get("Authorization"), " ")
-	if len(splitted) == 2 {
+	if len(splitted) == 2 { // nolint:gomnd
 		token = splitted[1]
 	}
 	if token == "" {

@@ -67,6 +67,7 @@ func (c *CountsController) FindSnippet(ctx *gin.Context) {
 		return
 	}
 
+	const secondsInMinute = 60
 	const defaultSnippetSize = 15
 	const maxSnippetSize = 60
 	limit, _ := strconv.ParseInt(ctx.Query("limit"), 10, 64)
@@ -76,7 +77,7 @@ func (c *CountsController) FindSnippet(ctx *gin.Context) {
 	if limit == 0 {
 		limit = defaultSnippetSize
 	}
-	from := timestamp - limit*60
+	from := timestamp - limit*secondsInMinute
 
 	filter := types.Filter{
 		DashId:    dashId,

@@ -70,7 +70,7 @@ func (repo *DashboardRepo) GetByOwnerId(id int) (types.Dashboards, error) {
 }
 
 func (repo *DashboardRepo) GetSystemIds(role int) []int {
-	ids := make([]int, 0, 2)
+	ids := make([]int, 0, 2) // nolint:gomnd
 	if role == types.ROLE_ADMIN {
 		ids = append(ids, types.DASHBOARD_SYSTEM_ID)
 	}

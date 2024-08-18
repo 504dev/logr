@@ -27,7 +27,8 @@ func (repo *DashboardKeyRepo) Create(key *types.DashKey, tx *sql.Tx) error {
 	var sqltext string
 	var res sql.Result
 
-	key.PublicKey, key.PrivateKey, err = cipher.GenerateKeyPairBase64(256)
+	const keyBitSize = 256
+	key.PublicKey, key.PrivateKey, err = cipher.GenerateKeyPairBase64(keyBitSize)
 	if err != nil {
 		return err
 	}

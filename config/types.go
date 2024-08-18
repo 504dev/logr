@@ -43,6 +43,7 @@ func (c *ConfigData) GetJwtSecret() string {
 		return c.OAuth.JwtSecret
 	}
 	hash := sha256.Sum256([]byte(c.OAuth.Github.ClientSecret))
+
 	return base64.StdEncoding.EncodeToString(hash[:])
 }
 func (c *ConfigData) IsSetupRequired() bool {
@@ -92,5 +93,6 @@ func (c *Config) SaveToFile(configpath string) error {
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(configpath, data, 0644)
+	const perms = 0644
+	return os.WriteFile(configpath, data, perms)
 }

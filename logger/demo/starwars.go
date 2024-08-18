@@ -15,8 +15,11 @@ func starwars(conf *logr.Config) {
 		crowl := crowls[rand.Intn(len(crowls))]
 		starwarslog.Warn(color.New(color.Bold).SprintFunc()(crowl.title))
 
+		const crowlInterval = 2 * time.Second
+		const printInterval = 666 * time.Millisecond
+
 		for _, t := range append(crowl.text, "...", "..", ".", "") {
-			time.Sleep(666 * time.Millisecond)
+			time.Sleep(printInterval)
 			starwarslog.Info(t)
 			starwarslog.Inc("count:letters", float64(len(t)))
 			starwarslog.Inc("count:words", float64(len(strings.Fields(t))))
@@ -27,7 +30,7 @@ func starwars(conf *logr.Config) {
 				starwarslog.Inc("count:Leia", 1)
 			}
 		}
-		time.Sleep(2 * time.Second)
+		time.Sleep(crowlInterval)
 	}
 }
 
