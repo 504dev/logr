@@ -1,10 +1,16 @@
+run:
+  tests: true
+
 linters:
   enable:
 #    - wsl
 #    - nlreturn
 #    - wrapcheck
+#    - revive
 
     - stylecheck
+    - sqlclosecheck
+    - gocritic
     - errcheck
     - govet
     - staticcheck

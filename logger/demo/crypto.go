@@ -136,9 +136,5 @@ func request(res interface{}, url string) error {
 		return err
 	}
 
-	if err = json.Unmarshal(bodyBytes, res); err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(bodyBytes, res)
 }
