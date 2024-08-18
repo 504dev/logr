@@ -29,6 +29,8 @@ func (demo *DemoController) FreeToken(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	const tokenLifeTime = 15 * time.Minute
+	const cacheTime = 4 * time.Minute
 	tokenstring, err := cachify.Cachify("free-token", func() (interface{}, error) {
 		claims := jwtservice.Claims{
 			Id:       usr.Id,
@@ -36,15 +38,16 @@ func (demo *DemoController) FreeToken(c *gin.Context) {
 			GihubId:  usr.GithubId,
 			Username: usr.Username,
 			RegisteredClaims: jwt.RegisteredClaims{
-				ExpiresAt: jwt.NewNumericDate(time.Now().Add(15 * time.Minute)),
+				ExpiresAt: jwt.NewNumericDate(time.Now().Add(tokenLifeTime)),
 			},
 		}
 		tokenstring, err := demo.jwtService.SignToken(&claims)
 		if err != nil {
 			return nil, err
 		}
+
 		return tokenstring, err
-	}, 4*time.Minute)
+	}, cacheTime)
 
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)

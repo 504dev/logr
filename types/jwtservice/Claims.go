@@ -22,7 +22,7 @@ func (claims *Claims) EncryptAccessToken(secret string) error {
 		return err
 	}
 	claims.AccessTokenCipher = base64.StdEncoding.EncodeToString(cipherAccessToken)
-	//fmt.Println("EncryptAccessToken", p.AccessToken, p.AccessTokenCipher)
+	// fmt.Println("EncryptAccessToken", p.AccessToken, p.AccessTokenCipher)
 	claims.AccessToken = ""
 
 	return nil
@@ -35,7 +35,7 @@ func (claims *Claims) DecryptAccessToken(secret string) error {
 		return err
 	}
 	claims.AccessToken = string(accessToken)
-	//fmt.Println("DecryptAccessToken", p.AccessTokenCipher, p.AccessToken)
+	// fmt.Println("DecryptAccessToken", p.AccessTokenCipher, p.AccessToken)
 	claims.AccessTokenCipher = ""
 
 	return nil

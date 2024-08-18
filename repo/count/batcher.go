@@ -8,10 +8,13 @@ import (
 )
 
 func (repo *CountRepo) StartBatcher() {
-	repo.batcher = batcher.NewBatcher(1000, time.Second, func(batch []*_types.Count) {
+	const batchSize = 1000
+	const batchInterval = time.Second
+	repo.batcher = batcher.NewBatcher(batchSize, batchInterval, func(batch []*_types.Count) {
 		err := repo.BatchInsert(batch)
 		Logger.InfoErr(err, "Batch insert %v %v", len(batch), err)
 	})
+
 	go repo.batcher.Run()
 }
 

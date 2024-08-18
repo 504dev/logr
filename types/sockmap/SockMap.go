@@ -51,13 +51,17 @@ func (sm *SockMap) Push(lg *_types.Log) int {
 		for sock := range user.Val.IterBuffered() {
 			s := sock.Val
 			sFilter := s.GetFilter()
+
 			if sFilter == nil || s.IsPaused() || !s.HasListener("/log") {
 				continue
 			}
+
 			if s.Claims.ExpiresAt.Before(now) {
 				sm.Unregister(s)
+
 				continue
 			}
+
 			if sFilter.Match(lg) {
 				if err := s.SendLog(lg); err != nil {
 					sm.Unregister(s)
@@ -72,6 +76,7 @@ func (sm *SockMap) Push(lg *_types.Log) int {
 func (sm *SockMap) SetFilter(userId int, sockId string, filter *types.Filter) bool {
 	if s := sm.GetSock(userId, sockId); s != nil {
 		s.SetFilter(filter)
+
 		return true
 	}
 	return false
@@ -91,8 +96,7 @@ func (sm *SockMap) GetSock(userId int, sockId string) *Sock {
 }
 
 func (sm *SockMap) add(s *Sock) {
-	us := sm.GetSocks(s.User.Id)
-	if us != nil {
+	if us := sm.GetSocks(s.User.Id); us != nil {
 		us.Set(s.SockId, s)
 		return
 	}

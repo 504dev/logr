@@ -1,6 +1,7 @@
 package server
 
 import (
+	"errors"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/grpc"
@@ -16,10 +17,10 @@ import (
 )
 
 type LogServer struct {
-	httpServer *http.HttpServer
+	httpServer *http.HTTPServer
 	wsServer   *ws.WsServer
-	grpcServer *grpc.GrpcServer
-	udpServer  *udp.UdpServer
+	grpcServer *grpc.GRPCServer
+	udpServer  *udp.UDPServer
 	jwtService *jwtservice.JwtService
 	sockMap    *sockmap.SockMap
 	channel    chan *types.LogPackageMeta
@@ -37,20 +38,20 @@ func NewLogServer(
 	repos *repo.Repos,
 ) (*LogServer, error) {
 	var err error
-	var udpServer *udp.UdpServer
-	var grpcServer *grpc.GrpcServer
-	var httpServer *http.HttpServer
+	var udpServer *udp.UDPServer
+	var grpcServer *grpc.GRPCServer
+	var httpServer *http.HTTPServer
 	var wsServer *ws.WsServer
 
 	channel := make(chan *types.LogPackageMeta)
 	if udpAddr != "" {
-		udpServer, err = udp.NewUdpServer(udpAddr, channel)
+		udpServer, err = udp.NewUDPServer(udpAddr, channel)
 		if err != nil {
 			return nil, err
 		}
 	}
 	if grpcAddr != "" {
-		grpcServer, err = grpc.NewGrpcServer(grpcAddr, channel)
+		grpcServer, err = grpc.NewGRPCServer(grpcAddr, channel)
 		if err != nil {
 			return nil, err
 		}
@@ -59,6 +60,7 @@ func NewLogServer(
 	jwtService := jwtservice.NewJwtService(jwtSecretFunc)
 
 	sockMap := sockmap.NewSockMap()
+
 	if redisAddr != "" {
 		store, err := sockmap.NewRedisSessionStore(redisAddr, time.Hour, time.Second)
 		if err != nil {
@@ -67,7 +69,7 @@ func NewLogServer(
 		sockMap.SetSessionStore(store)
 	}
 
-	httpServer, err = http.NewHttpServer(httpAddr, sockMap, jwtService, repos)
+	httpServer, err = http.NewHTTPServer(httpAddr, sockMap, jwtService, repos)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +101,7 @@ func (srv *LogServer) handleLoop() {
 func (srv *LogServer) Run() {
 	go func() {
 		if err := srv.httpServer.Listen(); err != nil {
-			if err == nethttp.ErrServerClosed {
+			if errors.Is(err, nethttp.ErrServerClosed) {
 				Logger.Warn(err)
 				return
 			}
@@ -107,10 +109,12 @@ func (srv *LogServer) Run() {
 		}
 	}()
 
-	// start recieving log packages
+	// start receiving log packages
 	var wg errgroup.Group
+
 	wg.Go(srv.udpServer.Listen)
 	wg.Go(srv.grpcServer.Listen)
+
 	go func() {
 		if err := wg.Wait(); err != nil {
 			Logger.Warn(err)
@@ -125,13 +129,17 @@ func (srv *LogServer) Run() {
 
 func (srv *LogServer) Stop() error {
 	var wg errgroup.Group
+
 	wg.Go(srv.udpServer.Stop)
 	wg.Go(srv.grpcServer.Stop)
 	wg.Go(srv.httpServer.Stop)
+
 	if err := wg.Wait(); err != nil {
 		return err
 	}
+
 	srv.repos.Stop()
 	<-srv.done
+
 	return nil
 }

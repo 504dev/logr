@@ -26,9 +26,11 @@ func (cs Counts) Format() Series {
 			m[key].Data = append(m[key].Data, [2]interface{}{c.Timestamp, v})
 		}
 	}
+
 	res := make(Series, 0, len(m))
 	for _, s := range m {
 		res = append(res, s)
 	}
+
 	return res
 }

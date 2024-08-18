@@ -43,7 +43,11 @@ func (*MarketplaceController) Support(c *gin.Context) {
 	}
 
 	data.Token = ""
-	payload, _ := json.Marshal(data)
+	payload, err := json.Marshal(data)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
+		return
+	}
 	Logger.Notice("%v %v", string(payload), verifyData)
 	c.AbortWithStatus(http.StatusOK)
 }

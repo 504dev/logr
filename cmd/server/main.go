@@ -24,9 +24,9 @@ func main() {
 	logger.Init(repos.DashboardKey)
 
 	logServer, err := server.NewLogServer(
-		config.Get().Bind.Http,
-		config.Get().Bind.Udp,
-		config.Get().Bind.Grpc,
+		config.Get().Bind.HTTP,
+		config.Get().Bind.UDP,
+		config.Get().Bind.GRPC,
 		config.Get().Redis,
 		config.Get().GetJwtSecret,
 		repos,
@@ -34,6 +34,7 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+
 	go logServer.Run()
 
 	// Exit & Graceful Shutdown

@@ -65,9 +65,11 @@ func (b *Batcher[T]) flush() int {
 	if len(b.batch) == 0 {
 		return 0
 	}
+
 	batch := b.batch
 	b.batch = make([]T, 0, b.nlimit)
 	b.handler(batch)
+
 	return len(batch)
 }
 

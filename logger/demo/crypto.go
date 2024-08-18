@@ -36,19 +36,22 @@ func (b *BitfinexPrice) UnmarshalJSON(buf []byte) error {
 }
 
 func crypto(conf *logr.Config, mainlog *logr.Logger) {
+	const promptInterval = 30 * time.Second
+
 	cryptolog, _ := conf.NewLogger("crypto.log")
 	cryptolog.Body = "[{version}, pid={pid}] {message}"
+
 	for {
 		cryptolog.Info("")
-		time.Sleep(30 * time.Second)
+		time.Sleep(promptInterval)
 		cryptolog.Info("**************************************************")
 		totals := make(map[string]float64)
+
 		for _, base := range [3]string{"BTC", "ETH", "LTC"} {
 			cryptolog.Info("")
 			sym := base + "_USDT"
 			bin, hit, bit := BinancePrice{}, HitbtcPrice{}, BitfinexPrice{}
-			var err error
-			err = request(&bin, fmt.Sprintf("https://api.binance.com/api/v3/ticker/24hr?symbol=%vUSDT", base))
+			err := request(&bin, fmt.Sprintf("https://api.binance.com/api/v3/ticker/24hr?symbol=%vUSDT", base))
 			if err != nil {
 				mainlog.Error("Demo crypto.log binance: %v", err)
 				continue

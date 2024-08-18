@@ -13,14 +13,14 @@ import (
 const bufferSize = 65536
 const concurrentLimit = 10
 
-type UdpServer struct {
+type UDPServer struct {
 	conn *net.UDPConn
 	ch   chan<- *types.LogPackageMeta
 	stop atomic.Bool
 	done chan struct{}
 }
 
-func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, error) {
+func NewUDPServer(addr string, ch chan<- *types.LogPackageMeta) (*UDPServer, error) {
 	serverAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		return nil, err
@@ -29,14 +29,14 @@ func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, err
 	if err != nil {
 		return nil, err
 	}
-	return &UdpServer{
+	return &UDPServer{
 		conn: udpconn,
 		ch:   ch,
 		done: make(chan struct{}),
 	}, nil
 }
 
-func (srv *UdpServer) Listen() error {
+func (srv *UDPServer) Listen() error {
 	if srv == nil {
 		return nil
 	}
@@ -54,7 +54,6 @@ func (srv *UdpServer) Listen() error {
 		size, _, err := srv.conn.ReadFromUDP(buf)
 		if err != nil {
 			Logger.Error("UDP read error: %v", err)
-
 			continue
 		}
 
@@ -62,7 +61,6 @@ func (srv *UdpServer) Listen() error {
 		copy(data, buf[:size])
 
 		semaphore <- struct{}{}
-
 		wg.Add(1)
 
 		go func() {
@@ -90,7 +88,7 @@ func (srv *UdpServer) Listen() error {
 	return nil
 }
 
-func (srv *UdpServer) Stop() error {
+func (srv *UDPServer) Stop() error {
 	if srv == nil {
 		return nil
 	}

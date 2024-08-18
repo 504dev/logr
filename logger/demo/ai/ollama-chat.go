@@ -36,6 +36,7 @@ func NewOllamaChat(url string) (*OllamaChat, error) {
 	if len(matches) != 3 {
 		return nil, errors.New("invalid llm url")
 	}
+
 	return &OllamaChat{
 		Url:   matches[1],
 		Model: matches[2],
@@ -71,6 +72,7 @@ func (ollama *OllamaChat) Prompt(
 		if err := json.Unmarshal(scanner.Bytes(), &item); err != nil {
 			return nil, err
 		}
+
 		if onToken != nil {
 			onToken(item.Message.Content)
 		}
@@ -90,15 +92,17 @@ func (ollama *OllamaChat) Prompt(
 func splitIntoSentences(text string) []string {
 	var sentences []string
 	var sentence strings.Builder
+
 	skip := false
 
 	for i, r := range text {
+		var next byte
+
 		if skip {
 			skip = false
-
 			continue
 		}
-		var next byte
+
 		if i+1 < len(text) {
 			next = text[i+1]
 		}
@@ -118,8 +122,10 @@ func splitIntoSentences(text string) []string {
 			sentence.WriteRune(r)
 		}
 	}
+
 	if sentence.Len() > 0 {
 		sentences = append(sentences, sentence.String())
 	}
+
 	return sentences
 }

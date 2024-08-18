@@ -83,7 +83,7 @@ func (f *Filter) Match(log *_types.Log) bool {
 	return true
 }
 
-func (f *Filter) ToSql() (string, []interface{}, error) {
+func (f *Filter) ToSQL() (string, []interface{}, error) {
 	sql := "where dash_id = ?"
 	values := []interface{}{f.DashId}
 	if f.Hostname != "" {

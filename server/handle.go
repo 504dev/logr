@@ -29,6 +29,7 @@ func (srv *LogServer) handle(meta *types.LogPackageMeta) {
 	if lp.CipherLog != nil || lp.PlainLog != nil || lp.Log != nil {
 		Logger.Inc(meta.Protocol+":logs", 1)
 		Logger.Inc(meta.Protocol+":logs:bytes", float64(meta.Size))
+
 		go func() {
 			if lp.CipherLog != nil || lp.PlainLog != nil {
 				if lp.Chunk != nil {
@@ -80,6 +81,7 @@ func (srv *LogServer) handle(meta *types.LogPackageMeta) {
 	if lp.CipherCount != nil || lp.Count != nil {
 		Logger.Inc(meta.Protocol+":counts", 1)
 		Logger.Inc(meta.Protocol+":counts:bytes", float64(meta.Size))
+
 		go func() {
 			if lp.CipherCount != nil {
 				err = lp.DecryptCount(dk.PrivateKey)

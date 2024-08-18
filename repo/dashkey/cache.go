@@ -8,9 +8,10 @@ import (
 )
 
 func (repo *DashboardKeyRepo) GetByPubCached(pub string) (*types.DashKey, error) {
-	key := fmt.Sprintf("dashkey:pub:%v", pub)
-	res, err := cachify.Cachify(key, func() (interface{}, error) {
+	const cacheTime = 15 * time.Second
+	cacheKey := fmt.Sprintf("dashkey:pub:%v", pub)
+	res, err := cachify.Cachify(cacheKey, func() (interface{}, error) {
 		return repo.GetByPub(pub)
-	}, 15*time.Second)
+	}, cacheTime)
 	return res.(*types.DashKey), err
 }

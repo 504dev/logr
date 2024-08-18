@@ -23,8 +23,8 @@ func createConfig(repo interfaces.DashboardKeyRepo, id int) *logr.Config {
 		panic(errors.New("no dashkey provided"))
 	}
 	return &logr.Config{
-		Udp:        config.Get().Bind.Udp,
-		Grpc:       config.Get().Bind.Grpc,
+		Udp:        config.Get().Bind.UDP,
+		Grpc:       config.Get().Bind.GRPC,
 		DashId:     dashkey.DashId,
 		PublicKey:  dashkey.PublicKey,
 		PrivateKey: dashkey.PrivateKey,

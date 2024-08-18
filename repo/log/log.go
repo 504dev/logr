@@ -59,7 +59,7 @@ func (repo *LogRepo) BatchInsert(batch []*_types.Log) error {
 }
 
 func (repo *LogRepo) GetByFilter(filter types.Filter) (_types.Logs, error) {
-	where, values, err := filter.ToSql()
+	where, values, err := filter.ToSQL()
 	if err != nil {
 		return nil, err
 	}

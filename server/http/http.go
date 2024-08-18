@@ -13,7 +13,7 @@ import (
 	"time"
 )
 
-type HttpServer struct {
+type HTTPServer struct {
 	jwtService *jwtservice.JwtService
 	sockMap    *sockmap.SockMap
 	engine     *gin.Engine
@@ -21,12 +21,12 @@ type HttpServer struct {
 	listener   net.Listener
 }
 
-func NewHttpServer(
+func NewHTTPServer(
 	addr string,
 	sockMap *sockmap.SockMap,
 	jwtService *jwtservice.JwtService,
 	repos *repo.Repos,
-) (*HttpServer, error) {
+) (*HTTPServer, error) {
 	frontend := func(c *gin.Context) {
 		c.File("./frontend/dist/index.html")
 	}
@@ -47,7 +47,7 @@ func NewHttpServer(
 		return nil, err
 	}
 
-	return &HttpServer{
+	return &HTTPServer{
 		jwtService: jwtService,
 		sockMap:    sockMap,
 		engine:     engine,
@@ -59,15 +59,15 @@ func NewHttpServer(
 	}, nil
 }
 
-func (srv *HttpServer) Engine() *gin.Engine {
+func (srv *HTTPServer) Engine() *gin.Engine {
 	return srv.engine
 }
 
-func (srv *HttpServer) Listen() error {
+func (srv *HTTPServer) Listen() error {
 	return srv.server.Serve(srv.listener)
 }
 
-func (srv *HttpServer) Stop() error {
+func (srv *HTTPServer) Stop() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 	return srv.server.Shutdown(ctx)

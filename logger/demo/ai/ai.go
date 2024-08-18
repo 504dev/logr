@@ -41,7 +41,6 @@ func Run(conf *logr.Config) {
 	ollama, err := NewOllamaChat(config.Get().DemoDash.Llm)
 	if err != nil {
 		ailog.Error(err)
-
 		return
 	}
 
@@ -68,8 +67,7 @@ Then write a 100-word summary of the book.`, genre, chaptersN)
 
 	onToken := func(token string) {
 		log.Inc("tokens", 1)
-		token = strings.TrimSpace(token)
-		if token == "Dima" {
+		if token = strings.TrimSpace(token); token == "Dima" {
 			log.Inc(token, 1)
 		}
 	}
@@ -88,10 +86,10 @@ Then write a 100-word summary of the book.`, genre, chaptersN)
 		if i == chaptersN {
 			prompt += " This is the last chapter, ending the book epically."
 		}
+
 		history = append(history, &ChatHistoryItem{Role: "user", Content: prompt})
 
 		answer, err := ollama.Prompt(history, func(s string) { log.Info(s) }, onToken)
-
 		if err != nil {
 			return err
 		}

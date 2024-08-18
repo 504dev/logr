@@ -35,7 +35,7 @@ func (s *Sock) HandleMessage(msg *SockMessage) {
 	case "unsubscribe":
 		s.RemoveListener(msg.Path)
 	case "pause":
-		paused := msg.Payload.(bool)
+		paused, _ := msg.Payload.(bool)
 		s.SetPaused(paused)
 	}
 	go s.store.Set(s.SockId, s.Session)

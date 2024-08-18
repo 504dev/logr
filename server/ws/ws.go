@@ -72,6 +72,7 @@ func (ws WsServer) Stream(conn *websocket.Conn) {
 		if err := websocket.JSON.Receive(conn, &msg); err != nil {
 			Logger.Error("websocket.JSON.Receive: userId=%v, sockId=%v, err=%v", usr.Id, sockId, err)
 			ws.sockMap.Unregister(sock)
+
 			break
 		}
 
@@ -82,9 +83,11 @@ func (ws WsServer) Stream(conn *websocket.Conn) {
 }
 
 func (ws WsServer) Info() {
+	const interval = 10 * time.Second
+
 	go func() {
 		for {
-			time.Sleep(10 * time.Second)
+			time.Sleep(interval)
 			Logger.Info("SockMap %v", ws.sockMap)
 		}
 	}()

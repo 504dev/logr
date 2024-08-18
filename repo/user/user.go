@@ -20,9 +20,11 @@ func NewUserRepo() *UserRepo {
 func (repo *UserRepo) findAllByField(fieldname string, val interface{}, limit int) (types.Users, error) {
 	users := types.Users{}
 	sql := fmt.Sprintf("SELECT id, github_id, username, role, login_at, created_at FROM users WHERE %v = ?", fieldname)
+
 	if limit > 0 {
 		sql = fmt.Sprintf("%v LIMIT %v", sql, limit)
 	}
+
 	err := repo.conn.Select(&users, sql, val)
 	if err != nil {
 		return nil, err

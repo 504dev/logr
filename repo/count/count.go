@@ -34,8 +34,10 @@ func (repo *CountRepo) Insert(count *_types.Count) error {
 
 func (repo *CountRepo) BatchInsert(batch []*_types.Count) error {
 	const sql = `
-		INSERT INTO counts (day, timestamp, dash_id, hostname, logname, keyname, version, inc, max, min, avg_sum, avg_num, per_tkn, per_ttl, time_dur)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+		INSERT INTO counts (
+		    day, timestamp, dash_id, hostname, logname, keyname, version,
+		    inc, max, min, avg_sum, avg_num, per_tkn, per_ttl, time_dur
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
 	tx, err := repo.conn.Begin()
 	if err != nil {
 		return err
@@ -159,7 +161,9 @@ func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, erro
 			Metrics:   metrics,
 		})
 	}
+
 	err = rows.Err()
+
 	return counts, err
 }
 

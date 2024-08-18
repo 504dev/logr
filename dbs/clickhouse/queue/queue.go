@@ -62,6 +62,7 @@ func (q *Queue[T]) Push(item T) bool {
 	if len(q.batch) >= q.config.FlushCount {
 		q.flush()
 	}
+
 	return true
 }
 

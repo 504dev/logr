@@ -15,9 +15,9 @@ type CommandLineArgs struct {
 
 type ConfigData struct {
 	Bind struct {
-		Http string `yaml:"http"`
-		Udp  string `yaml:"udp"`
-		Grpc string `yaml:"grpc"`
+		HTTP string `yaml:"http"`
+		UDP  string `yaml:"udp"`
+		GRPC string `yaml:"grpc"`
 	} `yaml:"bind"`
 	OAuth struct {
 		Github struct {

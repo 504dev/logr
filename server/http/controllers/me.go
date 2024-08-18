@@ -125,6 +125,7 @@ func (me *MeController) DashboardsShared(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
+
 	for _, dash := range shared {
 		dash.Owner, _ = me.repos.User.GetById(dash.OwnerId)
 		dash.Members, _ = me.repos.DashboardMember.GetByDashId(dash.Id)
@@ -143,6 +144,7 @@ func (me *MeController) Dashboards(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": err.Error()})
 		return
 	}
+
 	for _, dash := range dashboards {
 		dash.Keys, _ = me.repos.DashboardKey.GetByDashId(dash.Id)
 	}
@@ -152,9 +154,11 @@ func (me *MeController) Dashboards(c *gin.Context) {
 		return
 	}
 	dashboards = append(dashboards, shared...)
+
 	for _, dash := range dashboards {
 		dash.Owner, _ = me.repos.User.GetById(dash.OwnerId)
 		dash.Members, _ = me.repos.DashboardMember.GetByDashId(dash.Id)
+
 		for _, member := range dash.Members {
 			member.User, _ = me.repos.User.GetById(member.UserId)
 		}
@@ -241,7 +245,7 @@ func (me *MeController) DashRequired(name string) func(c *gin.Context) {
 
 func (*MeController) MyDash(c *gin.Context) {
 	idash, _ := c.Get("dash")
-	dash := idash.(*types.Dashboard)
+	dash, _ := idash.(*types.Dashboard)
 	if ownerId := c.GetInt("userId"); dash.OwnerId != ownerId {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
@@ -250,7 +254,7 @@ func (*MeController) MyDash(c *gin.Context) {
 
 func (me *MeController) MyDashOrShared(c *gin.Context) {
 	idash, _ := c.Get("dash")
-	dash := idash.(*types.Dashboard)
+	dash, _ := idash.(*types.Dashboard)
 	userId := c.GetInt("userId")
 	role := c.GetInt("role")
 	if dash.OwnerId == userId {

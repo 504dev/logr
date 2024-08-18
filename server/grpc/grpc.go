@@ -17,34 +17,37 @@ type logRpcService struct {
 
 func (s *logRpcService) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
 	var lp _types.LogPackage
+
 	lp.FromProto(lrp)
+
 	s.ch <- &types.LogPackageMeta{
 		LogPackage: &lp,
 		Protocol:   "grpc",
 		Size:       proto.Size(lrp),
 	}
+
 	return &pb.Response{}, nil
 }
 
-type GrpcServer struct {
+type GRPCServer struct {
 	grpcServer *grpc.Server
 	listener   net.Listener
 	service    *logRpcService
 }
 
-func NewGrpcServer(addr string, ch chan<- *types.LogPackageMeta) (*GrpcServer, error) {
+func NewGRPCServer(addr string, ch chan<- *types.LogPackageMeta) (*GRPCServer, error) {
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		return nil, err
 	}
-	return &GrpcServer{
+	return &GRPCServer{
 		grpcServer: grpc.NewServer(),
 		listener:   listener,
 		service:    &logRpcService{ch: ch},
 	}, nil
 }
 
-func (s *GrpcServer) Listen() error {
+func (s *GRPCServer) Listen() error {
 	if s == nil {
 		return nil
 	}
@@ -52,7 +55,7 @@ func (s *GrpcServer) Listen() error {
 	return s.grpcServer.Serve(s.listener)
 }
 
-func (s *GrpcServer) Stop() error {
+func (s *GRPCServer) Stop() error {
 	if s == nil {
 		return nil
 	}

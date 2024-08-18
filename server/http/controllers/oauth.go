@@ -31,11 +31,11 @@ func NewAuthController(jwtService *jwtservice.JwtService, repos *repo.Repos) *Au
 		repos:      repos,
 		jwtService: jwtService,
 	}
-	result.init()
+	result.initialize()
 	return result
 }
 
-func (a *AuthController) init() {
+func (a *AuthController) initialize() {
 	a.githubOAuth = &oauth2.Config{
 		ClientID:     config.Get().OAuth.Github.ClientId,
 		ClientSecret: config.Get().OAuth.Github.ClientSecret,
@@ -97,32 +97,35 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 			Login string `json:"login"`
 		} `json:"owner"`
 	}
-	err = json.NewDecoder(resp.Body).Decode(&data)
-	if err != nil {
+
+	if err = json.NewDecoder(resp.Body).Decode(&data); err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
 	_, err = a.repos.User.Create(data.Owner.ID, data.Owner.Login, types.ROLE_ADMIN)
 	if err != nil {
 		Logger.Error(err)
 	}
+
 	config.Set(func(conf *config.ConfigData) {
 		conf.OAuth.Github.ClientId = data.ClientId
 		conf.OAuth.Github.ClientSecret = data.ClientSecret
 		conf.OAuth.JwtSecret = conf.GetJwtSecret()
 	})
-	err = config.Save()
-	if err != nil {
+
+	if err = config.Save(); err != nil {
 		Logger.Error(err)
 	}
-	defer a.init()
-	callback, ok := a.states.Pop("setup")
-	if !ok {
+
+	if callback, ok := a.states.Pop("setup"); !ok {
 		c.JSON(http.StatusOK, data)
 	} else {
 		c.Redirect(http.StatusMovedPermanently, callback)
 	}
+
+	a.initialize()
 }
 
 func (a *AuthController) AuthorizeCallback(c *gin.Context) {
@@ -149,7 +152,9 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+
 	Logger.Info(userGithub)
+
 	if org := config.Get().OAuth.Github.Org; org != "" {
 		orgs, _, err := client.Organizations.List(c, *userGithub.Login, nil)
 		if err != nil {
@@ -159,9 +164,11 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		}
 		Logger.Info(orgs)
 		access := false
+
 		for _, v := range orgs {
 			if *v.Login == org {
 				access = true
+
 				break
 			}
 		}
@@ -229,7 +236,6 @@ func (a *AuthController) EnsureJWT(c *gin.Context) {
 	}
 	if token == "" {
 		token = c.PostForm("token")
-
 	}
 
 	claims, tkn, err := a.jwtService.ParseToken(token)
@@ -248,8 +254,7 @@ func (a *AuthController) EnsureJWT(c *gin.Context) {
 }
 
 func (a *AuthController) EnsureAdmin(c *gin.Context) {
-	role := c.GetInt("role")
-	if role != types.ROLE_ADMIN {
+	if role := c.GetInt("role"); role != types.ROLE_ADMIN {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -257,8 +262,7 @@ func (a *AuthController) EnsureAdmin(c *gin.Context) {
 }
 
 func (a *AuthController) EnsureUser(c *gin.Context) {
-	role := c.GetInt("role")
-	if role > types.ROLE_USER {
+	if role := c.GetInt("role"); role > types.ROLE_USER {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}

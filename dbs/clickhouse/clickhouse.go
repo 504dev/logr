@@ -19,16 +19,19 @@ func Conn() *sqlx.DB {
 func MustInit(retries int) {
 	var err error
 	db, err = sqlx.Connect("clickhouse", config.Get().Clickhouse)
+
 	if err == nil {
 		Migrate()
 		return
 	}
+
 	if retries > 0 {
 		fmt.Fprintf(os.Stderr, "(%v) clickhouse connect retry: %s\n", retries, err)
 		<-time.After(time.Second)
 		MustInit(retries - 1)
 		return
 	}
+
 	panic(err)
 }
 
