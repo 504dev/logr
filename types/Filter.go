@@ -1,6 +1,7 @@
 package types
 
 import (
+	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
 	"regexp"
 	"strings"
@@ -20,6 +21,11 @@ type Filter struct {
 	Offset    int64     `json:"offset,omitempty"`
 	Limit     int       `json:"limit,omitempty"`
 	Keyname   string    `json:"keyname,omitempty"`
+}
+
+func (f *Filter) String() string {
+	bytes, _ := json.Marshal(f) // nolint:errchkjson
+	return string(bytes)
 }
 
 func (f *Filter) Match(log *_types.Log) bool {

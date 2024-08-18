@@ -117,6 +117,6 @@ func (sm *SockMap) delete(s *Sock) bool {
 }
 
 func (sm *SockMap) String() string {
-	j, _ := json.Marshal(sm.clients)
-	return string(j)
+	bytes, _ := json.Marshal(sm.clients) // nolint:errchkjson
+	return string(bytes)
 }

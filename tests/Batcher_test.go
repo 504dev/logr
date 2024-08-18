@@ -125,9 +125,11 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 }
 
 func TestBatcher(t *testing.T) {
+	t.Parallel()
 	testBatchProcessor(t, createBatcher[int])
 }
 
 func TestQueue(t *testing.T) {
+	t.Parallel()
 	testBatchProcessor(t, createQueue[int])
 }

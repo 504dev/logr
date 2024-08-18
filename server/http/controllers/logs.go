@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"encoding/json"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
@@ -54,8 +53,7 @@ func (c *LogsController) Find(ctx *gin.Context) {
 	if sockId := ctx.Query("sock_id"); sockId != "" {
 		c.sockMap.SetFilter(userId, sockId, &filter)
 	}
-	f, _ := json.Marshal(filter)
-	Logger.Info(string(f))
+	Logger.Info("Filter %v", filter.String())
 
 	duration := Logger.Time("response:/logs", time.Millisecond)
 	logs, err := c.repos.Log.GetByFilter(filter)

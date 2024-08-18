@@ -11,6 +11,7 @@ import (
 )
 
 func TestLogPackageJoiner_Add(t *testing.T) {
+	t.Parallel()
 	joiner := types.NewLogPackageJoiner(time.Millisecond*10, 3)
 
 	lp1 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test1", I: 0, N: 3}, PlainLog: []byte("chunk1")}
@@ -31,6 +32,7 @@ func TestLogPackageJoiner_Add(t *testing.T) {
 }
 
 func TestLogPackageJoiner_AddOutOfOrder(t *testing.T) {
+	t.Parallel()
 	joiner := types.NewLogPackageJoiner(time.Millisecond*10, 3)
 
 	lp1 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test2", I: 0, N: 3}, PlainLog: []byte("chunk1")}
@@ -62,6 +64,7 @@ func TestLogPackageJoiner_AddOutOfOrder(t *testing.T) {
 }
 
 func TestLogPackageJoiner_AddTimeout(t *testing.T) {
+	t.Parallel()
 	joiner := types.NewLogPackageJoiner(time.Millisecond*10, 2)
 
 	lp1 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test3", I: 0, N: 2}, PlainLog: []byte("chunk1")}
@@ -76,6 +79,7 @@ func TestLogPackageJoiner_AddTimeout(t *testing.T) {
 }
 
 func TestLogPackageJoiner_AddCiphered(t *testing.T) {
+	t.Parallel()
 	joiner := types.NewLogPackageJoiner(time.Millisecond*10, 3)
 
 	lp1 := &_types.LogPackage{Chunk: &_types.ChunkInfo{Uid: "test4", I: 0, N: 2}, CipherLog: []byte("encrypted1")}

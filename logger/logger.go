@@ -14,13 +14,15 @@ import (
 	"strconv"
 )
 
+var ErrNoDashKey = errors.New("no dashkey provided")
+
 func createConfig(repo interfaces.DashboardKeyRepo, id int) *logr.Config {
 	dashkey, err := repo.GetById(id)
 	if err != nil {
 		panic(err)
 	}
 	if dashkey == nil {
-		panic(errors.New("no dashkey provided"))
+		panic(ErrNoDashKey)
 	}
 	return &logr.Config{
 		Udp:        config.Get().Bind.UDP,

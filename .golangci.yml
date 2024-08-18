@@ -8,6 +8,9 @@ linters:
 #    - wrapcheck
 #    - revive
 
+    - containedctx
+    - contextcheck
+    - bodyclose
     - stylecheck
     - sqlclosecheck
     - gocritic
@@ -17,6 +20,17 @@ linters:
     - gofmt
     - gosec
     - gomnd
+    - whitespace
+    - wastedassign
+    - dupl
+    - dupword
+    - errname
+    - errorlint
+    - gocyclo
+    - errchkjson
+    - nonamedreturns
+    - paralleltest
+    - goerr113
 
 linters-settings:
   govet:

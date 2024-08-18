@@ -12,6 +12,8 @@ import (
 	"time"
 )
 
+var ErrUnsuccessfulRecaptcha = errors.New("unsuccessful recaptcha verify request")
+
 type MarketplaceController struct{}
 
 func (*MarketplaceController) Webhook(ctx *gin.Context) {
@@ -88,7 +90,7 @@ func checkRecaptcha(ctx context.Context, secret, response string) (*siteVerifyRe
 
 	// Check recaptcha verification success.
 	if !body.Success {
-		return &body, errors.New("unsuccessful recaptcha verify request")
+		return &body, ErrUnsuccessfulRecaptcha
 	}
 
 	return &body, nil

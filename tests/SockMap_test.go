@@ -15,18 +15,19 @@ type writter struct {
 	journal chan string
 }
 
-func (w writter) Drain() (result []string) {
+func (w writter) Drain() []string {
+	var result []string
 	for {
 		select {
 		case v := <-w.journal:
 			result = append(result, v)
 		default:
-			return
+			return result
 		}
 	}
 }
 
-func (w writter) Write(p []byte) (n int, err error) {
+func (w writter) Write(p []byte) (int, error) {
 	w.journal <- string(p)
 	return 0, nil
 }
@@ -36,6 +37,7 @@ func (w writter) Close() error {
 }
 
 func TestSockMap(t *testing.T) {
+	t.Parallel()
 	sm := sockmap.NewSockMap()
 	journal := make(chan string, 100)
 	w := &writter{journal: journal}
@@ -94,5 +96,4 @@ func TestSockMap(t *testing.T) {
 	}
 
 	close(w.journal)
-
 }
