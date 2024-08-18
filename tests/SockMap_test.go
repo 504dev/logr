@@ -15,10 +15,22 @@ type writter struct {
 	journal chan string
 }
 
+func (w writter) Drain() (result []string) {
+	for {
+		select {
+		case v := <-w.journal:
+			result = append(result, v)
+		default:
+			return
+		}
+	}
+}
+
 func (w writter) Write(p []byte) (n int, err error) {
 	w.journal <- string(p)
 	return 0, nil
 }
+
 func (w writter) Close() error {
 	return nil
 }
@@ -50,14 +62,37 @@ func TestSockMap(t *testing.T) {
 
 	sm.SetFilter(sock1.User.Id, sock1.SockId, &types.Filter{DashId: 1})
 	sm.SetFilter(sock2.User.Id, sock2.SockId, &types.Filter{DashId: 2})
-	sm.SetFilter(sock3.User.Id, sock3.SockId, &types.Filter{DashId: 1, Logname: "hello.log"})
+	sm.SetFilter(sock3.User.Id, sock3.SockId, &types.Filter{DashId: 1, Level: "error"})
 
-	sm.Push(&_types.Log{DashId: 1, Logname: "hello.log"})
+	var result []string
 
-	time.Sleep(time.Second)
-	close(w.journal)
-	assert.Equal(t, len(w.journal), 2, "Unexpected journal size")
-	for v := range w.journal {
-		t.Log(v)
+	type testCase struct {
+		*_types.Log
+		len    int
+		result []string
 	}
+	tests := []testCase{
+		{
+			&_types.Log{DashId: 1, Level: "info", Message: "hello"},
+			1,
+			nil,
+		},
+		{
+			&_types.Log{DashId: 1, Level: "error", Message: "drop database"},
+			2,
+			nil,
+		},
+	}
+
+	for _, tc := range tests {
+		sm.Push(tc.Log)
+		result = w.Drain()
+		assert.Equal(t, tc.len, len(result), "Unexpected journal size")
+		if tc.result != nil {
+			assert.Equal(t, tc.result, result, "Unexpected journal content")
+		}
+	}
+
+	close(w.journal)
+
 }
