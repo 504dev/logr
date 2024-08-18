@@ -15,7 +15,7 @@ type logRpcService struct {
 	ch chan<- *types.LogPackageMeta
 }
 
-func (s *logRpcService) Push(ctx context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
+func (s *logRpcService) Push(_ context.Context, lrp *pb.LogRpcPackage) (*pb.Response, error) {
 	var lp _types.LogPackage
 
 	lp.FromProto(lrp)

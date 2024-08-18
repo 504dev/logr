@@ -90,10 +90,10 @@ func (q *Queue[T]) Stop() {
 	<-q.done
 }
 
-func (b *Queue[T]) HasStopped() <-chan struct{} {
-	return b.stop
+func (q *Queue[T]) HasStopped() <-chan struct{} {
+	return q.stop
 }
 
-func (b *Queue[T]) Done() <-chan struct{} {
-	return b.done
+func (q *Queue[T]) Done() <-chan struct{} {
+	return q.done
 }
