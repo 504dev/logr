@@ -10,10 +10,12 @@ import (
 
 func starwars(conf *logr.Config) {
 	starwarslog, _ := conf.NewLogger("starwars.log")
+
 	for {
-		c := crowls[rand.Intn(len(crowls))]
-		starwarslog.Warn(color.New(color.Bold).SprintFunc()(c.title))
-		for _, t := range append(c.text, "...", "..", ".", "") {
+		crowl := crowls[rand.Intn(len(crowls))]
+		starwarslog.Warn(color.New(color.Bold).SprintFunc()(crowl.title))
+
+		for _, t := range append(crowl.text, "...", "..", ".", "") {
 			time.Sleep(666 * time.Millisecond)
 			starwarslog.Info(t)
 			starwarslog.Inc("count:letters", float64(len(t)))

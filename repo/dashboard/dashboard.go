@@ -82,7 +82,7 @@ func (repo *DashboardRepo) GetSystemIds(role int) []int {
 
 func (repo *DashboardRepo) GetByIds(ids []int) (types.Dashboards, error) {
 	dashboards := types.Dashboards{}
-	inString := strings.Trim(strings.Replace(fmt.Sprint(ids), " ", ",", -1), "[]")
+	inString := strings.Trim(strings.ReplaceAll(fmt.Sprint(ids), " ", ","), "[]")
 	sqltext := fmt.Sprintf("SELECT id, owner_id, name FROM dashboards WHERE id IN (%v)", inString)
 	err := repo.conn.Select(&dashboards, sqltext)
 	if err != nil {

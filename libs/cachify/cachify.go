@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var store = cache.New(15*time.Second, 10*time.Minute)
+const defaultExpiration = 15 * time.Second
+const cleanupInterval = 10 * time.Minute
+
+var store = cache.New(defaultExpiration, cleanupInterval)
 
 const WARMING_TIME = 3 * time.Second
 const PREWARM_TIME = 3 * time.Second
@@ -30,8 +33,7 @@ func Cachify(key string, f func() (any, error), expired time.Duration) (any, err
 		return entry, nil
 	}
 
-	_, lock := store.Get(warmingKey)
-	if lock {
+	if _, locked := store.Get(warmingKey); locked {
 		time.Sleep(time.Second)
 		return Cachify(key, f, expired)
 	}

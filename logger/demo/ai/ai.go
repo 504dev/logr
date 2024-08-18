@@ -41,6 +41,7 @@ func Run(conf *logr.Config) {
 	ollama, err := NewOllamaChat(config.Get().DemoDash.Llm)
 	if err != nil {
 		ailog.Error(err)
+
 		return
 	}
 
@@ -55,7 +56,8 @@ func Run(conf *logr.Config) {
 func generateBook(log *logr.Logger, ollama *OllamaChat) error {
 	genre := genres[time.Now().Nanosecond()%len(genres)]
 	prompt := fmt.Sprintf(`Imagine that you are a writer in the %v genre.
-Think of the title of a book about a monitoring service called "Logr", which was developed by a 30-year-old developer from Saint-Petersburg named Dima.
+Think of the title of a book about a monitoring service called "Logr",
+which was developed by a 30-year-old developer from Saint-Petersburg named Dima.
 Then state the genre of the book.
 Then make a table of contents of %v chapters.
 Then write a 100-word summary of the book.`, genre, chaptersN)
@@ -80,6 +82,7 @@ Then write a 100-word summary of the book.`, genre, chaptersN)
 	history = append(history, answer)
 
 	log.Info("")
+
 	for i := 1; i <= chaptersN; i++ {
 		prompt := fmt.Sprintf(`Give me a %v-word chapter %v. Start with the title of the chapter.`, chapterWordCount, i)
 		if i == chaptersN {
@@ -94,6 +97,7 @@ Then write a 100-word summary of the book.`, genre, chaptersN)
 		}
 
 		history = append(history, answer)
+
 		log.Info("")
 	}
 

@@ -60,7 +60,7 @@ func NewLogServer(
 
 	sockMap := sockmap.NewSockMap()
 	if redisAddr != "" {
-		store, err := sockmap.NewRedisSessionStore(redisAddr, time.Hour)
+		store, err := sockmap.NewRedisSessionStore(redisAddr, time.Hour, time.Second)
 		if err != nil {
 			return nil, err
 		}

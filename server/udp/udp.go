@@ -5,17 +5,19 @@ import (
 	_types "github.com/504dev/logr-go-client/types"
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/types"
-	"golang.org/x/net/context"
 	"net"
 	"sync"
+	"sync/atomic"
 )
 
+const bufferSize = 65536
+const concurrentLimit = 10
+
 type UdpServer struct {
-	conn   *net.UDPConn
-	ch     chan<- *types.LogPackageMeta
-	ctx    context.Context
-	cancel context.CancelFunc
-	done   chan struct{}
+	conn *net.UDPConn
+	ch   chan<- *types.LogPackageMeta
+	stop atomic.Bool
+	done chan struct{}
 }
 
 func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, error) {
@@ -27,13 +29,10 @@ func NewUdpServer(addr string, ch chan<- *types.LogPackageMeta) (*UdpServer, err
 	if err != nil {
 		return nil, err
 	}
-	ctx, cancel := context.WithCancel(context.Background())
 	return &UdpServer{
-		conn:   udpconn,
-		ch:     ch,
-		ctx:    ctx,
-		cancel: cancel,
-		done:   make(chan struct{}),
+		conn: udpconn,
+		ch:   ch,
+		done: make(chan struct{}),
 	}, nil
 }
 
@@ -43,17 +42,19 @@ func (srv *UdpServer) Listen() error {
 	}
 
 	wg := sync.WaitGroup{}
-	semaphore := make(chan struct{}, 10) // limit concurrent connections
+	semaphore := make(chan struct{}, concurrentLimit)
 
-	buf := make([]byte, 65536)
+	buf := make([]byte, bufferSize)
+
 	for {
-		if srv.ctx.Err() != nil {
+		if srv.stop.Load() {
 			break
 		}
 
 		size, _, err := srv.conn.ReadFromUDP(buf)
 		if err != nil {
 			Logger.Error("UDP read error: %v", err)
+
 			continue
 		}
 
@@ -61,6 +62,7 @@ func (srv *UdpServer) Listen() error {
 		copy(data, buf[:size])
 
 		semaphore <- struct{}{}
+
 		wg.Add(1)
 
 		go func() {
@@ -92,7 +94,7 @@ func (srv *UdpServer) Stop() error {
 	if srv == nil {
 		return nil
 	}
-	srv.cancel()
+	srv.stop.Store(true)
 	<-srv.done
 	return srv.conn.Close()
 }

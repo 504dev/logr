@@ -42,8 +42,11 @@ func NewOllamaChat(url string) (*OllamaChat, error) {
 	}, nil
 }
 
-func (ollama *OllamaChat) Prompt(history ChatHistory, onSentence func(string), onToken func(string)) (*ChatHistoryItem, error) {
-
+func (ollama *OllamaChat) Prompt(
+	history ChatHistory,
+	onSentence func(string),
+	onToken func(string),
+) (*ChatHistoryItem, error) {
 	var buf bytes.Buffer
 	if err := json.NewEncoder(&buf).Encode(RequestBody{
 		Model:    ollama.Model,
@@ -88,15 +91,18 @@ func splitIntoSentences(text string) []string {
 	var sentences []string
 	var sentence strings.Builder
 	skip := false
+
 	for i, r := range text {
 		if skip {
 			skip = false
+
 			continue
 		}
 		var next byte
 		if i+1 < len(text) {
 			next = text[i+1]
 		}
+
 		switch r {
 		case '.', '?', '!':
 			sentence.WriteRune(r)

@@ -24,6 +24,7 @@ func createQueue[T any](size int, interval time.Duration, handler func([]T)) Bat
 }
 
 func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int)) BatchProcessor[int]) {
+	t.Helper()
 	t.Run("Boss test", func(t *testing.T) {
 		ts := time.Now()
 		expected := [][2]int{{50, 0}, {50, 0}, {30, 1}}

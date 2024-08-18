@@ -6,6 +6,7 @@ import (
 	"github.com/504dev/logr/config"
 	. "github.com/504dev/logr/logger"
 	"github.com/gin-gonic/gin"
+	"golang.org/x/net/context"
 	"net/http"
 	"net/http/httputil"
 	"time"
@@ -13,16 +14,16 @@ import (
 
 type MarketplaceController struct{}
 
-func (_ *MarketplaceController) Webhook(c *gin.Context) {
-	requestDump, err := httputil.DumpRequest(c.Request, true)
+func (*MarketplaceController) Webhook(ctx *gin.Context) {
+	requestDump, err := httputil.DumpRequest(ctx.Request, true)
 	if err != nil {
 		Logger.Error(err)
 	}
 	Logger.Notice(string(requestDump))
-	c.AbortWithStatus(http.StatusOK)
+	ctx.AbortWithStatus(http.StatusOK)
 }
 
-func (_ *MarketplaceController) Support(c *gin.Context) {
+func (*MarketplaceController) Support(c *gin.Context) {
 	var data struct {
 		Name    string `json:"name"`
 		Email   string `json:"email"`
@@ -35,7 +36,7 @@ func (_ *MarketplaceController) Support(c *gin.Context) {
 		return
 	}
 
-	verifyData, err := checkRecaptcha(config.Get().RecaptchaSecret, data.Token)
+	verifyData, err := checkRecaptcha(c, config.Get().RecaptchaSecret, data.Token)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
 		return
@@ -56,8 +57,8 @@ type siteVerifyResponse struct {
 	ErrorCodes  []string  `json:"error-codes"`
 }
 
-func checkRecaptcha(secret, response string) (*siteVerifyResponse, error) {
-	req, err := http.NewRequest(http.MethodPost, "https://www.google.com/recaptcha/api/siteverify", nil)
+func checkRecaptcha(ctx context.Context, secret, response string) (*siteVerifyResponse, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "https://www.google.com/recaptcha/api/siteverify", nil)
 	if err != nil {
 		return nil, err
 	}

@@ -17,7 +17,11 @@ func NewDashboardMemberRepo() *DashboardMemberRepo {
 	}
 }
 
-func (repo *DashboardMemberRepo) findAllByField(fieldname string, val interface{}, limit int) (types.DashMembers, error) {
+func (repo *DashboardMemberRepo) findAllByField(
+	fieldname string,
+	val interface{},
+	limit int,
+) (types.DashMembers, error) {
 	members := types.DashMembers{}
 	sqltext := fmt.Sprintf("SELECT id, dash_id, user_id, status FROM dashboard_members WHERE %v = ?", fieldname)
 	if limit > 0 {

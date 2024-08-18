@@ -123,8 +123,10 @@ func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, erro
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	counts := types.Counts{}
+
 	for rows.Next() {
 		var timestamp time.Time
 		var hostname, keyname string
@@ -157,7 +159,8 @@ func (repo *CountRepo) Find(filter types.Filter, agg string) (types.Counts, erro
 			Metrics:   metrics,
 		})
 	}
-	return counts, nil
+	err = rows.Err()
+	return counts, err
 }
 
 func (repo *CountRepo) StatsByLogname(dashId int, logname string) ([]*types.DashStatRow, error) {

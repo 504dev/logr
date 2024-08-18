@@ -3,6 +3,7 @@ package sockmap
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/go-redis/redis/v8"
 	"time"
 )
@@ -25,31 +26,30 @@ func (s MemorySessionStore) Del(key string) error {
 	return nil
 }
 
-func NewRedisSessionStore(addr string, ttl time.Duration) (*RedisSessionStore, error) {
+type RedisSessionStore struct {
+	client  *redis.Client
+	ttl     time.Duration
+	timeout time.Duration
+}
+
+func NewRedisSessionStore(addr string, ttl time.Duration, timeout time.Duration) (*RedisSessionStore, error) {
 	opt, err := redis.ParseURL(addr)
 	if err != nil {
 		return nil, err
 	}
 
 	client := redis.NewClient(opt)
-	ctx := context.Background()
 
-	_, err = client.Ping(ctx).Result()
+	_, err = client.Ping(context.Background()).Result()
 	if err != nil {
 		return nil, err
 	}
 
 	return &RedisSessionStore{
-		client: client,
-		ctx:    ctx,
-		ttl:    ttl,
+		client:  client,
+		ttl:     ttl,
+		timeout: timeout,
 	}, nil
-}
-
-type RedisSessionStore struct {
-	client *redis.Client
-	ctx    context.Context
-	ttl    time.Duration
 }
 
 func (store *RedisSessionStore) Set(key string, value *SockSession) error {
@@ -58,13 +58,19 @@ func (store *RedisSessionStore) Set(key string, value *SockSession) error {
 		return err
 	}
 
-	return store.client.Set(store.ctx, key, bytes, store.ttl).Err()
+	ctx, cancel := context.WithTimeout(context.Background(), store.timeout)
+	defer cancel()
+
+	return store.client.Set(ctx, key, bytes, store.ttl).Err()
 }
 
 func (store *RedisSessionStore) Get(key string) (*SockSession, error) {
-	val, err := store.client.Get(store.ctx, key).Result()
+	ctx, cancel := context.WithTimeout(context.Background(), store.timeout)
+	defer cancel()
+
+	val, err := store.client.Get(ctx, key).Result()
 	if err != nil {
-		if err == redis.Nil {
+		if errors.Is(err, redis.Nil) {
 			return nil, nil
 		}
 		return nil, err
@@ -80,5 +86,8 @@ func (store *RedisSessionStore) Get(key string) (*SockSession, error) {
 }
 
 func (store *RedisSessionStore) Del(key string) error {
-	return store.client.Del(store.ctx, key).Err()
+	ctx, cancel := context.WithTimeout(context.Background(), store.timeout)
+	defer cancel()
+
+	return store.client.Del(ctx, key).Err()
 }

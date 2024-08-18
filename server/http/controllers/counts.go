@@ -60,16 +60,21 @@ func (c *CountsController) FindSnippet(ctx *gin.Context) {
 	timestamp, _ := strconv.ParseInt(ctx.Query("timestamp"), 10, 64)
 
 	if logname == "" || hostname == "" || keyname == "" || kind == "" || timestamp == 0 {
-		ctx.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"msg": "logname, hostname, kind, keyname and timestamp required"})
+		ctx.AbortWithStatusJSON(
+			http.StatusBadRequest,
+			gin.H{"msg": "logname, hostname, kind, keyname and timestamp required"},
+		)
 		return
 	}
 
+	const defaultSnippetSize = 15
+	const maxSnippetSize = 60
 	limit, _ := strconv.ParseInt(ctx.Query("limit"), 10, 64)
-	if limit > 60 {
-		limit = 60
+	if limit > maxSnippetSize {
+		limit = maxSnippetSize
 	}
 	if limit == 0 {
-		limit = 15
+		limit = defaultSnippetSize
 	}
 	from := timestamp - limit*60
 

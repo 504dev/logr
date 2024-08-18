@@ -87,7 +87,6 @@ func (q *Queue[T]) flushSafe() int {
 func (q *Queue[T]) Stop() {
 	close(q.stop)
 	<-q.done
-	return
 }
 
 func (b *Queue[T]) HasStopped() <-chan struct{} {

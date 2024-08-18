@@ -34,24 +34,24 @@ func (dm DashMembers) ApprovedOnly() DashMembers {
 	return res
 }
 
-func (ds DashMembers) ByUserId() map[int]*DashMember {
-	res := make(map[int]*DashMember, len(ds))
-	for _, v := range ds {
+func (dm DashMembers) ByUserId() map[int]*DashMember {
+	res := make(map[int]*DashMember, len(dm))
+	for _, v := range dm {
 		res[v.UserId] = v
 	}
 	return res
 }
 
-func (ds DashMembers) ByDashId() map[int]*DashMember {
-	res := make(map[int]*DashMember, len(ds))
-	for _, v := range ds {
+func (dm DashMembers) ByDashId() map[int]*DashMember {
+	res := make(map[int]*DashMember, len(dm))
+	for _, v := range dm {
 		res[v.DashId] = v
 	}
 	return res
 }
 
-func (ds DashMembers) HasUser(userId int) *DashMember {
-	for _, v := range ds {
+func (dm DashMembers) HasUser(userId int) *DashMember {
+	for _, v := range dm {
 		if v.UserId == userId {
 			return v
 		}
@@ -59,8 +59,8 @@ func (ds DashMembers) HasUser(userId int) *DashMember {
 	return nil
 }
 
-func (ds DashMembers) HasDash(dashId int) *DashMember {
-	for _, v := range ds {
+func (dm DashMembers) HasDash(dashId int) *DashMember {
+	for _, v := range dm {
 		if v.DashId == dashId {
 			return v
 		}
