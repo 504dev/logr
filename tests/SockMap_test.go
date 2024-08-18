@@ -3,6 +3,7 @@ package tests
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/504dev/logr/types/sockmap"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
@@ -26,7 +27,7 @@ func TestSockMap(t *testing.T) {
 	sm := sockmap.NewSockMap()
 	journal := make(chan string, 100)
 	w := &writter{journal: journal}
-	claims := &types.Claims{
+	claims := &jwtservice.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
 		},

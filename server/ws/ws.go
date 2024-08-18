@@ -3,7 +3,7 @@ package ws
 import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
-	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/websocket"
@@ -12,11 +12,11 @@ import (
 
 type WsServer struct {
 	repos      *repo.Repos
-	jwtService *types.JwtService
+	jwtService *jwtservice.JwtService
 	sockMap    *sockmap.SockMap
 }
 
-func NewWsServer(sockMap *sockmap.SockMap, jwtService *types.JwtService, repos *repo.Repos) *WsServer {
+func NewWsServer(sockMap *sockmap.SockMap, jwtService *jwtservice.JwtService, repos *repo.Repos) *WsServer {
 	return &WsServer{
 		repos:      repos,
 		jwtService: jwtService,

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"golang.org/x/net/websocket"
 	"io"
 	"sync"
@@ -17,14 +18,14 @@ type SockSession struct {
 }
 
 type Sock struct {
-	mu            sync.RWMutex
-	store         SessionStore
-	SockId        string         `json:"sock_id"`
-	Session       *SockSession   `json:"session"`
-	Conn          io.WriteCloser `json:"conn"`
-	JwtToken      string         `json:"jwt_token"`
-	*types.User   `json:"user"`
-	*types.Claims `json:"claims"`
+	mu                 sync.RWMutex
+	store              SessionStore
+	SockId             string         `json:"sock_id"`
+	Session            *SockSession   `json:"session"`
+	Conn               io.WriteCloser `json:"conn"`
+	JwtToken           string         `json:"jwt_token"`
+	*types.User        `json:"user"`
+	*jwtservice.Claims `json:"claims"`
 }
 
 func (s *Sock) HandleMessage(msg *SockMessage) {

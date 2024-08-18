@@ -1,4 +1,4 @@
-package types
+package jwtservice
 
 import (
 	"encoding/base64"

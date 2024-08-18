@@ -6,7 +6,7 @@ import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/http/controllers"
-	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-func NewRouter(sockMap *sockmap.SockMap, jwtService *types.JwtService, repos *repo.Repos) *gin.Engine {
+func NewRouter(sockMap *sockmap.SockMap, jwtService *jwtservice.JwtService, repos *repo.Repos) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"GET", "PUT", "POST", "DELETE"},

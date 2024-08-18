@@ -1,4 +1,4 @@
-package types
+package jwtservice
 
 import (
 	"github.com/golang-jwt/jwt/v5"

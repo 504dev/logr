@@ -4,6 +4,7 @@ import (
 	"github.com/504dev/logr/libs/cachify"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"net/http"
@@ -12,10 +13,10 @@ import (
 
 type DemoController struct {
 	repos      *repo.Repos
-	jwtService *types.JwtService
+	jwtService *jwtservice.JwtService
 }
 
-func NewDemoController(jwtService *types.JwtService, repos *repo.Repos) *DemoController {
+func NewDemoController(jwtService *jwtservice.JwtService, repos *repo.Repos) *DemoController {
 	return &DemoController{
 		repos:      repos,
 		jwtService: jwtService,
@@ -29,7 +30,7 @@ func (demo *DemoController) FreeToken(c *gin.Context) {
 		return
 	}
 	tokenstring, err := cachify.Cachify("free-token", func() (interface{}, error) {
-		claims := types.Claims{
+		claims := jwtservice.Claims{
 			Id:       usr.Id,
 			Role:     usr.Role,
 			GihubId:  usr.GithubId,

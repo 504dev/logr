@@ -8,6 +8,7 @@ import (
 	"github.com/504dev/logr/server/udp"
 	"github.com/504dev/logr/server/ws"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/504dev/logr/types/sockmap"
 	"golang.org/x/sync/errgroup"
 	nethttp "net/http"
@@ -19,7 +20,7 @@ type LogServer struct {
 	wsServer   *ws.WsServer
 	grpcServer *grpc.GrpcServer
 	udpServer  *udp.UdpServer
-	jwtService *types.JwtService
+	jwtService *jwtservice.JwtService
 	sockMap    *sockmap.SockMap
 	channel    chan *types.LogPackageMeta
 	joiner     *types.LogPackageJoiner
@@ -55,7 +56,7 @@ func NewLogServer(
 		}
 	}
 
-	jwtService := types.NewJwtService(jwtSecretFunc)
+	jwtService := jwtservice.NewJwtService(jwtSecretFunc)
 
 	sockMap := sockmap.NewSockMap()
 	if redisAddr != "" {

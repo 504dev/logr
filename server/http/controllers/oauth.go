@@ -7,6 +7,7 @@ import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/go-github/v29/github"
@@ -20,12 +21,12 @@ const DEFAULT_EXPIRE_TIME = 8 * time.Hour
 
 type AuthController struct {
 	repos       *repo.Repos
-	jwtService  *types.JwtService
+	jwtService  *jwtservice.JwtService
 	states      *types.States
 	githubOAuth *oauth2.Config
 }
 
-func NewAuthController(jwtService *types.JwtService, repos *repo.Repos) *AuthController {
+func NewAuthController(jwtService *jwtservice.JwtService, repos *repo.Repos) *AuthController {
 	result := &AuthController{
 		repos:      repos,
 		jwtService: jwtService,
@@ -193,7 +194,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		expiresAt = githubPermit.Expiry
 	}
 
-	claims := types.Claims{
+	claims := jwtservice.Claims{
 		Id:          userDb.Id,
 		Role:        userDb.Role,
 		GihubId:     *userGithub.ID,

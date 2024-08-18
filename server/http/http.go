@@ -3,7 +3,7 @@ package http
 import (
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/http/router"
-	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/jwtservice"
 	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -14,7 +14,7 @@ import (
 )
 
 type HttpServer struct {
-	jwtService *types.JwtService
+	jwtService *jwtservice.JwtService
 	sockMap    *sockmap.SockMap
 	engine     *gin.Engine
 	server     *http.Server
@@ -24,7 +24,7 @@ type HttpServer struct {
 func NewHttpServer(
 	addr string,
 	sockMap *sockmap.SockMap,
-	jwtService *types.JwtService,
+	jwtService *jwtservice.JwtService,
 	repos *repo.Repos,
 ) (*HttpServer, error) {
 	frontend := func(c *gin.Context) {
