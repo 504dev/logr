@@ -57,7 +57,7 @@ func (me *MeController) AddMember(c *gin.Context) {
 		client := github.NewClient(nil)
 		userGithub, _, err := client.Users.Get(c, username)
 		if err == nil {
-			created, err := me.repos.User.Create(*userGithub.ID, username, types.RoleUser)
+			created, err := me.repos.User.Create(*userGithub.ID, username, types.ROLE_USER)
 			if err == nil {
 				userTo = created
 			}

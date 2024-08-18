@@ -103,7 +103,7 @@ func (a *AuthController) SetupCallback(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	_, err = a.repos.User.Create(data.Owner.ID, data.Owner.Login, types.RoleAdmin)
+	_, err = a.repos.User.Create(data.Owner.ID, data.Owner.Login, types.ROLE_ADMIN)
 	if err != nil {
 		Logger.Error(err)
 	}
@@ -177,7 +177,7 @@ func (a *AuthController) AuthorizeCallback(c *gin.Context) {
 		}
 	}
 
-	userDb, err := a.repos.User.Upsert(*userGithub.ID, *userGithub.Login, types.RoleUser)
+	userDb, err := a.repos.User.Upsert(*userGithub.ID, *userGithub.Login, types.ROLE_USER)
 	if err != nil {
 		Logger.Error(err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -249,7 +249,7 @@ func (a *AuthController) EnsureJWT(c *gin.Context) {
 
 func (a *AuthController) EnsureAdmin(c *gin.Context) {
 	role := c.GetInt("role")
-	if role != types.RoleAdmin {
+	if role != types.ROLE_ADMIN {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}
@@ -258,7 +258,7 @@ func (a *AuthController) EnsureAdmin(c *gin.Context) {
 
 func (a *AuthController) EnsureUser(c *gin.Context) {
 	role := c.GetInt("role")
-	if role > types.RoleUser {
+	if role > types.ROLE_USER {
 		c.AbortWithStatus(http.StatusForbidden)
 		return
 	}

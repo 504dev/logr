@@ -24,7 +24,7 @@ func NewDemoController(jwtService *jwtservice.JwtService, repos *repo.Repos) *De
 }
 
 func (demo *DemoController) FreeToken(c *gin.Context) {
-	usr, err := demo.repos.User.GetById(types.UserDemoId)
+	usr, err := demo.repos.User.GetById(types.USER_DEMO_ID)
 	if err != nil {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -14,13 +14,13 @@ type User struct {
 type Users []*User
 
 const (
-	RoleAdmin  = 1
-	RoleUser   = 2
-	RoleViewer = 3
-	RoleDemo   = 4
+	ROLE_ADMIN  = 1
+	ROLE_USER   = 2
+	ROLE_VIEWER = 3
+	ROLE_DEMO   = 4
 )
 
 const (
-	UserLogrId = 1
-	UserDemoId = 2
+	USER_LOGR_ID = 1
+	USER_DEMO_ID = 2
 )
