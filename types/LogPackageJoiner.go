@@ -7,10 +7,10 @@ import (
 )
 
 type LogPackageJoiner struct {
+	mu    sync.RWMutex
 	delay time.Duration
 	tries int
 	data  map[string]_types.LogPackageChunks
-	mu    sync.RWMutex
 }
 
 func NewLogPackageJoiner(delay time.Duration, tries int) *LogPackageJoiner {

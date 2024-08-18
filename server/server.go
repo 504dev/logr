@@ -8,6 +8,7 @@ import (
 	"github.com/504dev/logr/server/udp"
 	"github.com/504dev/logr/server/ws"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/sockmap"
 	"golang.org/x/sync/errgroup"
 	nethttp "net/http"
 	"time"
@@ -19,7 +20,7 @@ type LogServer struct {
 	grpcServer *grpc.GrpcServer
 	udpServer  *udp.UdpServer
 	jwtService *types.JwtService
-	sockmap    *types.SockMap
+	sockMap    *sockmap.SockMap
 	channel    chan *types.LogPackageMeta
 	joiner     *types.LogPackageJoiner
 	repos      *repo.Repos
@@ -56,21 +57,21 @@ func NewLogServer(
 
 	jwtService := types.NewJwtService(jwtSecretFunc)
 
-	sockmap := types.NewSockMap()
+	sockMap := sockmap.NewSockMap()
 	if redisAddr != "" {
-		store, err := types.NewRedisSessionStore(redisAddr, time.Hour)
+		store, err := sockmap.NewRedisSessionStore(redisAddr, time.Hour)
 		if err != nil {
 			return nil, err
 		}
-		sockmap.SetSessionStore(store)
+		sockMap.SetSessionStore(store)
 	}
 
-	httpServer, err = http.NewHttpServer(httpAddr, sockmap, jwtService, repos)
+	httpServer, err = http.NewHttpServer(httpAddr, sockMap, jwtService, repos)
 	if err != nil {
 		return nil, err
 	}
 
-	wsServer = ws.NewWsServer(sockmap, jwtService, repos)
+	wsServer = ws.NewWsServer(sockMap, jwtService, repos)
 	wsServer.Bind(httpServer.Engine())
 	wsServer.Info()
 
@@ -80,7 +81,7 @@ func NewLogServer(
 		httpServer: httpServer,
 		wsServer:   wsServer,
 		jwtService: jwtService,
-		sockmap:    sockmap,
+		sockMap:    sockMap,
 		channel:    channel,
 		joiner:     types.NewLogPackageJoiner(time.Second, 5),
 		repos:      repos,

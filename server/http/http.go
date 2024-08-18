@@ -4,6 +4,7 @@ import (
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/http/router"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/context"
@@ -14,7 +15,7 @@ import (
 
 type HttpServer struct {
 	jwtService *types.JwtService
-	sockmap    *types.SockMap
+	sockMap    *sockmap.SockMap
 	engine     *gin.Engine
 	server     *http.Server
 	listener   net.Listener
@@ -22,7 +23,7 @@ type HttpServer struct {
 
 func NewHttpServer(
 	addr string,
-	sockmap *types.SockMap,
+	sockMap *sockmap.SockMap,
 	jwtService *types.JwtService,
 	repos *repo.Repos,
 ) (*HttpServer, error) {
@@ -30,7 +31,7 @@ func NewHttpServer(
 		c.File("./frontend/dist/index.html")
 	}
 
-	engine := router.NewRouter(sockmap, jwtService, repos)
+	engine := router.NewRouter(sockMap, jwtService, repos)
 	engine.Use(static.Serve("/", static.LocalFile("./frontend/dist", false)))
 	engine.GET("/", frontend)
 	engine.GET("/demo", frontend)
@@ -48,7 +49,7 @@ func NewHttpServer(
 
 	return &HttpServer{
 		jwtService: jwtService,
-		sockmap:    sockmap,
+		sockMap:    sockMap,
 		engine:     engine,
 		listener:   listener,
 		server: &http.Server{

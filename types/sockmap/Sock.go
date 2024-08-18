@@ -1,8 +1,9 @@
-package types
+package sockmap
 
 import (
 	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr/types"
 	"golang.org/x/net/websocket"
 	"io"
 	"sync"
@@ -10,26 +11,20 @@ import (
 )
 
 type SockSession struct {
-	Paused    bool           `json:"paused"`
-	Listeners map[string]int `json:"listeners"`
-	*Filter   `json:"filter"`
+	Paused        bool           `json:"paused"`
+	Listeners     map[string]int `json:"listeners"`
+	*types.Filter `json:"filter"`
 }
 
 type Sock struct {
-	mu       sync.RWMutex
-	store    SessionStore
-	SockId   string         `json:"sock_id"`
-	Session  *SockSession   `json:"session"`
-	Conn     io.WriteCloser `json:"conn"`
-	JwtToken string         `json:"jwt_token"`
-	*User    `json:"user"`
-	*Claims  `json:"claims"`
-}
-
-type SockMessage struct {
-	Action  string      `json:"action,omitempty"`
-	Path    string      `json:"path"`
-	Payload interface{} `json:"payload"`
+	mu            sync.RWMutex
+	store         SessionStore
+	SockId        string         `json:"sock_id"`
+	Session       *SockSession   `json:"session"`
+	Conn          io.WriteCloser `json:"conn"`
+	JwtToken      string         `json:"jwt_token"`
+	*types.User   `json:"user"`
+	*types.Claims `json:"claims"`
 }
 
 func (s *Sock) HandleMessage(msg *SockMessage) {
@@ -101,12 +96,12 @@ func (s *Sock) RemoveListener(path string) {
 	s.mu.Unlock()
 }
 
-func (s *Sock) GetFilter() *Filter {
+func (s *Sock) GetFilter() *types.Filter {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	return s.Session.Filter
 }
-func (s *Sock) SetFilter(f *Filter) {
+func (s *Sock) SetFilter(f *types.Filter) {
 	s.mu.Lock()
 	s.Session.Filter = f
 	s.mu.Unlock()

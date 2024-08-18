@@ -3,6 +3,7 @@ package tests
 import (
 	_types "github.com/504dev/logr-go-client/types"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/sockmap"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -22,7 +23,7 @@ func (w writter) Close() error {
 }
 
 func TestSockMap(t *testing.T) {
-	sm := types.NewSockMap()
+	sm := sockmap.NewSockMap()
 	journal := make(chan string, 100)
 	w := &writter{journal: journal}
 	claims := &types.Claims{
@@ -34,9 +35,9 @@ func TestSockMap(t *testing.T) {
 	user1 := &types.User{Id: 1}
 	user2 := &types.User{Id: 3}
 
-	sock1 := &types.Sock{User: user1, SockId: "sock_1", Conn: w, Claims: claims}
-	sock2 := &types.Sock{User: user1, SockId: "sock_2", Conn: w, Claims: claims}
-	sock3 := &types.Sock{User: user2, SockId: "sock_3", Conn: w, Claims: claims}
+	sock1 := &sockmap.Sock{User: user1, SockId: "sock_1", Conn: w, Claims: claims}
+	sock2 := &sockmap.Sock{User: user1, SockId: "sock_2", Conn: w, Claims: claims}
+	sock3 := &sockmap.Sock{User: user2, SockId: "sock_3", Conn: w, Claims: claims}
 
 	sm.Register(sock1)
 	sm.Register(sock2)

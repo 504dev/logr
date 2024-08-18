@@ -5,6 +5,7 @@ import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
@@ -12,13 +13,13 @@ import (
 )
 
 type LogsController struct {
-	sockmap *types.SockMap
+	sockMap *sockmap.SockMap
 	repos   *repo.Repos
 }
 
-func NewLogsController(sockmap *types.SockMap, repos *repo.Repos) *LogsController {
+func NewLogsController(sockMap *sockmap.SockMap, repos *repo.Repos) *LogsController {
 	return &LogsController{
-		sockmap: sockmap,
+		sockMap: sockMap,
 		repos:   repos,
 	}
 }
@@ -51,7 +52,7 @@ func (c *LogsController) Find(ctx *gin.Context) {
 	}
 	sockId := ctx.Query("sock_id")
 	if sockId != "" {
-		c.sockmap.SetFilter(userId, sockId, &filter)
+		c.sockMap.SetFilter(userId, sockId, &filter)
 	}
 	f, _ := json.Marshal(filter)
 	Logger.Info(string(f))

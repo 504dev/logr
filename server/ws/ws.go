@@ -4,6 +4,7 @@ import (
 	. "github.com/504dev/logr/logger"
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/net/websocket"
 	"time"
@@ -12,14 +13,14 @@ import (
 type WsServer struct {
 	repos      *repo.Repos
 	jwtService *types.JwtService
-	sockmap    *types.SockMap
+	sockMap    *sockmap.SockMap
 }
 
-func NewWsServer(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo.Repos) *WsServer {
+func NewWsServer(sockMap *sockmap.SockMap, jwtService *types.JwtService, repos *repo.Repos) *WsServer {
 	return &WsServer{
 		repos:      repos,
 		jwtService: jwtService,
-		sockmap:    sockmap,
+		sockMap:    sockMap,
 	}
 }
 
@@ -56,21 +57,21 @@ func (ws WsServer) Stream(conn *websocket.Conn) {
 		return
 	}
 
-	sock := &types.Sock{
+	sock := &sockmap.Sock{
 		SockId:   sockId,
 		User:     usr,
 		Conn:     conn,
 		Claims:   claims,
 		JwtToken: tokenstring,
 	}
-	ws.sockmap.Register(sock)
+	ws.sockMap.Register(sock)
 
 	for {
-		var msg types.SockMessage
+		var msg sockmap.SockMessage
 
 		if err := websocket.JSON.Receive(conn, &msg); err != nil {
 			Logger.Error("websocket.JSON.Receive: userId=%v, sockId=%v, err=%v", usr.Id, sockId, err)
-			ws.sockmap.Unregister(sock)
+			ws.sockMap.Unregister(sock)
 			break
 		}
 
@@ -84,7 +85,7 @@ func (ws WsServer) Info() {
 	go func() {
 		for {
 			time.Sleep(10 * time.Second)
-			Logger.Info("SockMap %v", ws.sockmap)
+			Logger.Info("SockMap %v", ws.sockMap)
 		}
 	}()
 }

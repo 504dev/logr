@@ -7,13 +7,14 @@ import (
 	"github.com/504dev/logr/repo"
 	"github.com/504dev/logr/server/http/controllers"
 	"github.com/504dev/logr/types"
+	"github.com/504dev/logr/types/sockmap"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
 )
 
-func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo.Repos) *gin.Engine {
+func NewRouter(sockMap *sockmap.SockMap, jwtService *types.JwtService, repos *repo.Repos) *gin.Engine {
 	r := gin.Default()
 	r.Use(cors.New(cors.Config{
 		AllowMethods:    []string{"GET", "PUT", "POST", "DELETE"},
@@ -96,7 +97,7 @@ func NewRouter(sockmap *types.SockMap, jwtService *types.JwtService, repos *repo
 	}
 
 	// logs
-	logs := controllers.NewLogsController(sockmap, repos)
+	logs := controllers.NewLogsController(sockMap, repos)
 	{
 		r.GET("/api/logs", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logs.Find)
 		r.GET("/api/logs/:dash_id/lognames", auth.EnsureJWT, me.DashRequired("dash_id"), me.MyDashOrShared, logs.StatsByDashboard)

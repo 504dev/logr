@@ -1,8 +1,9 @@
-package types
+package sockmap
 
 import (
 	"encoding/json"
 	_types "github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr/types"
 	cmap "github.com/orcaman/concurrent-map/v2"
 	"strconv"
 	"time"
@@ -68,7 +69,7 @@ func (sm *SockMap) Push(lg *_types.Log) int {
 	return cnt
 }
 
-func (sm *SockMap) SetFilter(userId int, sockId string, filter *Filter) bool {
+func (sm *SockMap) SetFilter(userId int, sockId string, filter *types.Filter) bool {
 	if s := sm.GetSock(userId, sockId); s != nil {
 		s.SetFilter(filter)
 		return true
