@@ -26,6 +26,8 @@ func createQueue[T any](size int, interval time.Duration, handler func([]T)) Bat
 func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int)) BatchProcessor[int]) {
 	t.Helper()
 	t.Run("Boss test", func(t *testing.T) {
+		t.Parallel()
+
 		ts := time.Now()
 		expected := [][2]int{{50, 0}, {50, 0}, {30, 1}}
 		result := make([][2]int, 0)
@@ -54,6 +56,8 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 	})
 
 	t.Run("Basic functionality", func(t *testing.T) {
+		t.Parallel()
+
 		results := make([][]int, 0)
 		processor := create(3, 100*time.Millisecond, func(batch []int) {
 			results = append(results, batch)
@@ -75,6 +79,8 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 	})
 
 	t.Run("Time limit", func(t *testing.T) {
+		t.Parallel()
+
 		results := make([][]int, 0)
 		processor := create(10, 50*time.Millisecond, func(batch []int) {
 			results = append(results, batch)
@@ -94,6 +100,8 @@ func testBatchProcessor(t *testing.T, create func(int, time.Duration, func([]int
 	})
 
 	t.Run("Concurrent pushes", func(t *testing.T) {
+		t.Parallel()
+
 		results := make([][]int, 0)
 		processor := create(5, 100*time.Millisecond, func(batch []int) {
 			results = append(results, batch)

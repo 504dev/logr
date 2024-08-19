@@ -31,6 +31,17 @@ linters:
     - nonamedreturns
     - paralleltest
     - goerr113
+    - goconst
+    - lll
+    - unused
+    - ginkgolinter
+    - usestdlibvars
+    - testableexamples
+#    - testpackage
+    - thelper
+    - tparallel
+    - unparam
+    - unconvert
 
 linters-settings:
   govet:
