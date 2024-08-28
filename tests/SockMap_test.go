@@ -2,6 +2,7 @@ package tests
 
 import (
 	_types "github.com/504dev/logr-go-client/types"
+	"github.com/504dev/logr/tests/mocks"
 	"github.com/504dev/logr/types"
 	"github.com/504dev/logr/types/jwtservice"
 	"github.com/504dev/logr/types/sockmap"
@@ -11,36 +12,10 @@ import (
 	"time"
 )
 
-type writter struct {
-	journal chan string
-}
-
-func (w writter) Drain() []string {
-	var result []string
-	for {
-		select {
-		case v := <-w.journal:
-			result = append(result, v)
-		default:
-			return result
-		}
-	}
-}
-
-func (w writter) Write(p []byte) (int, error) {
-	w.journal <- string(p)
-	return 0, nil
-}
-
-func (w writter) Close() error {
-	return nil
-}
-
 func TestSockMap(t *testing.T) {
 	t.Parallel()
 	sm := sockmap.NewSockMap()
-	journal := make(chan string, 100)
-	w := &writter{journal: journal}
+	w := mocks.NewWebsocketConn()
 	claims := &jwtservice.Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute)),
@@ -95,5 +70,5 @@ func TestSockMap(t *testing.T) {
 		}
 	}
 
-	close(w.journal)
+	_ = w.Close()
 }

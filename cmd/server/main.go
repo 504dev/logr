@@ -40,7 +40,9 @@ func main() {
 	// Exit & Graceful Shutdown
 	exit := make(chan os.Signal, 1)
 	signal.Notify(exit, syscall.SIGINT, syscall.SIGTERM)
+
 	sig := <-exit
+
 	ts := time.Now()
 	logger.Logger.Warn("Exit with code: %v", sig)
 	err = logServer.Stop()

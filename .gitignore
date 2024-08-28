@@ -11,3 +11,4 @@ logr-server
 *.xml
 prometheus.yml
 cmd/test/
+coverage*
