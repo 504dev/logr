@@ -1,16 +1,3 @@
-<div align="center" style="display: block">
-  <a href="https://logr.info/demo">
-    <img width="128" height="128" src="https://raw.githubusercontent.com/504dev/logr-front/master/static/logr.png">
-  </a>
-  <p>
-    <b>logr</b> is an open-source logger and metric service.
-    <br>
-    Helps you debug and analyze performance of your features.
-    <br>
-    Get to know your application better with <b>logr</b>.
-  </p>
-</div>
-
 [![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.png)](http://logr.info/demo)
 
 ## About
