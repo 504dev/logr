@@ -74,7 +74,7 @@ func (repo *DashboardRepo) GetSystemIds(role int) []int {
 	if role == types.ROLE_ADMIN {
 		ids = append(ids, types.DASHBOARD_SYSTEM_ID)
 	}
-	if config.Get().DemoDash.Enabled {
+	if !config.Get().DemoDash.Disabled {
 		ids = append(ids, types.DASHBOARD_DEMO_ID)
 	}
 	return ids
