@@ -49,7 +49,6 @@ func (c *LogsController) Find(ctx *gin.Context) {
 		Offset:   offset,
 		Limit:    limit,
 	}
-
 	if sockId := ctx.Query("sock_id"); sockId != "" {
 		c.sockMap.SetFilter(userId, sockId, &filter)
 	}

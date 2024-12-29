@@ -63,6 +63,7 @@ func (repo *LogRepo) GetByFilter(filter types.Filter) (_types.Logs, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	limit := filter.Limit
 	if limit == 0 {
 		limit = 100
@@ -73,22 +74,25 @@ func (repo *LogRepo) GetByFilter(filter types.Filter) (_types.Logs, error) {
 			now = time.Unix(0, filter.Offset)
 		}
 		day := now.UTC().Format(time.RFC3339)[0:10]
-		w1 := fmt.Sprintf("%v AND day = '%v'", where, day)
-		logs, err := repo.getByFilter(w1, values, limit)
+		whereToday := fmt.Sprintf("%v AND day = '%v'", where, day)
+		logsToday, err := repo.getByFilter(whereToday, values, limit)
 		if err != nil {
 			return nil, err
 		}
-		rest := limit - len(logs)
+
+		rest := limit - len(logsToday)
 		if rest == 0 {
-			return logs, nil
+			return logsToday, nil
 		}
-		w2 := fmt.Sprintf("%v AND day < '%v'", where, day)
-		tmp, err := repo.getByFilter(w2, values, rest)
+		whereRest := fmt.Sprintf("%v AND day < '%v'", where, day)
+		logsRest, err := repo.getByFilter(whereRest, values, rest)
 		if err != nil {
 			return nil, err
 		}
-		return append(logs, tmp...), nil
+
+		return append(logsToday, logsRest...), nil
 	}
+
 	return repo.getByFilter(where, values, limit)
 }
 

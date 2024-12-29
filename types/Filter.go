@@ -129,18 +129,18 @@ func (f *Filter) ToSQL() (string, []interface{}, error) {
 			values = append(values, r)
 		}
 	}
+	if f.Offset != 0 {
+		sql += " AND timestamp < ?"
+		values = append(values, f.Offset)
+	}
 	if f.Timestamp != nil {
 		if f.Timestamp[0] != 0 {
 			sql += " AND timestamp > ?"
 			values = append(values, f.Timestamp[0])
 		}
-		to := f.Timestamp[1]
-		if f.Offset != 0 {
-			to = f.Offset
-		}
-		if to != 0 {
+		if f.Timestamp[1] != 0 {
 			sql += " AND timestamp < ?"
-			values = append(values, to)
+			values = append(values, f.Timestamp[1])
 		}
 	}
 	if f.Message != "" {
