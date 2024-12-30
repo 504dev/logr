@@ -32,7 +32,7 @@ type ConfigData struct {
 	Redis         string `yaml:"redis"`
 	AllowNoCipher bool   `yaml:"allow_no_cipher"`
 	DemoDash      struct {
-		Enabled bool   `yaml:"disabled"`
+		Enabled bool   `yaml:"enabled"`
 		Llm     string `yaml:"llm"`
 	} `yaml:"demo_dash"`
 	RecaptchaSecret string `yaml:"recaptcha"`
