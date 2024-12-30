@@ -45,7 +45,7 @@ func Init(repo interfaces.DashboardKeyRepo) {
 	gin.ForceConsoleColor()
 	gin.DefaultWriter = io.MultiWriter(os.Stdout, GinWriter())
 
-	if !config.Get().DemoDash.Disabled {
+	if config.Get().DemoDash.Enabled {
 		conf := createConfig(repo, types.DASHKEY_DEMO_ID)
 		go demo.Start(conf, Logger)
 	}

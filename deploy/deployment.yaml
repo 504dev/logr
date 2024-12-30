@@ -27,6 +27,12 @@ spec:
               value: "${OAUTH_GITHUB_CLIENT_ID}"
             - name: OAUTH_GITHUB_CLIENT_SECRET
               value: "${OAUTH_GITHUB_CLIENT_SECRET}"
+            - name: LLM_URL
+              value: "${LLM_URL}"
+            - name: RECAPTCHA_SECRET
+              value: "${RECAPTCHA_SECRET}"
+            - name: DEMO_DASH_ENABLED
+              value: "true"
           volumeMounts:
             - mountPath: /var/lib/mysql
               name: mysql
