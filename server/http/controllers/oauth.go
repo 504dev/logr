@@ -238,9 +238,13 @@ func (a *AuthController) EnsureJWT(c *gin.Context) {
 		token = c.PostForm("token")
 	}
 
+	if token == "" {
+		c.AbortWithStatus(http.StatusUnauthorized)
+	}
+
 	claims, tkn, err := a.jwtService.ParseToken(token)
 	if err != nil || !tkn.Valid {
-		Logger.Error("parse jwt token valid=%v, err=%v", tkn.Valid, err)
+		Logger.Error("parse jwt token tkn=%+v, err=%v", tkn, err) //nolint:govet
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
