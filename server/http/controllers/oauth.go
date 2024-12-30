@@ -240,7 +240,7 @@ func (a *AuthController) EnsureJWT(c *gin.Context) {
 
 	claims, tkn, err := a.jwtService.ParseToken(token)
 	if err != nil || !tkn.Valid {
-		Logger.Error("parse jwt token valid=%s, err=%s", tkn.Valid, err)
+		Logger.Error("parse jwt token valid=%v, err=%v", tkn.Valid, err)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
