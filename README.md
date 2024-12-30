@@ -1,4 +1,4 @@
-[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.png)](http://79.132.138.4/demo)
+[![Logr](https://raw.githubusercontent.com/504dev/logr-front/master/static/preview.png)](http://kozhurkin.tech/demo)
 
 ## About
 
@@ -9,7 +9,7 @@
 * `Highcharts` for metrics
 * data storage in `ClickHouse`
 * transport via `WebSocket`
-* [Look at the demo page](http://79.132.138.4/demo)
+* [Look at the demo page](http://kozhurkin.tech/demo)
 
 ## Usage
 
