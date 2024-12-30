@@ -22,12 +22,6 @@ spec:
         - name: logr
           image: "kozhurkin/logr:${VERSION}"
           imagePullPolicy: Always
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 7778
-            initialDelaySeconds: 5
-            periodSeconds: 5
           ports:
             - containerPort: 7778
               protocol: TCP
