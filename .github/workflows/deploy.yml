@@ -79,6 +79,17 @@ jobs:
           mkdir -p ~/.kube
           echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
 
+      # Why the 401: `kubectl config view` redacts certs/tokens but still shows
+      # the server and which auth method is configured; `auth whoami` says who
+      # the server thinks we are, if anyone.
+      - name: Debug cluster access
+        continue-on-error: true
+        run: |
+          set +e
+          kubectl config view
+          kubectl auth whoami
+          kubectl get ns
+
       - name: Apply Kubernetes manifests
         env:
           VERSION: ${{ github.ref_name }}
